@@ -5,16 +5,25 @@ import { PLANS } from '@/lib/types'
 const CINETPAY_API_KEY = process.env.CINETPAY_API_KEY
 const CINETPAY_SITE_ID = process.env.CINETPAY_SITE_ID
 
-// Use service role for webhook (no user context)
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+function getSupabaseAdmin() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!supabaseUrl || !serviceKey) return null
+  return createClient(supabaseUrl, serviceKey)
+}
 
 export async function POST(request: NextRequest) {
+  const supabaseAdmin = getSupabaseAdmin()
+
   try {
     const body = await request.json()
     const { cpm_trans_id, cpm_site_id } = body
+
+    // If no CinetPay credentials, return mock success
+    if (!CINETPAY_API_KEY || !CINETPAY_SITE_ID) {
+      console.warn('CinetPay not configured - webhook mock mode')
+      return NextResponse.json({ status: 'success', mock: true })
+    }
 
     // Verify site ID
     if (cpm_site_id !== CINETPAY_SITE_ID) {
@@ -35,13 +44,17 @@ export async function POST(request: NextRequest) {
     const verifyData = await verifyResponse.json()
 
     if (verifyData.code !== '00') {
-      // Payment not successful
-      await supabaseAdmin
-        .from('payments')
-        .update({ statut: 'echoue' })
-        .eq('cinetpay_transaction_id', cpm_trans_id)
-
+      if (supabaseAdmin) {
+        await supabaseAdmin
+          .from('payments')
+          .update({ statut: 'echoue' })
+          .eq('cinetpay_transaction_id', cpm_trans_id)
+      }
       return NextResponse.json({ status: 'payment_failed' })
+    }
+
+    if (!supabaseAdmin) {
+      return NextResponse.json({ status: 'error', message: 'Supabase not configured' }, { status: 500 })
     }
 
     // Payment successful - update payment record
@@ -65,7 +78,7 @@ export async function POST(request: NextRequest) {
 
     // Update user profile with new plan
     const planExpiry = new Date()
-    planExpiry.setMonth(planExpiry.getMonth() + 1) // 1 month validity
+    planExpiry.setMonth(planExpiry.getMonth() + 1)
 
     const { error: profileError } = await supabaseAdmin
       .from('profiles')
