@@ -7,7 +7,14 @@ import { Badge } from '@/components/ui/badge'
 import { Lock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { CVDonnees, PlanConfig } from '@/lib/types'
+import { CVPreviewClassique } from '../templates/cv-preview-classique'
 import { CVPreviewModerne } from '../templates/cv-preview-moderne'
+import { CVPreviewCreatif } from '../templates/cv-preview-creatif'
+import { CVPreviewExecutif } from '../templates/cv-preview-executif'
+import { CVPreviewTech } from '../templates/cv-preview-tech'
+import { CVPreviewMinimaliste } from '../templates/cv-preview-minimaliste'
+import { CVPreviewStartup } from '../templates/cv-preview-startup'
+import { CVPreviewLuxe } from '../templates/cv-preview-luxe'
 
 interface StepPreviewProps {
   data: CVDonnees
@@ -27,6 +34,29 @@ const templates = [
   { id: 'luxe', name: 'Luxe', description: 'Elegant', plans: ['premium'] },
 ]
 
+function CVTemplateRenderer({ template, data, showWatermark }: { template: string; data: CVDonnees; showWatermark: boolean }) {
+  switch (template) {
+    case 'classique':
+      return <CVPreviewClassique data={data} showWatermark={showWatermark} />
+    case 'moderne':
+      return <CVPreviewModerne data={data} showWatermark={showWatermark} />
+    case 'creatif':
+      return <CVPreviewCreatif data={data} showWatermark={showWatermark} />
+    case 'executif':
+      return <CVPreviewExecutif data={data} showWatermark={showWatermark} />
+    case 'tech':
+      return <CVPreviewTech data={data} showWatermark={showWatermark} />
+    case 'minimaliste':
+      return <CVPreviewMinimaliste data={data} showWatermark={showWatermark} />
+    case 'startup':
+      return <CVPreviewStartup data={data} showWatermark={showWatermark} />
+    case 'luxe':
+      return <CVPreviewLuxe data={data} showWatermark={showWatermark} />
+    default:
+      return <CVPreviewModerne data={data} showWatermark={showWatermark} />
+  }
+}
+
 export function StepPreview({ data, template, onTemplateChange, plan }: StepPreviewProps) {
   const isTemplateAvailable = (templateId: string) => {
     const t = templates.find(t => t.id === templateId)
@@ -36,7 +66,7 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-foreground">Aperçu et template</h2>
+        <h2 className="text-2xl font-bold text-foreground">Apercu et template</h2>
         <p className="mt-2 text-muted-foreground">
           Choisissez votre template et verifiez votre CV
         </p>
@@ -90,13 +120,17 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
         {/* CV Preview */}
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle className="text-lg">Aperçu</CardTitle>
+            <CardTitle className="text-lg">Apercu</CardTitle>
             <CardDescription>Voici a quoi ressemblera votre CV</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="overflow-hidden rounded-lg border border-border bg-white shadow-lg">
               <div className="aspect-[8.5/11] w-full overflow-y-auto">
-                <CVPreviewModerne data={data} showWatermark={plan.limites.filigrane} />
+                <CVTemplateRenderer
+                  template={template}
+                  data={data}
+                  showWatermark={plan.limites.filigrane}
+                />
               </div>
             </div>
           </CardContent>
