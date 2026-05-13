@@ -56,8 +56,7 @@ export default async function DashboardPage() {
               Bonjour, {displayName}
             </h1>
             <p className="mt-2 max-w-2xl text-muted-foreground">
-              Creez un CV professionnel ou retrouvez vos derniers documents. Aucun questionnaire
-              n&apos;est requis pour utiliser cette page.
+              Creez un CV professionnel ou retrouvez vos derniers documents depuis cet espace.
             </p>
             {profile && (
               <div className="mt-4 flex flex-wrap items-center gap-2">
