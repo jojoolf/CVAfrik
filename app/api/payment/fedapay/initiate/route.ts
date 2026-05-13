@@ -25,8 +25,26 @@ export async function POST(req: Request) {
       .eq('id', user.id)
       .single();
 
+    if (!process.env.FEDAPAY_SECRET_KEY) {
+      console.error("FEDAPAY_SECRET_KEY is missing");
+      return NextResponse.json({ error: "Configuration de paiement manquante" }, { status: 500 });
+    }
+
     const amount = plan.prix_fcfa;
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://cv-afrik.vercel.app";
+
+    const customerData: any = {
+      firstname: profile?.prenom || user.user_metadata?.first_name || "Client",
+      lastname: profile?.nom || user.user_metadata?.last_name || "CVAfrik",
+      email: user.email,
+    };
+
+    if (profile?.telephone) {
+      customerData.phone_number = {
+        number: profile.telephone,
+        country: profile.pays?.toLowerCase() || "tg"
+      };
+    }
 
     // FedaPay API Request
     const response = await fetch("https://api.fedapay.com/v1/transactions", {
@@ -40,15 +58,7 @@ export async function POST(req: Request) {
         amount: amount,
         currency: { iso: "XOF" },
         callback_url: `${appUrl}/dashboard?payment=success`,
-        customer: {
-          firstname: profile?.prenom || user.user_metadata?.first_name || "Client",
-          lastname: profile?.nom || user.user_metadata?.last_name || "CVAfrik",
-          email: user.email,
-          phone_number: {
-            number: profile?.telephone || "",
-            country: profile?.pays?.toLowerCase() || "tg"
-          }
-        },
+        customer: customerData,
         metadata: {
           userId: user.id,
           planId: plan.id
