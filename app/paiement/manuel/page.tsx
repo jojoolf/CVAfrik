@@ -31,9 +31,8 @@ function ManualPaymentContent() {
   const amount = planId === "premium" ? "3 000" : "1 200";
 
   const paymentMethods = [
-    { id: "tmoney", name: "T-Money", number: "+228 XX XX XX XX", color: "bg-yellow-400", text: "text-black" },
-    { id: "flooz", name: "Moov Money", number: "+228 XX XX XX XX", color: "bg-blue-600", text: "text-white" },
-    { id: "wave", name: "Wave", number: "+228 XX XX XX XX", color: "bg-cyan-400", text: "text-white" },
+    { id: "tmoney", name: "T-Money / Moov", number: "+228 90 64 32 52", color: "bg-yellow-400", text: "text-black", owner: "Mixx by yas" },
+    { id: "wave", name: "Wave", number: "+228 90 64 32 52", color: "bg-cyan-400", text: "text-white", owner: "Mixx by yas" },
   ];
 
   const handleCopy = (text: string) => {
@@ -130,6 +129,7 @@ function ManualPaymentContent() {
                     <div>
                       <div className="text-xs font-black text-slate-400 uppercase tracking-widest">{pm.name}</div>
                       <div className="font-bold text-slate-900">{pm.number}</div>
+                      <div className="text-[10px] font-medium text-slate-400 italic">Nom: {pm.owner}</div>
                     </div>
                   </div>
                   <button 
