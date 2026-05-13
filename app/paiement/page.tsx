@@ -29,23 +29,9 @@ function PaymentContent() {
         return;
       }
 
-      try {
-        const response = await fetch("/api/payment/fedapay/initiate", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ planId: plan }),
-        });
-
-        const data = await response.json();
-
-        if (data.url) {
-          window.location.href = data.url;
-        } else {
-          setError(data.details || data.error || "Une erreur est survenue lors de l'initiation du paiement.");
-          setLoading(false);
-        }
+      // Rediriger directement vers le paiement manuel pour éviter les erreurs d'API non configurées
+      router.push(`/paiement/manuel?plan=${plan}`);
+      return;
       } catch (err: any) {
         setError("Erreur de connexion au serveur.");
         setLoading(false);
