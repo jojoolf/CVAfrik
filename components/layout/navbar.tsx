@@ -2,9 +2,11 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
+import type { User } from '@supabase/supabase-js'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-import { Menu, FileText, X } from 'lucide-react'
+import { Menu, FileText } from 'lucide-react'
+import { UserNav } from '@/components/layout/user-nav'
 
 const navigation = [
   { name: 'Fonctionnalites', href: '/#fonctionnalites' },
@@ -14,7 +16,7 @@ const navigation = [
 ]
 
 interface NavbarProps {
-  user?: { email: string } | null
+  user?: User | null
 }
 
 export function Navbar({ user }: NavbarProps) {
@@ -46,12 +48,10 @@ export function Navbar({ user }: NavbarProps) {
           ))}
         </div>
 
-        {/* Desktop Auth Buttons */}
+        {/* Desktop Auth */}
         <div className="hidden items-center gap-3 md:flex">
           {user ? (
-            <Button asChild>
-              <Link href="/dashboard">Mon espace</Link>
-            </Button>
+            <UserNav user={user} />
           ) : (
             <>
               <Button variant="ghost" asChild>
@@ -84,7 +84,7 @@ export function Navbar({ user }: NavbarProps) {
                   </span>
                 </Link>
               </div>
-              
+
               <nav className="flex flex-col gap-4">
                 {navigation.map((item) => (
                   <Link
@@ -98,11 +98,9 @@ export function Navbar({ user }: NavbarProps) {
                 ))}
               </nav>
 
-              <div className="flex flex-col gap-3 pt-4">
+              <div className="flex flex-col gap-3 border-t border-border pt-4">
                 {user ? (
-                  <Button asChild onClick={() => setIsOpen(false)}>
-                    <Link href="/dashboard">Mon espace</Link>
-                  </Button>
+                  <UserNav user={user} variant="stacked" onNavigate={() => setIsOpen(false)} />
                 ) : (
                   <>
                     <Button variant="outline" asChild onClick={() => setIsOpen(false)}>
