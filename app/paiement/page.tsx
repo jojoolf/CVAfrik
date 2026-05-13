@@ -30,7 +30,7 @@ function PaymentContent() {
       }
 
       try {
-        const response = await fetch("/api/payment/initiate", {
+        const response = await fetch("/api/payment/fedapay/initiate", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -94,7 +94,7 @@ function PaymentContent() {
       
       <h1 className="text-3xl font-black text-slate-900 mb-4">Préparation du paiement</h1>
       <p className="text-slate-500 max-w-sm mb-12 leading-relaxed">
-        Nous vous redirigeons vers l'interface sécurisée de <span className="font-bold text-slate-900">CinetPay</span> pour finaliser votre abonnement <span className="text-primary font-bold">{plan}</span>.
+        Nous vous redirigeons vers l'interface sécurisée de <span className="font-bold text-slate-900">FedaPay</span> pour finaliser votre abonnement <span className="text-primary font-bold">{plan}</span>.
       </p>
 
       <div className="flex items-center gap-4 text-slate-400 bg-white px-8 py-4 rounded-2xl border border-slate-100 shadow-sm mb-12 animate-pulse">
