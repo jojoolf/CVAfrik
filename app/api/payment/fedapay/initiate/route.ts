@@ -23,7 +23,7 @@ export async function POST(req: Request) {
       .from('profiles')
       .select('*')
       .eq('id', user.id)
-      .single();
+      .maybeSingle();
 
     if (!process.env.FEDAPAY_SECRET_KEY) {
       console.error("FEDAPAY_SECRET_KEY is missing");
