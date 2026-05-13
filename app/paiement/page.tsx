@@ -32,10 +32,6 @@ function PaymentContent() {
       // Rediriger directement vers le paiement manuel pour éviter les erreurs d'API non configurées
       router.push(`/paiement/manuel?plan=${plan}`);
       return;
-      } catch (err: any) {
-        setError("Erreur de connexion au serveur.");
-        setLoading(false);
-      }
     }
 
     checkUserAndPay();
