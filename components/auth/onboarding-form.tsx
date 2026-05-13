@@ -100,14 +100,16 @@ export function OnboardingForm() {
     try {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
+      if (!user || !user.email) {
         toast.error('Vous devez etre connecte')
         return
       }
 
       const { error } = await supabase
         .from('profiles')
-        .update({
+        .upsert({
+          id: user.id,
+          email: user.email,
           prenom: answers.prenom,
           statut: answers.statut,
           secteur: answers.secteur,
@@ -116,7 +118,6 @@ export function OnboardingForm() {
           onboarding_completed: true,
           updated_at: new Date().toISOString(),
         })
-        .eq('id', user.id)
 
       if (error) throw error
 
