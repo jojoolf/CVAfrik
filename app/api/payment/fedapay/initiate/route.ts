@@ -25,8 +25,10 @@ export async function POST(req: Request) {
       .eq('id', user.id)
       .maybeSingle();
 
-    if (!process.env.FEDAPAY_SECRET_KEY) {
-      console.error("FEDAPAY_SECRET_KEY is missing");
+    const secretKey = (process.env.FEDAPAY_SECRET_KEY || "").trim();
+    
+    if (!secretKey) {
+      console.error("FEDAPAY_SECRET_KEY is missing or empty");
       return NextResponse.json({ error: "Configuration de paiement manquante" }, { status: 500 });
     }
 
@@ -34,14 +36,14 @@ export async function POST(req: Request) {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://cv-afrik.vercel.app";
 
     const customerData: any = {
-      firstname: profile?.prenom || user.user_metadata?.first_name || "Client",
-      lastname: profile?.nom || user.user_metadata?.last_name || "CVAfrik",
+      firstname: (profile?.prenom || user.user_metadata?.first_name || "Client").substring(0, 50),
+      lastname: (profile?.nom || user.user_metadata?.last_name || "CVAfrik").substring(0, 50),
       email: user.email,
     };
 
     if (profile?.telephone) {
       customerData.phone_number = {
-        number: profile.telephone,
+        number: profile.telephone.replace(/\s/g, ''),
         country: profile.pays?.toLowerCase() || "tg"
       };
     }
@@ -50,8 +52,9 @@ export async function POST(req: Request) {
     const response = await fetch("https://api.fedapay.com/v1/transactions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${process.env.FEDAPAY_SECRET_KEY}`,
+        "Authorization": `Bearer ${secretKey}`,
         "Content-Type": "application/json",
+        "Accept": "application/json",
       },
       body: JSON.stringify({
         description: `Abonnement CVAfrik - Plan ${plan.nom}`,
@@ -72,7 +75,7 @@ export async function POST(req: Request) {
       const tokenResponse = await fetch(`https://api.fedapay.com/v1/transactions/${data.v1.transaction.id}/token`, {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${process.env.FEDAPAY_SECRET_KEY}`,
+          "Authorization": `Bearer ${secretKey}`,
           "Content-Type": "application/json",
         }
       });
