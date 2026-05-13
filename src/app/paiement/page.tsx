@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createBrowserClient } from "@supabase/ssr";
 import { Loader2, CreditCard, ShieldCheck, AlertCircle } from "lucide-react";
 import Link from "next/link";
 
@@ -12,7 +12,10 @@ function PaymentContent() {
   const plan = searchParams.get("plan");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const supabase = createClientComponentClient();
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
 
   useEffect(() => {
     async function checkUserAndPay() {

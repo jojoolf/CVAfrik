@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createBrowserClient } from "@supabase/ssr";
 import { 
   User, 
   Calendar, 
@@ -25,7 +25,10 @@ export default function SettingsPage() {
     email: "",
   });
 
-  const supabase = createClientComponentClient();
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
 
   useEffect(() => {
     async function getProfile() {

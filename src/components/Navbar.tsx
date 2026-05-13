@@ -2,12 +2,15 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { Menu, X, Sparkles, User } from "lucide-react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createBrowserClient } from "@supabase/ssr";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
-  const supabase = createClientComponentClient();
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
