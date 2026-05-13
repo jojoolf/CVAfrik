@@ -39,10 +39,14 @@ export function EditProfileForm({ initialProfile, userId }: EditProfileFormProps
 
     try {
       const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Utilisateur non trouvé')
+
       const { error: upsertError } = await supabase
         .from('profiles')
         .upsert({
           id: userId,
+          email: user.email,
           ...formData,
           updated_at: new Date().toISOString(),
         })
