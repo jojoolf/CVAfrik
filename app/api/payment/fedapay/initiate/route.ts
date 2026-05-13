@@ -26,6 +26,7 @@ export async function POST(req: Request) {
       .single();
 
     const amount = plan.prix_fcfa;
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://cv-afrik.vercel.app";
 
     // FedaPay API Request
     const response = await fetch("https://api.fedapay.com/v1/transactions", {
@@ -38,7 +39,7 @@ export async function POST(req: Request) {
         description: `Abonnement CVAfrik - Plan ${plan.nom}`,
         amount: amount,
         currency: { iso: "XOF" },
-        callback_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?payment=success`,
+        callback_url: `${appUrl}/dashboard?payment=success`,
         customer: {
           firstname: profile?.prenom || user.user_metadata?.first_name || "Client",
           lastname: profile?.nom || user.user_metadata?.last_name || "CVAfrik",
