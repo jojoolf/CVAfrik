@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { OnboardingForm } from '@/components/auth/onboarding-form'
+import { OnboardingBanner } from '@/components/auth/onboarding-banner'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -18,24 +18,12 @@ export default async function DashboardPage() {
 
   const showOnboarding = !profile || profile.onboarding_completed !== true
 
-  if (showOnboarding) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <header className="py-4 px-6">
-          <span className="text-xl font-bold">
-            CVA<span className="text-primary">frik</span>
-          </span>
-        </header>
-        <main className="flex-1 flex items-center justify-center px-4 py-8">
-          <OnboardingForm />
-        </main>
-      </div>
-    )
-  }
-
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <p className="text-muted-foreground">Tableau de bord (bientot disponible)</p>
+    <div className="min-h-screen">
+      {showOnboarding && <OnboardingBanner prenom={profile?.prenom} />}
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-muted-foreground">Tableau de bord (bientot disponible)</p>
+      </div>
     </div>
   )
 }
