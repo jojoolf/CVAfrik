@@ -19,6 +19,12 @@ export interface Profile {
   derniere_reinitialisation: string
   cinetpay_customer_id: string | null
   pays: string | null
+  /** Champs optionnels (questionnaire / onboarding) — non requis pour acceder au tableau de bord */
+  statut?: string | null
+  secteur?: string | null
+  objectif?: string | null
+  source?: string | null
+  onboarding_completed?: boolean
   created_at: string
   updated_at: string
 }
