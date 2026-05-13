@@ -16,3 +16,18 @@ export function decodeOAuthCookie(raw: string | undefined): string | null {
     return null
   }
 }
+
+/** Parse `document.cookie` or `Cookie` header for a single name (first match). */
+export function readNamedCookie(cookieString: string, name: string): string | undefined {
+  const parts = cookieString.split('; ')
+  for (const part of parts) {
+    if (!part || !part.startsWith(`${name}=`)) continue
+    return part.slice(name.length + 1)
+  }
+  return undefined
+}
+
+export function readOAuthNextFromCookieString(cookieString: string): string {
+  const raw = readNamedCookie(cookieString, OAUTH_RETURN_COOKIE)
+  return safeInternalPath(decodeOAuthCookie(raw))
+}

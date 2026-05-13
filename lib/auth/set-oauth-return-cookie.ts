@@ -7,3 +7,8 @@ export function setOAuthReturnCookieClient(path: string | undefined) {
   const secure = window.location.protocol === 'https:' ? '; Secure' : ''
   document.cookie = `${OAUTH_RETURN_COOKIE}=${encodeURIComponent(safe)}; Path=/; Max-Age=600; SameSite=Lax${secure}`
 }
+
+export function clearOAuthReturnCookieClient() {
+  if (typeof window === 'undefined') return
+  document.cookie = `${OAUTH_RETURN_COOKIE}=; Path=/; Max-Age=0`
+}
