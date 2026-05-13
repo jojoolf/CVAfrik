@@ -30,7 +30,7 @@ export default async function CVBuilderPage({ searchParams }: PageProps) {
     .single()
 
   if (!profile) {
-    redirect('/auth/connexion')
+    redirect('/profil/modifier')
   }
 
   // Get plan limits
