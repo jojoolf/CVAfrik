@@ -43,7 +43,8 @@ export default function AdminPaymentsPage() {
         profiles (
           email,
           nom,
-          prenom
+          prenom,
+          plan_expiry
         )
       `)
       .order("created_at", { ascending: false });
@@ -152,6 +153,11 @@ export default function AdminPaymentsPage() {
                       <span className="bg-slate-100 text-slate-600 px-3 py-1 rounded-full">
                         Via {p.methode}
                       </span>
+                      {p.statut === 'valide' && p.profiles?.plan_expiry && (
+                        <span className="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full border border-emerald-100">
+                          Expire le: {new Date(p.profiles.plan_expiry).toLocaleDateString('fr-FR')}
+                        </span>
+                      )}
                     </div>
                     <div className="mt-3 font-mono text-[10px] text-slate-400 bg-slate-50 p-2 rounded-lg border border-slate-100">
                       ID Transaction: {p.transaction_id || 'N/A'}

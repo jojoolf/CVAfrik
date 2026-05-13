@@ -23,11 +23,15 @@ export async function POST(req: Request) {
 
     if (payError) throw payError;
 
-    // 2. Update the user profile plan
+    // 2. Update the user profile plan and expiry date (30 days from now)
+    const expiryDate = new Date();
+    expiryDate.setDate(expiryDate.getDate() + 30);
+
     const { error: profileError } = await supabase
       .from("profiles")
       .update({ 
         plan: planId,
+        plan_expiry: expiryDate.toISOString(),
         updated_at: new Date().toISOString()
       })
       .eq("id", userId);
