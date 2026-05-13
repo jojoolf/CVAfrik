@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import ClassicTemplate from "@/components/templates/ClassicTemplate";
 import ModernTemplate from "@/components/templates/ModernTemplate";
 import { Layout, Grid, List, Sparkles, ChevronLeft, ChevronRight, Download, Eye } from "lucide-react";
+import Link from "next/link";
 
 const mockData = {
   profile: {
