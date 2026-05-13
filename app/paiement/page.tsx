@@ -43,7 +43,7 @@ function PaymentContent() {
         if (data.url) {
           window.location.href = data.url;
         } else {
-          setError(data.error || "Une erreur est survenue lors de l'initiation du paiement.");
+          setError(data.details || data.error || "Une erreur est survenue lors de l'initiation du paiement.");
           setLoading(false);
         }
       } catch (err: any) {
