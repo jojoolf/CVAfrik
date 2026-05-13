@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator'
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
+import { setOAuthReturnCookieClient } from '@/lib/auth/set-oauth-return-cookie'
 
 interface LoginFormProps {
   redirectTo?: string
@@ -59,11 +60,12 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
     setIsLinkedinLoading(true)
 
     try {
+      setOAuthReturnCookieClient(redirectTo)
       const supabase = createClient()
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'linkedin_oidc',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=${redirectTo || '/dashboard'}`,
+          redirectTo: `${window.location.origin}/auth/callback`,
         },
       })
 
@@ -81,11 +83,12 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
     setIsGoogleLoading(true)
 
     try {
+      setOAuthReturnCookieClient(redirectTo)
       const supabase = createClient()
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=${redirectTo || '/dashboard'}`,
+          redirectTo: `${window.location.origin}/auth/callback`,
         },
       })
 

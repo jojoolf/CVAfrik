@@ -11,6 +11,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
+import { setOAuthReturnCookieClient } from '@/lib/auth/set-oauth-return-cookie'
 
 export function SignupForm() {
   const router = useRouter()
@@ -84,11 +85,12 @@ export function SignupForm() {
     setIsLinkedinLoading(true)
 
     try {
+      setOAuthReturnCookieClient('/dashboard')
       const supabase = createClient()
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'linkedin_oidc',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+          redirectTo: `${window.location.origin}/auth/callback`,
         },
       })
 
@@ -106,11 +108,12 @@ export function SignupForm() {
     setIsGoogleLoading(true)
 
     try {
+      setOAuthReturnCookieClient('/dashboard')
       const supabase = createClient()
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+          redirectTo: `${window.location.origin}/auth/callback`,
         },
       })
 
