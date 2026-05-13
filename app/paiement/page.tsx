@@ -65,9 +65,14 @@ function PaymentContent() {
           <h1 className="text-2xl font-black text-slate-900 mb-4">Oups ! Une erreur est survenue</h1>
           <p className="text-slate-500 mb-10 leading-relaxed">{error}</p>
           <div className="flex flex-col gap-3">
+            <Button asChild className="bg-slate-900 text-white py-6 rounded-2xl font-black text-sm hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/10">
+              <Link href={`/paiement/manuel?plan=${plan}`}>
+                Payer manuellement (Wave / T-Money)
+              </Link>
+            </Button>
             <Link 
               href="/tarifs" 
-              className="bg-slate-900 text-white py-4 rounded-2xl font-black text-sm hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/10"
+              className="text-slate-400 py-3 font-bold text-sm hover:text-slate-900 transition-colors"
             >
               Retour aux tarifs
             </Link>
