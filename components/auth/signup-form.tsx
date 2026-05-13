@@ -74,8 +74,8 @@ export function SignupForm() {
 
       toast.success('Compte cree avec succes! Verifiez votre email pour confirmer.')
       router.push('/auth/verification-email')
-    } catch {
-      toast.error('Une erreur est survenue')
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Une erreur est survenue')
     } finally {
       setIsLoading(false)
     }
@@ -97,8 +97,8 @@ export function SignupForm() {
       if (error) {
         toast.error(error.message)
       }
-    } catch {
-      toast.error('Une erreur est survenue')
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Une erreur est survenue')
     } finally {
       setIsLinkedinLoading(false)
     }
@@ -120,8 +120,8 @@ export function SignupForm() {
       if (error) {
         toast.error(error.message)
       }
-    } catch {
-      toast.error('Une erreur est survenue')
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Une erreur est survenue')
     } finally {
       setIsGoogleLoading(false)
     }

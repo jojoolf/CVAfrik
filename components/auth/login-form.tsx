@@ -49,8 +49,8 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
       toast.success('Connexion reussie!')
       router.push(redirectTo || '/dashboard')
       router.refresh()
-    } catch {
-      toast.error('Une erreur est survenue')
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Une erreur est survenue')
     } finally {
       setIsLoading(false)
     }
@@ -72,8 +72,8 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
       if (error) {
         toast.error(error.message)
       }
-    } catch {
-      toast.error('Une erreur est survenue')
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Une erreur est survenue')
     } finally {
       setIsLinkedinLoading(false)
     }
@@ -95,8 +95,8 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
       if (error) {
         toast.error(error.message)
       }
-    } catch {
-      toast.error('Une erreur est survenue')
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Une erreur est survenue')
     } finally {
       setIsGoogleLoading(false)
     }

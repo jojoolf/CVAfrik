@@ -1,14 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { PLANS } from '@/lib/types'
+import { getSupabaseApiUrl } from '@/lib/supabase/project-url'
 
 const CINETPAY_API_KEY = process.env.CINETPAY_API_KEY
 const CINETPAY_SITE_ID = process.env.CINETPAY_SITE_ID
 
 function getSupabaseAdmin() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  let supabaseUrl: string
+  try {
+    supabaseUrl = getSupabaseApiUrl()
+  } catch (e) {
+    console.error('[payment/webhook] URL Supabase invalide:', e)
+    return null
+  }
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-  if (!supabaseUrl || !serviceKey) return null
+  if (!serviceKey) return null
   return createClient(supabaseUrl, serviceKey)
 }
 
