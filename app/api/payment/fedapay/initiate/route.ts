@@ -58,7 +58,6 @@ export async function POST(req: Request) {
     const data = await response.json();
 
     if (data.v1 && data.v1.transaction) {
-      // Create a token for the transaction to get the redirect URL
       const tokenResponse = await fetch(`https://api.fedapay.com/v1/transactions/${data.v1.transaction.id}/token`, {
         method: "POST",
         headers: {
@@ -71,11 +70,17 @@ export async function POST(req: Request) {
       
       if (tokenData.v1 && tokenData.v1.token) {
         return NextResponse.json({ url: tokenData.v1.url });
+      } else {
+        console.error("FedaPay Token Error:", tokenData);
+        return NextResponse.json({ error: "Erreur lors de la génération du token FedaPay" }, { status: 500 });
       }
     }
 
-    console.error("FedaPay Error:", data);
-    return NextResponse.json({ error: "Erreur lors de la création de la transaction FedaPay" }, { status: 500 });
+    console.error("FedaPay Transaction Error:", JSON.stringify(data, null, 2));
+    return NextResponse.json({ 
+      error: "Erreur FedaPay", 
+      details: data.message || "Erreur inconnue" 
+    }, { status: 500 });
     
   } catch (error: any) {
     console.error("FedaPay Initiation Error:", error);
