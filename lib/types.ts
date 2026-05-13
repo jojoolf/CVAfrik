@@ -10,6 +10,7 @@ export interface Profile {
   nom: string | null
   prenom: string | null
   telephone: string | null
+  date_naissance: string | null
   adresse: string | null
   linkedin: string | null
   plan: Plan

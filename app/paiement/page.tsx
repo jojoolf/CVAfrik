@@ -1,61 +1,119 @@
-import { Metadata } from 'next'
-import { redirect } from 'next/navigation'
-import { Navbar } from '@/components/layout/navbar'
-import { PaymentForm } from '@/components/payment/payment-form'
-import { createClient } from '@/lib/supabase/server'
-import { PLANS } from '@/lib/types'
+"use client";
 
-export const metadata: Metadata = {
-  title: 'Paiement',
-  description: 'Finalisez votre achat avec Mobile Money ou carte bancaire.',
-}
+import React, { useEffect, useState, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
+import { Loader2, CreditCard, ShieldCheck, AlertCircle } from "lucide-react";
+import Link from "next/link";
 
-interface PageProps {
-  searchParams: Promise<{ plan?: string }>
-}
+function PaymentContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const plan = searchParams.get("plan");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const supabase = createClient();
 
-export default async function PaiementPage({ searchParams }: PageProps) {
-  const params = await searchParams
-  const planId = params.plan
+  useEffect(() => {
+    async function checkUserAndPay() {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        router.push(`/auth/connexion?redirect=/paiement?plan=${plan}`);
+        return;
+      }
 
-  // Validate plan
-  const plan = PLANS.find(p => p.id === planId && p.id !== 'gratuit')
-  if (!plan) {
-    redirect('/tarifs')
-  }
+      if (!plan) {
+        setError("Plan non spécifié.");
+        setLoading(false);
+        return;
+      }
 
-  // Check authentication
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+      try {
+        const response = await fetch("/api/payment/initiate", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ planId: plan }),
+        });
 
-  if (!user) {
-    redirect(`/auth/connexion?redirect=/paiement?plan=${planId}`)
-  }
+        const data = await response.json();
 
-  // Get user profile
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single()
+        if (data.url) {
+          window.location.href = data.url;
+        } else {
+          setError(data.error || "Une erreur est survenue lors de l'initiation du paiement.");
+          setLoading(false);
+        }
+      } catch (err: any) {
+        setError("Erreur de connexion au serveur.");
+        setLoading(false);
+      }
+    }
 
-  return (
-    <div className="flex min-h-screen flex-col bg-secondary/20">
-      <Navbar user={user} />
-      <main className="flex-1 py-12">
-        <div className="container mx-auto px-4">
-          <div className="mx-auto max-w-2xl">
-            <h1 className="text-center text-3xl font-bold text-foreground">
-              Finaliser votre achat
-            </h1>
-            <p className="mt-2 text-center text-muted-foreground">
-              Vous avez choisi le plan <span className="font-semibold text-primary">{plan.nom}</span>
-            </p>
+    checkUserAndPay();
+  }, [plan, router, supabase]);
 
-            <PaymentForm plan={plan} userEmail={user.email!} userId={user.id} />
+  if (error) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6 text-center">
+        <div className="max-w-md w-full bg-white rounded-[2rem] p-10 shadow-2xl shadow-slate-200 border border-slate-100">
+          <div className="w-20 h-20 bg-red-50 text-red-500 rounded-3xl flex items-center justify-center mx-auto mb-8">
+            <AlertCircle size={40} />
+          </div>
+          <h1 className="text-2xl font-black text-slate-900 mb-4">Oups ! Une erreur est survenue</h1>
+          <p className="text-slate-500 mb-10 leading-relaxed">{error}</p>
+          <div className="flex flex-col gap-3">
+            <Link 
+              href="/tarifs" 
+              className="bg-slate-900 text-white py-4 rounded-2xl font-black text-sm hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/10"
+            >
+              Retour aux tarifs
+            </Link>
+            <Link 
+              href="/dashboard" 
+              className="text-slate-500 py-3 font-bold text-sm hover:text-slate-900 transition-colors"
+            >
+              Aller au tableau de bord
+            </Link>
           </div>
         </div>
-      </main>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center">
+      <div className="w-24 h-24 relative mb-10">
+        <div className="absolute inset-0 bg-primary/20 rounded-full animate-ping" />
+        <div className="absolute inset-2 bg-primary rounded-full flex items-center justify-center shadow-2xl shadow-primary/40">
+          <CreditCard className="w-10 h-10 text-white" />
+        </div>
+      </div>
+      
+      <h1 className="text-3xl font-black text-slate-900 mb-4">Préparation du paiement</h1>
+      <p className="text-slate-500 max-w-sm mb-12 leading-relaxed">
+        Nous vous redirigeons vers l'interface sécurisée de <span className="font-bold text-slate-900">CinetPay</span> pour finaliser votre abonnement <span className="text-primary font-bold">{plan}</span>.
+      </p>
+
+      <div className="flex items-center gap-4 text-slate-400 bg-white px-8 py-4 rounded-2xl border border-slate-100 shadow-sm mb-12 animate-pulse">
+        <Loader2 className="w-5 h-5 animate-spin text-primary" />
+        <span className="font-bold text-sm uppercase tracking-widest">Connexion sécurisée...</span>
+      </div>
+
+      <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 bg-emerald-50 px-4 py-2 rounded-full border border-emerald-100">
+        <ShieldCheck size={14} />
+        Paiement Mobile Money Sécurisé
+      </div>
     </div>
-  )
+  );
+}
+
+export default function PaymentPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-50 flex items-center justify-center"><Loader2 className="w-10 h-10 animate-spin text-primary" /></div>}>
+      <PaymentContent />
+    </Suspense>
+  );
 }

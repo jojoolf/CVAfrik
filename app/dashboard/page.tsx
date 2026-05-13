@@ -69,13 +69,17 @@ export default async function DashboardPage() {
 
           {!profile && (
             <Card className="mb-8 border-amber-500/40 bg-amber-500/5">
-              <CardHeader>
-                <CardTitle className="text-lg">Profil non trouve</CardTitle>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg">Profil non trouvé</CardTitle>
                 <CardDescription>
-                  Votre compte est connecte mais la ligne profil est absente en base. Executez la
-                  migration Supabase (trigger de creation de profil) ou contactez le support.
+                  Votre compte est connecté mais votre profil n&apos;est pas encore initialisé.
                 </CardDescription>
               </CardHeader>
+              <CardContent>
+                <Button variant="outline" className="border-amber-500/50 text-amber-700 hover:bg-amber-500/10" asChild>
+                  <Link href="/profil/modifier">Initialiser mon profil</Link>
+                </Button>
+              </CardContent>
             </Card>
           )}
 

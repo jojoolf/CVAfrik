@@ -77,16 +77,21 @@ export default async function ProfilPage() {
           </Card>
 
           <Card className="mb-8">
-            <CardHeader>
-              <CardTitle>Abonnement</CardTitle>
-              <CardDescription>Plan actuel sur CVAfrik.</CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
+              <div>
+                <CardTitle>Abonnement</CardTitle>
+                <CardDescription>Plan actuel sur CVAfrik.</CardDescription>
+              </div>
+              <Button variant="outline" asChild>
+                <Link href="/profil/modifier">Modifier mon profil</Link>
+              </Button>
             </CardHeader>
             <CardContent className="flex flex-wrap items-center gap-3">
               <Badge variant="secondary" className="text-sm font-normal">
                 {planLabel}
               </Badge>
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/tarifs">Voir les tarifs</Link>
+              <Button variant="ghost" size="sm" asChild className="text-primary hover:text-primary hover:bg-primary/5">
+                <Link href="/tarifs">Changer de plan</Link>
               </Button>
             </CardContent>
           </Card>
