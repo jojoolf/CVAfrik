@@ -12,11 +12,13 @@ export default async function DashboardPage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('onboarding_completed')
+    .select('onboarding_completed, prenom')
     .eq('id', user.id)
     .single()
 
-  if (!profile?.onboarding_completed) {
+  const showOnboarding = !profile || profile.onboarding_completed !== true
+
+  if (showOnboarding) {
     return (
       <div className="min-h-screen flex flex-col">
         <header className="py-4 px-6">
