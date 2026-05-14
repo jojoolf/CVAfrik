@@ -136,3 +136,14 @@ CREATE POLICY "Users can view own candidatures" ON suivi_candidatures FOR SELECT
 CREATE POLICY "Users can manage own candidatures" ON suivi_candidatures FOR ALL USING (auth.uid() = user_id);
 
 CREATE POLICY "Users can view own simulations" ON simulations_entretien FOR SELECT USING (auth.uid() = user_id);
+
+-- Support Tickets
+CREATE TABLE IF NOT EXISTS support_tickets (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  sujet TEXT NOT NULL,
+  message TEXT NOT NULL,
+  statut TEXT DEFAULT 'ouvert',
+  priorite TEXT DEFAULT 'normale',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
