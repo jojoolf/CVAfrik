@@ -6,12 +6,30 @@ import { PaymentMethods } from '@/components/pricing/payment-methods'
 import { FAQ } from '@/components/pricing/faq'
 import { createClient } from '@/lib/supabase/server'
 
+import { Lock } from 'lucide-react'
+
 export const metadata: Metadata = {
   title: 'Tarifs',
   description: 'Explorez nos tarifs transparents. Commencez gratuitement, passez au Pro pour des CV illimités, le score ATS et la préparation aux entretiens.',
 }
 
-export default async function TarifsPage() {
+export default async function TarifsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+  const params = await searchParams
+  const locked = params.locked as string
+
+  let lockedMessage = null
+  if (locked === 'simulateur') {
+    lockedMessage = 'Le simulateur d\'entretien est réservé aux plans payants. Passez au niveau supérieur pour débloquer cette fonctionnalité !'
+  } else if (locked === 'cv') {
+    lockedMessage = 'Vous avez atteint la limite de création de CV de votre plan actuel. Passez au niveau supérieur pour en créer d\'autres !'
+  } else if (locked === 'lettres') {
+    lockedMessage = 'Vous avez atteint la limite de création de lettres de motivation de votre plan actuel. Passez au niveau supérieur pour en créer d\'autres !'
+  }
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -19,6 +37,14 @@ export default async function TarifsPage() {
     <div className="flex min-h-screen flex-col">
       <Navbar user={user} />
       <main className="flex-1">
+        {lockedMessage && (
+          <div className="bg-amber-100 border-b border-amber-200 py-3">
+            <div className="container mx-auto px-4 flex items-center justify-center gap-2 text-amber-800 font-medium text-sm">
+              <Lock className="h-4 w-4 shrink-0" />
+              <span>{lockedMessage}</span>
+            </div>
+          </div>
+        )}
         {/* Hero */}
         <section className="bg-gradient-to-b from-secondary/50 to-background py-16 md:py-24">
           <div className="container mx-auto px-4 text-center">

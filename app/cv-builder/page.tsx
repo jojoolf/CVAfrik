@@ -53,6 +53,10 @@ export default async function CVBuilderPage({ searchParams }: PageProps) {
     profile.cvs_generes_ce_mois < (plan.limites.cvs_par_mois || 0) ||
     existingCV !== null
 
+  if (!canCreate) {
+    redirect('/tarifs?locked=cv')
+  }
+
   return (
     <CVBuilderForm 
       profile={profile}

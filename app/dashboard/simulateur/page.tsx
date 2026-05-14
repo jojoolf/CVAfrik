@@ -5,6 +5,7 @@ import { Footer } from '@/components/layout/footer'
 import { InterviewChat } from './interview-chat'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { MessageSquareCode, Sparkles, Trophy } from 'lucide-react'
+import { PLANS } from '@/lib/types'
 
 export default async function SimulateurPage() {
   const supabase = await createClient()
@@ -12,6 +13,19 @@ export default async function SimulateurPage() {
 
   if (!user) {
     redirect('/auth/connexion')
+  }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('plan')
+    .eq('id', user.id)
+    .single()
+
+  const planId = profile?.plan ?? 'gratuit'
+  const planInfo = PLANS.find(p => p.id === planId) || PLANS[0]
+
+  if (!planInfo.limites.simulation_entretien) {
+    redirect('/tarifs?locked=simulateur')
   }
 
   const { data: cvs } = await supabase
