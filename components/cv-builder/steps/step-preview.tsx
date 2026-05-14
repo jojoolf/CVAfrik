@@ -187,13 +187,14 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
         {/* CV Preview */}
         <Card className="lg:col-span-2 overflow-hidden border-none shadow-none bg-transparent">
           <div className="relative group">
-            <div className="overflow-hidden rounded-xl border border-border bg-white shadow-2xl transition-all">
+            <div className="overflow-auto rounded-xl border border-border bg-gray-100 shadow-inner p-4 md:p-8 flex justify-center custom-scrollbar">
               <div 
                 ref={cvRef}
-                className="w-full bg-white"
+                className="bg-white shadow-2xl shrink-0"
                 style={{ 
-                  aspectRatio: '1 / 1.414',
-                  minHeight: '800px'
+                  width: '210mm',
+                  minHeight: '297mm',
+                  // Ensure it renders exactly as A4 for PDF export
                 }}
               >
                 <CVTemplateRenderer
@@ -205,10 +206,10 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
             </div>
             
             {/* Hover indication */}
-            <div className="absolute inset-0 flex items-center justify-center bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none rounded-xl">
+            <div className="absolute top-4 right-4 flex items-center justify-center bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none rounded-xl">
               <p className="bg-white/90 px-4 py-2 rounded-full text-xs font-bold shadow-lg flex items-center gap-2">
                 <FileText className="h-3 w-3" />
-                Aperçu du document
+                Format A4
               </p>
             </div>
           </div>
