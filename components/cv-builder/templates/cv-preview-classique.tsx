@@ -34,6 +34,13 @@ export function CVPreviewClassique({ data, showWatermark = false }: CVPreviewCla
         {/* Left sidebar */}
         <div className="w-1/3 bg-gray-900 p-6 text-white">
           <div className="text-center mb-6">
+            {data.informations_personnelles.photo && (
+              <img 
+                src={data.informations_personnelles.photo} 
+                alt="Profile" 
+                className="w-24 h-24 rounded-full object-cover mx-auto mb-4 border-2 border-gray-700"
+              />
+            )}
             <h1 className="text-xl font-bold">
               {data.informations_personnelles.prenom} {data.informations_personnelles.nom}
             </h1>

@@ -274,6 +274,7 @@ export function CVBuilderForm({
             <StepPersonalInfo
               data={cvData}
               onUpdate={updateCVData}
+              plan={plan}
             />
           )}
           {currentStep === 1 && (
