@@ -208,6 +208,7 @@ export const PLANS: PlanConfig[] = [
     description: 'Pour découvrir CVAfrik et créer ton premier CV',
     fonctionnalites: [
       '2 CV par mois',
+      '3 lettres de motivation / mois',
       '3 templates basiques',
       'Export PDF (avec watermark)',
       'Score ATS basique',
@@ -216,7 +217,7 @@ export const PLANS: PlanConfig[] = [
     ],
     limites: {
       cvs_par_mois: 2,
-      lettres_par_mois: 0,
+      lettres_par_mois: 3,
       templates: ['classique', 'moderne', 'minimaliste'],
       filigrane: true,
       export_pdf: true,
@@ -237,6 +238,7 @@ export const PLANS: PlanConfig[] = [
     description: 'Pour décrocher ton stage ou premier emploi rapidement',
     fonctionnalites: [
       'CV illimités',
+      'Lettres de motivation illimitées',
       '15+ templates premium',
       'Export PDF sans watermark',
       'Score ATS détaillé + conseils',
