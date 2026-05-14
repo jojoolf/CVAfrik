@@ -24,7 +24,7 @@ export function HeroSection() {
           <div className="text-center lg:text-left">
             <Badge variant="secondary" className="mb-6 gap-2 px-4 py-2 text-sm">
               <Sparkles className="h-4 w-4 text-primary" />
-              Plus de 10 000 CV crees en Afrique
+              Sois parmi les premiers en Afrique
             </Badge>
 
             <h1 className="text-balance text-4xl font-bold tracking-tight text-foreground md:text-5xl lg:text-6xl">
@@ -66,21 +66,24 @@ export function HeroSection() {
             {/* Social Proof */}
             <div className="mt-10 flex items-center justify-center gap-4 lg:justify-start">
               <div className="flex -space-x-2">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <div
-                    key={i}
-                    className="h-10 w-10 rounded-full border-2 border-background bg-gradient-to-br from-primary/80 to-accent/80"
-                  />
-                ))}
+                <div className="h-10 w-10 overflow-hidden rounded-full border-2 border-background bg-muted">
+                  <img src="https://i.pravatar.cc/100?img=1" alt="Utilisateur" className="h-full w-full object-cover" />
+                </div>
+                <div className="h-10 w-10 overflow-hidden rounded-full border-2 border-background bg-muted">
+                  <img src="https://i.pravatar.cc/100?img=2" alt="Utilisateur" className="h-full w-full object-cover" />
+                </div>
+                <div className="h-10 w-10 overflow-hidden rounded-full border-2 border-background bg-muted">
+                  <img src="https://i.pravatar.cc/100?img=3" alt="Utilisateur" className="h-full w-full object-cover" />
+                </div>
               </div>
               <div className="text-left">
                 <div className="flex items-center gap-1">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <Star key={i} className="h-4 w-4 fill-primary text-primary" />
-                  ))}
+                  <Badge variant="outline" className="text-primary border-primary/20 bg-primary/5">
+                    Nouveau 🚀
+                  </Badge>
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  Note 4.9/5 par nos utilisateurs
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Rejoignez la communaute
                 </p>
               </div>
             </div>

@@ -62,7 +62,7 @@ export function TestimonialsSection() {
             <span className="text-primary"> emploi de reve</span>
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Plus de 10 000 utilisateurs en Afrique nous font confiance 
+            De nombreux utilisateurs en Afrique nous font confiance 
             pour creer leur CV professionnel.
           </p>
           <div className="mt-6">
@@ -94,9 +94,12 @@ export function TestimonialsSection() {
                     &ldquo;{testimonial.commentaire || testimonial.content}&rdquo;
                   </p>
 
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold text-xs uppercase">
-                      {testimonial.nom?.substring(0, 2) || 'CV'}
+                    <div className="h-10 w-10 overflow-hidden rounded-full border border-slate-200 bg-slate-100 shrink-0">
+                      <img 
+                        src={`https://i.pravatar.cc/150?u=${encodeURIComponent(testimonial.nom || testimonial.author || 'cv')}`} 
+                        alt={testimonial.nom || testimonial.author} 
+                        className="h-full w-full object-cover" 
+                      />
                     </div>
                     <div>
                       <p className="font-bold text-slate-900">{testimonial.nom || testimonial.author}</p>
@@ -110,12 +113,11 @@ export function TestimonialsSection() {
         </div>
 
         {/* Stats */}
-        <div className="mt-16 grid gap-8 rounded-[2.5rem] bg-white p-10 shadow-2xl shadow-slate-200/60 border border-slate-100 md:grid-cols-4">
+        <div className="mt-16 grid gap-8 rounded-[2.5rem] bg-white p-10 shadow-2xl shadow-slate-200/60 border border-slate-100 md:grid-cols-3">
           {[
-            { value: '10 000+', label: 'CV crees' },
-            { value: 'Africa', label: 'Couverture' },
-            { value: '4.9/5', label: 'Note moyenne' },
-            { value: '85%', label: 'Taux de succes' },
+            { value: 'Rapide', label: 'Création de CV' },
+            { value: '100%', label: 'Adapté ATS' },
+            { value: 'Afrique', label: 'Couverture' },
           ].map((stat) => (
             <div key={stat.label} className="text-center">
               <p className="text-4xl font-black text-slate-900">{stat.value}</p>

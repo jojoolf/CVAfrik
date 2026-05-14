@@ -30,7 +30,8 @@ function PaymentContent() {
       }
 
       // Rediriger directement vers le paiement manuel pour éviter les erreurs d'API non configurées
-      router.push(`/paiement/manuel?plan=${plan}`);
+      const billingParam = searchParams.get("billing") ? `&billing=${searchParams.get("billing")}` : "";
+      router.push(`/paiement/manuel?plan=${plan}${billingParam}`);
       return;
     }
 
@@ -48,7 +49,7 @@ function PaymentContent() {
           <p className="text-slate-500 mb-10 leading-relaxed">{error}</p>
           <div className="flex flex-col gap-3">
             <Button asChild className="bg-slate-900 text-white py-6 rounded-2xl font-black text-sm hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/10">
-              <Link href={`/paiement/manuel?plan=${plan}`}>
+              <Link href={`/paiement/manuel?plan=${plan}${searchParams.get("billing") ? `&billing=${searchParams.get("billing")}` : ""}`}>
                 Payer manuellement (Wave / T-Money)
               </Link>
             </Button>

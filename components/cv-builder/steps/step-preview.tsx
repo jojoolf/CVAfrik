@@ -6,12 +6,13 @@ import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Lock, Download, Loader2, Sparkles, FileText } from 'lucide-react'
+import { Lock, Download, Loader2, Sparkles, FileText, Eye, Maximize2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { CVDonnees, PlanConfig } from '@/lib/types'
 import { toPng } from 'html-to-image'
 import { jsPDF } from 'jspdf'
 import { toast } from 'sonner'
+import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 
 import { CVPreviewClassique } from '../templates/cv-preview-classique'
 import { CVPreviewModerne } from '../templates/cv-preview-moderne'
@@ -124,29 +125,77 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
   return (
     <div className="space-y-6">
       <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-        <div>
+        <div className="text-center md:text-left">
           <h2 className="text-2xl font-bold text-foreground">Apercu et template</h2>
           <p className="text-muted-foreground">
             Choisissez votre template et telechargez votre CV
           </p>
         </div>
-        <Button 
-          onClick={handleDownloadPDF} 
-          disabled={isExporting}
-          className="gap-2 bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 rounded-full px-6"
-        >
-          {isExporting ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Generation...
-            </>
-          ) : (
-            <>
-              <Download className="h-4 w-4" />
-              Telecharger PDF
-            </>
-          )}
-        </Button>
+        
+        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+          {/* Aperçu Plein Ecran Mobile */}
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="gap-2 rounded-full lg:hidden flex-1 border-primary/20 hover:bg-primary/5">
+                <Maximize2 className="h-4 w-4 text-primary" />
+                Plein ecran
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-[100vw] w-full p-2 md:p-6 h-[95vh] flex flex-col items-center overflow-auto bg-slate-100/80 backdrop-blur-sm border-none">
+              <DialogHeader className="w-full flex justify-between items-center mb-2">
+                <DialogTitle className="text-slate-500 font-bold uppercase tracking-widest text-xs">Aperçu du CV</DialogTitle>
+              </DialogHeader>
+              
+              <div className="w-full flex justify-center custom-scrollbar overflow-auto">
+                <div 
+                  className="bg-white shadow-2xl shrink-0 mb-10"
+                  style={{ 
+                    width: '210mm',
+                    minHeight: '297mm',
+                    transform: 'scale(0.85)',
+                    transformOrigin: 'top center'
+                  }}
+                >
+                  <CVTemplateRenderer
+                    template={template}
+                    data={data}
+                    showWatermark={plan.limites.filigrane}
+                  />
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          <div className="flex flex-col gap-2 flex-1">
+            <Button 
+              onClick={handleDownloadPDF} 
+              disabled={isExporting}
+              className="gap-2 bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 rounded-full px-6 w-full"
+            >
+              {isExporting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  PDF...
+                </>
+              ) : (
+                <>
+                  <Download className="h-4 w-4" />
+                  Télécharger PDF
+                </>
+              )}
+            </Button>
+
+            <Button 
+              variant="outline"
+              onClick={() => toast.info('L\'export Word (DOCX) sera disponible dans la prochaine mise à jour !')} 
+              className="gap-2 rounded-full px-6 w-full border-dashed"
+            >
+              <FileText className="h-4 w-4 text-muted-foreground" />
+              <span className="text-muted-foreground">Télécharger Word</span>
+              <Badge variant="secondary" className="ml-auto text-[9px] py-0">Bientôt</Badge>
+            </Button>
+          </div>
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">

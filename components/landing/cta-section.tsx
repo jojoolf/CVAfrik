@@ -25,7 +25,7 @@ export function CTASection() {
               Pret a creer votre CV professionnel?
             </h2>
             <p className="mt-4 text-lg text-primary-foreground/90">
-              Rejoignez plus de 10 000 utilisateurs en Afrique qui ont 
+              Rejoignez de nombreux utilisateurs en Afrique qui ont 
               deja cree leur CV avec CVAfrik. Commencez gratuitement des maintenant.
             </p>
 

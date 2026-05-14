@@ -18,17 +18,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { PLANS } from "@/lib/types";
 
 function ManualPaymentContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const planId = searchParams.get("plan") || "pro";
+  const billing = searchParams.get("billing");
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [method, setMethod] = useState<string>("");
   const [transactionId, setTransactionId] = useState("");
 
-  const amount = planId === "premium" ? "3 000" : "1 200";
+  const planInfo = PLANS.find((p) => p.id === planId) || PLANS.find((p) => p.id === 'pro')!;
+  const isAnnual = billing === "annual";
+  const amount = isAnnual ? planInfo.prix_annuel_fcfa : planInfo.prix_fcfa;
+  const formattedAmount = amount.toLocaleString('fr-FR');
 
   const paymentMethods = [
     { id: "tmoney", name: "T-Money / Moov", number: "+228 90 64 32 52", color: "bg-yellow-400", text: "text-black", owner: "Mixx by yas" },
@@ -60,7 +65,7 @@ function ManualPaymentContent() {
       const { error } = await supabase.from("manual_payments").insert({
         user_id: user.id,
         plan_id: planId,
-        montant: planId === "premium" ? 3000 : 1200,
+        montant: amount,
         methode: method,
         transaction_id: transactionId,
       });
@@ -115,8 +120,8 @@ function ManualPaymentContent() {
           
           <div className="space-y-3">
             <div className="p-4 bg-slate-50 rounded-2xl flex items-center justify-between">
-              <span className="text-sm font-bold text-slate-500">Montant à payer :</span>
-              <span className="text-xl font-black text-slate-900">{amount} FCFA</span>
+              <span className="text-sm font-bold text-slate-500">Montant à payer {isAnnual && "(Annuel)"} :</span>
+              <span className="text-xl font-black text-slate-900">{formattedAmount} FCFA</span>
             </div>
 
             <div className="grid grid-cols-1 gap-3">
