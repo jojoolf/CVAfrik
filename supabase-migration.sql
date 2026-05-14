@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   plan_expiry TIMESTAMPTZ,
   cvs_generes_ce_mois INTEGER DEFAULT 0,
   lettres_generees_ce_mois INTEGER DEFAULT 0,
+  simulations_faites_ce_mois INTEGER DEFAULT 0,
   derniere_reinitialisation TIMESTAMPTZ DEFAULT NOW(),
   cinetpay_customer_id TEXT,
   pays TEXT,
