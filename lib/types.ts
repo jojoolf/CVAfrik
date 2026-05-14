@@ -97,6 +97,18 @@ export interface Certification {
   lien?: string
 }
 
+export interface LettreMotivation {
+  id: string
+  user_id: string
+  cv_id: string | null
+  destinataire: string
+  entreprise: string
+  poste: string
+  contenu: string
+  style: string
+  created_at: string
+}
+
 export interface CV {
   id: string
   user_id: string
