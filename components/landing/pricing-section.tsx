@@ -64,12 +64,12 @@ export function PricingSection() {
               <Card
                 key={plan.id}
                 className={cn(
-                  'relative flex flex-col',
-                  isPopular && 'border-primary shadow-lg ring-1 ring-primary'
+                  'relative flex flex-col transition-all duration-300 hover:scale-105 hover:shadow-xl',
+                  isPopular && 'border-primary shadow-lg ring-1 ring-primary shadow-primary/10'
                 )}
               >
                 {isPopular && (
-                  <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 gap-1 px-3">
+                  <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 gap-1 px-3 animate-shine shadow-lg">
                     <Sparkles className="h-3 w-3" />
                     Plus populaire
                   </Badge>
