@@ -9,36 +9,32 @@ import {
 
 const faqs = [
   {
-    question: 'Comment fonctionne le paiement Mobile Money?',
-    answer: 'Apres avoir choisi votre plan, vous serez redirige vers CinetPay ou vous pourrez payer avec Orange Money, Wave, MTN, Moov ou Flooz. Vous recevrez un code de confirmation sur votre telephone pour valider le paiement. Une fois le paiement confirme, votre plan est active immediatement.',
+    question: 'Comment fonctionne le paiement par Mobile Money ou Carte ?',
+    answer: 'C\'est très simple. Après avoir choisi votre plan, vous pourrez payer instantanément via Orange Money, Wave, MTN, Moov ou par Carte Bancaire (Visa/Mastercard). L\'activation de votre plan est immédiate dès la validation de la transaction.',
   },
   {
-    question: 'Puis-je annuler mon abonnement a tout moment?',
-    answer: 'Oui, vous pouvez annuler votre abonnement a tout moment depuis votre espace client. Votre acces aux fonctionnalites premium restera actif jusqu\'a la fin de la periode payee.',
+    question: 'Puis-je annuler mon abonnement à tout moment ?',
+    answer: 'Oui, absolument. CVAfrik est sans engagement. Vous pouvez annuler votre abonnement en un clic depuis votre profil. Vous garderez vos accès premium jusqu\'à la fin de la période déjà réglée.',
   },
   {
-    question: 'Quelle est la duree de validite des plans?',
-    answer: 'Les plans Pro et Premium sont valides pour une duree d\'un mois a compter de la date de paiement. Vous pouvez renouveler votre abonnement manuellement ou configurer le renouvellement automatique.',
+    question: 'C\'est quoi le "Score ATS" et pourquoi est-ce important ?',
+    answer: 'L\'ATS (Applicant Tracking System) est un logiciel utilisé par les recruteurs pour filtrer les CV. Notre IA analyse votre CV pour vérifier s\'il contient les bons mots-clés et le bon format pour passer ces filtres automatiques et arriver sur le bureau du recruteur.',
   },
   {
-    question: 'Puis-je changer de plan en cours de mois?',
-    answer: 'Oui, vous pouvez passer a un plan superieur a tout moment. La difference de prix sera calculee au prorata des jours restants. Le passage a un plan inferieur sera effectif a la fin de votre periode en cours.',
+    question: 'Le plan Business est-il adapté pour les écoles ou universités ?',
+    answer: 'Oui, le plan Business est conçu spécifiquement pour les institutions et les coachs carrière. Il permet de gérer plusieurs profils étudiants, de suivre leur progression et d\'utiliser des templates personnalisés avec le logo de votre établissement.',
   },
   {
-    question: 'Que se passe-t-il si mon paiement echoue?',
-    answer: 'Si votre paiement echoue, vous pouvez reessayer immediatement avec le meme operateur ou en choisir un autre. Si le probleme persiste, contactez notre support a contact@cvafrik.com.',
+    question: 'Quels sont les avantages de l\'abonnement annuel ?',
+    answer: 'L\'abonnement annuel vous permet de bénéficier de 2 mois offerts par rapport au tarif mensuel. C\'est la solution idéale pour un accompagnement complet sur le long terme.',
   },
   {
-    question: 'Les prix sont-ils les memes dans tous les pays?',
-    answer: 'Oui, nos prix en FCFA sont uniformes dans toute la zone CFA. Pour les autres pays africains, les prix sont convertis en monnaie locale au taux du jour par CinetPay.',
+    question: 'Puis-je changer de plan en cours de route ?',
+    answer: 'Oui, vous pouvez passer d\'un plan Starter à Career Pro à tout moment pour débloquer les fonctionnalités avancées comme la simulation d\'entretien IA.',
   },
   {
-    question: 'Comment obtenir une facture?',
-    answer: 'Une facture est automatiquement generee apres chaque paiement et envoyee a votre adresse email. Vous pouvez egalement telecharger vos factures depuis votre espace client.',
-  },
-  {
-    question: 'Y a-t-il des frais supplementaires?',
-    answer: 'Non, les prix affiches sont les prix finaux. Les frais de transaction Mobile Money sont a notre charge. Vous payez uniquement le montant indique.',
+    question: 'Comment obtenir une facture ?',
+    answer: 'Une facture professionnelle est générée automatiquement pour chaque paiement. Vous pouvez la télécharger à tout moment depuis votre tableau de bord dans la section "Paiements".',
   },
 ]
 

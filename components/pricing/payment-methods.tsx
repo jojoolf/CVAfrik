@@ -11,8 +11,8 @@ const mobileMoneyOperators = [
 const securityFeatures = [
   {
     icon: Shield,
-    title: 'Paiement securise',
-    description: 'Transactions protegees par CinetPay, leader du paiement en Afrique',
+    title: 'Paiement sécurisé',
+    description: 'Vos transactions sont protégées par les meilleurs standards de sécurité',
   },
   {
     icon: Lock,
@@ -66,15 +66,10 @@ export function PaymentMethods() {
           ))}
         </div>
 
-        {/* CinetPay Badge */}
         <div className="mt-10 text-center">
-          <p className="text-sm text-muted-foreground">
-            Paiement securise par
+          <p className="text-sm text-muted-foreground italic">
+            Partenaire de confiance pour votre réussite professionnelle
           </p>
-          <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-card px-4 py-2 font-semibold shadow-sm ring-1 ring-border">
-            <div className="h-6 w-6 rounded-full bg-gradient-to-br from-green-500 to-green-600" />
-            CinetPay
-          </div>
         </div>
       </div>
     </section>
