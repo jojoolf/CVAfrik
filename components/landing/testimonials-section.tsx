@@ -1,60 +1,57 @@
-import { Star, Quote } from 'lucide-react'
+"use client";
+
+import { Star, Quote, Loader2 } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-
-const testimonials = [
-  {
-    id: 1,
-    content: 'Grace a CVAfrik, j\'ai pu creer un CV professionnel en quelques minutes. Le paiement par Orange Money m\'a facilite la vie. J\'ai decroche un entretien une semaine apres!',
-    author: 'Aminata Diallo',
-    role: 'Comptable',
-    location: 'Dakar, Senegal',
-    rating: 5,
-  },
-  {
-    id: 2,
-    content: 'Les conseils de l\'IA m\'ont aide a ameliorer mon CV. Mon score est passe de 65% a 92%. Je recommande vivement CVAfrik a tous les jeunes diplomes.',
-    author: 'Kouadio Yao',
-    role: 'Ingenieur informatique',
-    location: 'Abidjan, Cote d\'Ivoire',
-    rating: 5,
-  },
-  {
-    id: 3,
-    content: 'J\'ai essaye plusieurs sites de CV mais aucun n\'etait adapte a notre contexte. CVAfrik comprend vraiment les besoins des candidats africains.',
-    author: 'Fatoumata Traore',
-    role: 'Responsable RH',
-    location: 'Bamako, Mali',
-    rating: 5,
-  },
-  {
-    id: 4,
-    content: 'Le template Executif m\'a permis de postuler a des postes de direction. L\'export PDF est impeccable et professionnel.',
-    author: 'Emmanuel Mensah',
-    role: 'Directeur commercial',
-    location: 'Lome, Togo',
-    rating: 5,
-  },
-  {
-    id: 5,
-    content: 'La simulation d\'entretien avec l\'IA m\'a vraiment prepare pour mon entretien. J\'ai pu anticiper les questions et repondre avec confiance.',
-    author: 'Mariam Ouedraogo',
-    role: 'Marketing Manager',
-    location: 'Ouagadougou, Burkina Faso',
-    rating: 5,
-  },
-  {
-    id: 6,
-    content: 'Simple, efficace et pas cher. Le plan Pro a 1200 FCFA est vraiment abordable. J\'ai cree 5 versions de mon CV pour differents postes.',
-    author: 'Ibrahima Sow',
-    role: 'Developpeur web',
-    location: 'Conakry, Guinee',
-    rating: 5,
-  },
-]
+import { createClient } from '@/lib/supabase/client'
+import { useEffect, useState } from 'react'
 
 export function TestimonialsSection() {
+  const [realReviews, setRealReviews] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const supabase = createClient()
+
+  useEffect(() => {
+    async function fetchReviews() {
+      const { data, error } = await supabase
+        .from('avis')
+        .select('*')
+        .eq('statut', 'approuve')
+        .order('created_at', { ascending: false })
+        .limit(6)
+      
+      if (!error && data) {
+        setRealReviews(data)
+      }
+      setLoading(false)
+    }
+    fetchReviews()
+  }, [])
+
+  const staticTestimonials = [
+    {
+      id: 's1',
+      commentaire: 'Grace a CVAfrik, j\'ai pu creer un CV professionnel en quelques minutes. Le paiement par Orange Money m\'a facilite la vie. J\'ai decroche un entretien une semaine apres!',
+      nom: 'Aminata Diallo',
+      note: 5,
+    },
+    {
+      id: 's2',
+      commentaire: 'Les conseils de l\'IA m\'ont aide a ameliorer mon CV. Mon score est passe de 65% a 92%. Je recommande vivement CVAfrik a tous les jeunes diplomes.',
+      nom: 'Kouadio Yao',
+      note: 5,
+    },
+    {
+      id: 's3',
+      commentaire: 'J\'ai essaye plusieurs sites de CV mais aucun n\'etait adapte a notre contexte. CVAfrik comprend vraiment les besoins des candidats africains.',
+      nom: 'Fatoumata Traore',
+      note: 5,
+    },
+  ]
+
+  const displayReviews = realReviews.length > 0 ? [...realReviews, ...staticTestimonials].slice(0, 6) : staticTestimonials
+
   return (
     <section id="temoignages" className="bg-secondary/30 py-20 md:py-28">
       <div className="container mx-auto px-4">
@@ -77,48 +74,52 @@ export function TestimonialsSection() {
 
         {/* Testimonials Grid */}
         <div className="mt-16 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {testimonials.map((testimonial) => (
-            <Card key={testimonial.id} className="relative">
-              <CardContent className="pt-6">
-                {/* Quote Icon */}
-                <Quote className="absolute right-6 top-6 h-8 w-8 text-primary/10" />
-
-                {/* Rating */}
-                <div className="mb-4 flex gap-0.5">
-                  {Array.from({ length: testimonial.rating }).map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-primary text-primary" />
-                  ))}
-                </div>
-
-                {/* Content */}
-                <p className="text-muted-foreground">&ldquo;{testimonial.content}&rdquo;</p>
-
-                {/* Author */}
-                <div className="mt-6 flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-accent" />
-                  <div>
-                    <p className="font-semibold text-foreground">{testimonial.author}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {testimonial.role} • {testimonial.location}
-                    </p>
+          {loading ? (
+            <div className="col-span-full flex justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : (
+            displayReviews.map((testimonial) => (
+              <Card key={testimonial.id} className="relative overflow-hidden border-none shadow-xl shadow-slate-200/50">
+                <CardContent className="pt-6">
+                  <Quote className="absolute right-6 top-6 h-8 w-8 text-primary/5" />
+                  
+                  <div className="mb-4 flex gap-0.5">
+                    {Array.from({ length: testimonial.note }).map((_, i) => (
+                      <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
+                    ))}
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+
+                  <p className="text-slate-600 italic leading-relaxed mb-6">
+                    &ldquo;{testimonial.commentaire || testimonial.content}&rdquo;
+                  </p>
+
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold text-xs uppercase">
+                      {testimonial.nom?.substring(0, 2) || 'CV'}
+                    </div>
+                    <div>
+                      <p className="font-bold text-slate-900">{testimonial.nom || testimonial.author}</p>
+                      <p className="text-xs text-slate-400">Utilisateur verifie</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
         </div>
 
         {/* Stats */}
-        <div className="mt-16 grid gap-8 rounded-2xl bg-card p-8 shadow-lg ring-1 ring-border md:grid-cols-4">
+        <div className="mt-16 grid gap-8 rounded-[2.5rem] bg-white p-10 shadow-2xl shadow-slate-200/60 border border-slate-100 md:grid-cols-4">
           {[
             { value: '10 000+', label: 'CV crees' },
-            { value: '8', label: 'Pays couverts' },
+            { value: 'Africa', label: 'Couverture' },
             { value: '4.9/5', label: 'Note moyenne' },
             { value: '85%', label: 'Taux de succes' },
           ].map((stat) => (
             <div key={stat.label} className="text-center">
-              <p className="text-3xl font-bold text-primary">{stat.value}</p>
-              <p className="mt-1 text-sm text-muted-foreground">{stat.label}</p>
+              <p className="text-4xl font-black text-slate-900">{stat.value}</p>
+              <p className="mt-2 text-xs font-black uppercase text-slate-400 tracking-widest">{stat.label}</p>
             </div>
           ))}
         </div>
