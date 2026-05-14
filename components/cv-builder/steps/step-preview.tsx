@@ -88,7 +88,15 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
       })
       
       const imgData = canvas.toDataURL('image/png')
-      const pdf = new jsPDF({
+      
+      // Handle different module resolution in Next.js/Turbopack
+      const JSPDFClass = typeof jsPDF === 'function' ? jsPDF : (jsPDF as any).jsPDF || (jsPDF as any).default;
+      
+      if (!JSPDFClass) {
+        throw new Error("Impossible de charger le module PDF.")
+      }
+
+      const pdf = new JSPDFClass({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4'
@@ -100,9 +108,9 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
       pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight)
       pdf.save(`CV_${data.informations_personnelles.nom || 'CVAfrik'}.pdf`)
       toast.success('CV telecharge avec succes !')
-    } catch (error) {
+    } catch (error: any) {
       console.error('PDF Error:', error)
-      toast.error('Erreur lors de la generation du PDF')
+      toast.error(`Erreur: ${error.message || 'Generation du PDF impossible'}`)
     } finally {
       setIsExporting(false)
     }
