@@ -45,7 +45,7 @@ export function Navbar({ user }: NavbarProps) {
         { name: 'Fonctionnalités', href: '/#fonctionnalites' },
         { name: 'Templates', href: '/templates' },
         { name: 'Tarifs', href: '/tarifs' },
-        { name: 'Avis', href: '/avis' },
+        { name: 'Blog & Emploi', href: '/blog' },
       ]
     }
 
@@ -55,6 +55,7 @@ export function Navbar({ user }: NavbarProps) {
       { name: 'CV', href: '/cv-builder', icon: FileText },
       { name: 'Lettres', href: '/dashboard/lettres', icon: FileSignature },
       { name: 'Entretien', href: '/dashboard/simulateur', icon: MessageSquareCode },
+      { name: 'Blog', href: '/blog', icon: Sparkles },
     ]
 
     return [
