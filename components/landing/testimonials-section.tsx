@@ -94,6 +94,7 @@ export function TestimonialsSection() {
                     &ldquo;{testimonial.commentaire || testimonial.content}&rdquo;
                   </p>
 
+                  <div className="flex items-center gap-3">
                     <div className="h-10 w-10 overflow-hidden rounded-full border border-slate-200 bg-slate-100 shrink-0">
                       <img 
                         src={`https://i.pravatar.cc/150?u=${encodeURIComponent(testimonial.nom || testimonial.author || 'cv')}`} 
