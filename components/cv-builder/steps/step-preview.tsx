@@ -10,7 +10,7 @@ import { Lock, Download, Loader2, Sparkles, FileText } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { CVDonnees, PlanConfig } from '@/lib/types'
 import html2canvas from 'html2canvas'
-import jsPDF from 'jspdf'
+import { jsPDF } from 'jspdf'
 import { toast } from 'sonner'
 
 import { CVPreviewClassique } from '../templates/cv-preview-classique'
