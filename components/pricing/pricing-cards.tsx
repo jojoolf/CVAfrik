@@ -62,7 +62,7 @@ export function PricingCards({ currentPlan }: PricingCardsProps) {
                   <span className="text-muted-foreground"> FCFA</span>
                   {plan.prix_fcfa > 0 && (
                     <p className="mt-1 text-sm text-muted-foreground">
-                      ~{plan.prix_usd}$ USD / mois
+                      ~{plan.prix_usd}€ / mois
                     </p>
                   )}
                 </div>
@@ -121,28 +121,28 @@ export function PricingCards({ currentPlan }: PricingCardsProps) {
             <thead>
               <tr className="border-b border-border">
                 <th className="py-4 text-left font-medium text-foreground">Fonctionnalite</th>
-                <th className="py-4 text-center font-medium text-foreground">Gratuit</th>
-                <th className="py-4 text-center font-medium text-primary">Pro</th>
-                <th className="py-4 text-center font-medium text-accent">Premium</th>
+                <th className="py-4 text-center font-medium text-foreground">Starter</th>
+                <th className="py-4 text-center font-medium text-primary">Career Pro</th>
+                <th className="py-4 text-center font-medium text-accent">Business</th>
               </tr>
             </thead>
             <tbody className="text-sm">
               {[
-                { name: 'CV par mois', gratuit: '1', pro: 'Illimite', premium: 'Illimite' },
-                { name: 'Lettres de motivation', gratuit: '-', pro: '5/mois', premium: 'Illimite' },
-                { name: 'Templates disponibles', gratuit: '2', pro: '6', premium: '8' },
-                { name: 'Export PDF', gratuit: 'Avec filigrane', pro: 'Sans filigrane', premium: 'Sans filigrane' },
-                { name: 'Score CV et conseils IA', gratuit: '-', pro: 'Oui', premium: 'Oui' },
-                { name: 'Adaptation aux offres', gratuit: '-', pro: 'Oui', premium: 'Oui' },
-                { name: 'Simulation entretien IA', gratuit: '-', pro: '-', premium: 'Oui' },
-                { name: 'Suivi candidatures', gratuit: '-', pro: '-', premium: 'Oui' },
-                { name: 'Generateur LinkedIn', gratuit: '-', pro: '-', premium: 'Oui' },
+                { name: 'CV par mois', starter: '2', pro: 'Illimite', business: 'Illimite' },
+                { name: 'Templates', starter: '3 basiques', pro: '15+ premium', business: 'Premium + Custom' },
+                { name: 'Export PDF', starter: 'Avec filigrane', pro: 'Sans filigrane', business: 'Sans filigrane' },
+                { name: 'Score ATS', starter: 'Basique', pro: 'Detaille', business: 'Detaille' },
+                { name: 'Simulation entretien', starter: '3/mois', pro: 'Illimite', business: 'Illimite' },
+                { name: 'Matching offres', starter: '-', pro: 'Oui', business: 'Oui' },
+                { name: 'Traduction', starter: '-', pro: 'Oui', business: 'Oui' },
+                { name: 'Multi-profils', starter: '-', pro: '-', business: 'Oui' },
+                { name: 'Support', starter: 'Standard', pro: 'Standard', business: 'Prioritaire WhatsApp' },
               ].map((row) => (
                 <tr key={row.name} className="border-b border-border/50">
                   <td className="py-3 text-muted-foreground">{row.name}</td>
-                  <td className="py-3 text-center text-muted-foreground">{row.gratuit}</td>
+                  <td className="py-3 text-center text-muted-foreground">{row.starter}</td>
                   <td className="py-3 text-center font-medium text-foreground">{row.pro}</td>
-                  <td className="py-3 text-center font-medium text-foreground">{row.premium}</td>
+                  <td className="py-3 text-center font-medium text-foreground">{row.business}</td>
                 </tr>
               ))}
             </tbody>

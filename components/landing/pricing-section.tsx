@@ -31,54 +31,52 @@ export function PricingSection() {
               <Card
                 key={plan.id}
                 className={cn(
-                  'relative flex flex-col border-none bg-slate-900 text-white shadow-2xl transition-all hover:scale-[1.02]',
-                  isPopular && 'ring-2 ring-primary bg-gradient-to-br from-slate-900 to-slate-800'
+                  'relative flex flex-col',
+                  isPopular && 'border-primary shadow-lg ring-1 ring-primary'
                 )}
               >
                 {isPopular && (
-                  <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 gap-1 px-3 bg-primary text-primary-foreground border-none">
+                  <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 gap-1 px-3">
                     <Sparkles className="h-3 w-3" />
-                    Le plus populaire
+                    Plus populaire
                   </Badge>
                 )}
 
-                <CardHeader className="text-center pt-8">
-                  <CardTitle className="text-xl font-black uppercase tracking-widest text-slate-400">{plan.nom}</CardTitle>
-                  <CardDescription className="text-slate-300">{plan.description}</CardDescription>
-                  <div className="mt-6">
-                    <span className="text-5xl font-black">
-                      {plan.id === 'gratuit' ? '0' : plan.prix_usd}
+                <CardHeader className="text-center">
+                  <CardTitle className="text-xl">{plan.nom}</CardTitle>
+                  <CardDescription>{plan.description}</CardDescription>
+                  <div className="mt-4">
+                    <span className="text-4xl font-bold text-foreground">
+                      {plan.prix_fcfa.toLocaleString('fr-FR')}
                     </span>
-                    <span className="text-xl text-slate-400"> {plan.id === 'gratuit' ? '€' : '€'}/mois</span>
+                    <span className="text-muted-foreground"> FCFA</span>
                     {plan.prix_fcfa > 0 && (
-                      <p className="mt-2 text-xs font-bold text-primary uppercase tracking-tighter">
-                        Soit environ {plan.prix_fcfa.toLocaleString('fr-FR')} FCFA
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        ~{plan.prix_usd}€ / mois
                       </p>
                     )}
                   </div>
                 </CardHeader>
 
-                <CardContent className="flex-1 px-8">
-                  <ul className="space-y-4">
+                <CardContent className="flex-1">
+                  <ul className="space-y-3">
                     {plan.fonctionnalites.map((feature) => (
-                      <li key={feature} className="flex items-start gap-3">
+                      <li key={feature} className="flex items-start gap-2">
                         <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                        <span className="text-sm text-slate-300 leading-tight">{feature}</span>
+                        <span className="text-sm text-muted-foreground">{feature}</span>
                       </li>
                     ))}
                   </ul>
                 </CardContent>
 
-                <CardFooter className="p-8">
+                <CardFooter>
                   <Button
-                    className={cn(
-                      "w-full h-14 rounded-2xl font-black text-lg transition-all shadow-xl",
-                      isPopular ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-primary/20" : "bg-white/10 text-white hover:bg-white/20"
-                    )}
+                    className="w-full"
+                    variant={isPopular ? 'default' : 'outline'}
                     asChild
                   >
-                    <Link href={plan.id === 'gratuit' ? '/auth/inscription' : '/tarifs'}>
-                      {plan.id === 'gratuit' ? 'Commencer' : 'Choisir ce plan'}
+                    <Link href={plan.id === 'gratuit' ? '/auth/inscription' : `/tarifs?plan=${plan.id}`}>
+                      {plan.id === 'gratuit' ? 'Commencer gratuitement' : 'Choisir ce plan'}
                     </Link>
                   </Button>
                 </CardFooter>
