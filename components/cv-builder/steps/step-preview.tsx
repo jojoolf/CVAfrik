@@ -21,6 +21,8 @@ import { CVPreviewTech } from '../templates/cv-preview-tech'
 import { CVPreviewMinimaliste } from '../templates/cv-preview-minimaliste'
 import { CVPreviewStartup } from '../templates/cv-preview-startup'
 import { CVPreviewLuxe } from '../templates/cv-preview-luxe'
+import { CVPreviewElite } from '../templates/cv-preview-elite'
+import { CVPreviewDesign } from '../templates/cv-preview-design'
 
 interface StepPreviewProps {
   data: CVDonnees
@@ -38,6 +40,8 @@ const templates = [
   { id: 'minimaliste', name: 'Minimaliste', description: 'L\'essentiel', plans: ['pro', 'premium'] },
   { id: 'startup', name: 'Startup', description: 'Dynamique', plans: ['premium'] },
   { id: 'luxe', name: 'Luxe', description: 'Elegant', plans: ['premium'] },
+  { id: 'elite', name: 'Elite', description: 'Design premium avec photo', plans: ['pro', 'premium'] },
+  { id: 'design', name: 'Design', description: 'Esthetique et chaleureux', plans: ['pro', 'premium'] },
 ]
 
 function CVTemplateRenderer({ template, data, showWatermark }: { template: string; data: CVDonnees; showWatermark: boolean }) {
@@ -58,6 +62,10 @@ function CVTemplateRenderer({ template, data, showWatermark }: { template: strin
       return <CVPreviewStartup data={data} showWatermark={showWatermark} />
     case 'luxe':
       return <CVPreviewLuxe data={data} showWatermark={showWatermark} />
+    case 'elite':
+      return <CVPreviewElite data={data} showWatermark={showWatermark} />
+    case 'design':
+      return <CVPreviewDesign data={data} showWatermark={showWatermark} />
     default:
       return <CVPreviewModerne data={data} showWatermark={showWatermark} />
   }
