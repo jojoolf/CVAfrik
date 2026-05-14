@@ -1,12 +1,18 @@
 'use client'
 
+import { useRef, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Badge } from '@/components/ui/badge'
-import { Lock } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Lock, Download, Loader2, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { CVDonnees, PlanConfig } from '@/lib/types'
+import html2canvas from 'html2canvas'
+import jsPDF from 'jspdf'
+import { toast } from 'sonner'
+
 import { CVPreviewClassique } from '../templates/cv-preview-classique'
 import { CVPreviewModerne } from '../templates/cv-preview-moderne'
 import { CVPreviewCreatif } from '../templates/cv-preview-creatif'
@@ -58,26 +64,87 @@ function CVTemplateRenderer({ template, data, showWatermark }: { template: strin
 }
 
 export function StepPreview({ data, template, onTemplateChange, plan }: StepPreviewProps) {
+  const cvRef = useRef<HTMLDivElement>(null)
+  const [isExporting, setIsExporting] = useState(false)
+
   const isTemplateAvailable = (templateId: string) => {
     const t = templates.find(t => t.id === templateId)
     return t?.plans.includes(plan.id) || false
   }
 
+  const handleDownloadPDF = async () => {
+    if (!cvRef.current) return
+    setIsExporting(true)
+    
+    try {
+      // Small delay to ensure everything is rendered
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      const canvas = await html2canvas(cvRef.current, {
+        scale: 2, // Higher quality
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff'
+      })
+      
+      const imgData = canvas.toDataURL('image/png')
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      })
+      
+      const imgWidth = 210 // A4 width in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight)
+      pdf.save(`CV_${data.informations_personnelles.nom || 'CVAfrik'}.pdf`)
+      toast.success('CV telecharge avec succes !')
+    } catch (error) {
+      console.error('PDF Error:', error)
+      toast.error('Erreur lors de la generation du PDF')
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold text-foreground">Apercu et template</h2>
-        <p className="mt-2 text-muted-foreground">
-          Choisissez votre template et verifiez votre CV
-        </p>
+      <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
+        <div>
+          <h2 className="text-2xl font-bold text-foreground">Apercu et template</h2>
+          <p className="text-muted-foreground">
+            Choisissez votre template et telechargez votre CV
+          </p>
+        </div>
+        <Button 
+          onClick={handleDownloadPDF} 
+          disabled={isExporting}
+          className="gap-2 bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 rounded-full px-6"
+        >
+          {isExporting ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Generation...
+            </>
+          ) : (
+            <>
+              <Download className="h-4 w-4" />
+              Telecharger PDF
+            </>
+          )}
+        </Button>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Template Selection */}
-        <Card className="lg:col-span-1">
+        <Card className="lg:col-span-1 h-fit">
           <CardHeader>
-            <CardTitle className="text-lg">Template</CardTitle>
-            <CardDescription>Choisissez le style de votre CV</CardDescription>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-primary" />
+              Templates
+            </CardTitle>
+            <CardDescription>Style de votre CV</CardDescription>
           </CardHeader>
           <CardContent>
             <RadioGroup value={template} onValueChange={onTemplateChange} className="space-y-2">
@@ -94,18 +161,18 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
                     <Label
                       htmlFor={t.id}
                       className={cn(
-                        'flex cursor-pointer items-center justify-between rounded-lg border-2 border-muted bg-popover p-3 transition-colors',
-                        'peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary',
+                        'flex cursor-pointer items-center justify-between rounded-xl border-2 border-muted bg-popover p-3 transition-all hover:border-primary/50',
+                        'peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 [&:has([data-state=checked])]:border-primary',
                         !available && 'cursor-not-allowed opacity-50'
                       )}
                     >
                       <div>
-                        <p className="font-medium text-foreground">{t.name}</p>
-                        <p className="text-xs text-muted-foreground">{t.description}</p>
+                        <p className="font-semibold text-foreground text-sm">{t.name}</p>
+                        <p className="text-[10px] text-muted-foreground">{t.description}</p>
                       </div>
                       {!available && (
-                        <Badge variant="secondary" className="gap-1 text-xs">
-                          <Lock className="h-3 w-3" />
+                        <Badge variant="secondary" className="gap-1 text-[10px] py-0">
+                          <Lock className="h-2.5 w-2.5" />
                           {t.plans.includes('pro') ? 'Pro' : 'Premium'}
                         </Badge>
                       )}
@@ -118,14 +185,17 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
         </Card>
 
         {/* CV Preview */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="text-lg">Apercu</CardTitle>
-            <CardDescription>Voici a quoi ressemblera votre CV</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-hidden rounded-lg border border-border bg-white shadow-lg">
-              <div className="aspect-[8.5/11] w-full overflow-y-auto">
+        <Card className="lg:col-span-2 overflow-hidden border-none shadow-none bg-transparent">
+          <div className="relative group">
+            <div className="overflow-hidden rounded-xl border border-border bg-white shadow-2xl transition-all">
+              <div 
+                ref={cvRef}
+                className="w-full bg-white"
+                style={{ 
+                  aspectRatio: '1 / 1.414',
+                  minHeight: '800px'
+                }}
+              >
                 <CVTemplateRenderer
                   template={template}
                   data={data}
@@ -133,7 +203,15 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
                 />
               </div>
             </div>
-          </CardContent>
+            
+            {/* Hover indication */}
+            <div className="absolute inset-0 flex items-center justify-center bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none rounded-xl">
+              <p className="bg-white/90 px-4 py-2 rounded-full text-xs font-bold shadow-lg flex items-center gap-2">
+                <FileText className="h-3 w-3" />
+                Aperçu du document
+              </p>
+            </div>
+          </div>
         </Card>
       </div>
     </div>

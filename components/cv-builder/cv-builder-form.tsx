@@ -71,7 +71,7 @@ export function CVBuilderForm({
   selectedTemplate 
 }: CVBuilderFormProps) {
   const router = useRouter()
-  const [currentStep, setCurrentStep] = useState(0)
+  const [currentStep, setCurrentStep] = useState(existingCV ? steps.length - 1 : 0)
   const [isSaving, setIsSaving] = useState(false)
   const [cvTitle, setCvTitle] = useState(existingCV?.titre || 'Mon CV')
   const [template, setTemplate] = useState(existingCV?.template || selectedTemplate)

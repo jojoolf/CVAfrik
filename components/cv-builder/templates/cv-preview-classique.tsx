@@ -16,9 +16,17 @@ export function CVPreviewClassique({ data, showWatermark = false }: CVPreviewCla
 
   return (
     <div className="relative min-h-full bg-white text-gray-800" style={{ fontSize: '10pt', lineHeight: '1.4' }}>
+      {/* Watermark (Filigrane) - Version premium au bas pour le plan gratuit */}
       {showWatermark && (
-        <div className="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none">
-          <div className="rotate-[-30deg] text-6xl font-bold text-gray-500">CVAfrik</div>
+        <div className="absolute bottom-4 left-0 right-0 z-50 flex flex-col items-center justify-center pointer-events-none">
+          <div className="flex items-center gap-1.5 px-3 py-1 bg-white/80 rounded-full border border-primary/20 shadow-sm overflow-hidden animate-shine">
+            <div className="flex h-5 w-5 items-center justify-center rounded bg-primary">
+              <span className="text-[10px] font-bold text-white">CV</span>
+            </div>
+            <span className="text-[11px] font-bold text-gray-400">
+              Cree avec <span className="text-primary font-bold">CVAfrik</span>
+            </span>
+          </div>
         </div>
       )}
 
