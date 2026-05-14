@@ -15,20 +15,50 @@ interface PricingCardsProps {
 
 export function PricingCards({ currentPlan }: PricingCardsProps) {
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
+  const [isAnnual, setIsAnnual] = useState(false)
 
   const handleSubscribe = async (planId: 'pro' | 'premium') => {
     setLoadingPlan(planId)
     // Redirect to payment page
-    window.location.href = `/paiement?plan=${planId}`
+    window.location.href = `/paiement?plan=${planId}${isAnnual ? '&billing=annual' : ''}`
   }
 
   return (
     <div className="container mx-auto px-4">
+      {/* Toggle */}
+      <div className="mb-12 flex items-center justify-center gap-4">
+        <span className={cn("text-sm font-medium", !isAnnual ? "text-foreground" : "text-muted-foreground")}>
+          Mensuel
+        </span>
+        <button
+          onClick={() => setIsAnnual(!isAnnual)}
+          className="relative h-6 w-12 rounded-full bg-muted p-1 transition-colors hover:bg-muted/80"
+        >
+          <div
+            className={cn(
+              "h-4 w-4 rounded-full bg-primary transition-transform",
+              isAnnual ? "translate-x-6" : "translate-x-0"
+            )}
+          />
+        </button>
+        <div className="flex items-center gap-2">
+          <span className={cn("text-sm font-medium", isAnnual ? "text-foreground" : "text-muted-foreground")}>
+            Annuel
+          </span>
+          <Badge variant="secondary" className="bg-primary/10 text-primary border-none text-[10px]">
+            -2 mois offerts
+          </Badge>
+        </div>
+      </div>
+
       <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-3">
         {PLANS.map((plan) => {
           const isPopular = plan.id === 'pro'
           const isCurrent = currentPlan === plan.id
           const isLoading = loadingPlan === plan.id
+
+          const prixFCFA = isAnnual && plan.prix_annuel_fcfa !== undefined ? plan.prix_annuel_fcfa : plan.prix_fcfa
+          const prixUSD = isAnnual && plan.prix_annuel_usd !== undefined ? plan.prix_annuel_usd : plan.prix_usd
 
           return (
             <Card
@@ -56,14 +86,23 @@ export function PricingCards({ currentPlan }: PricingCardsProps) {
                 <CardTitle className="text-xl">{plan.nom}</CardTitle>
                 <CardDescription>{plan.description}</CardDescription>
                 <div className="mt-4">
-                  <span className="text-4xl font-bold text-foreground">
-                    {plan.prix_fcfa.toLocaleString('fr-FR')}
-                  </span>
-                  <span className="text-muted-foreground"> FCFA</span>
+                  <div className="flex items-baseline justify-center gap-1">
+                    <span className="text-4xl font-bold text-foreground">
+                      {prixFCFA.toLocaleString('fr-FR')}
+                    </span>
+                    <span className="text-muted-foreground text-sm font-medium"> FCFA</span>
+                  </div>
                   {plan.prix_fcfa > 0 && (
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      ~{plan.prix_usd}€ / mois
-                    </p>
+                    <div className="mt-2 space-y-1">
+                      <p className="text-sm font-medium text-primary">
+                        ~{isAnnual ? (prixUSD / 12).toFixed(2) : prixUSD}€ / mois
+                      </p>
+                      {isAnnual && (
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">
+                          Facture {prixFCFA.toLocaleString('fr-FR')} FCFA / an
+                        </p>
+                      )}
+                    </div>
                   )}
                 </div>
               </CardHeader>

@@ -167,6 +167,8 @@ export interface PlanConfig {
   nom: string
   prix_fcfa: number
   prix_usd: number
+  prix_annuel_fcfa?: number
+  prix_annuel_usd?: number
   description: string
   fonctionnalites: string[]
   limites: {
@@ -189,6 +191,8 @@ export const PLANS: PlanConfig[] = [
     nom: 'Starter',
     prix_fcfa: 0,
     prix_usd: 0,
+    prix_annuel_fcfa: 0,
+    prix_annuel_usd: 0,
     description: 'Pour découvrir CVAfrik et créer ton premier CV',
     fonctionnalites: [
       '2 CV par mois',
@@ -216,6 +220,8 @@ export const PLANS: PlanConfig[] = [
     nom: 'Career Pro',
     prix_fcfa: 2600,
     prix_usd: 3.99,
+    prix_annuel_fcfa: 26000,
+    prix_annuel_usd: 39.99,
     description: 'Pour décrocher ton stage ou premier emploi rapidement',
     fonctionnalites: [
       'CV illimités',
@@ -247,6 +253,8 @@ export const PLANS: PlanConfig[] = [
     nom: 'Business',
     prix_fcfa: 6500,
     prix_usd: 9.99,
+    prix_annuel_fcfa: 65000,
+    prix_annuel_usd: 99.99,
     description: 'Pour les universités, écoles et coachs carrière',
     fonctionnalites: [
       'Tout le plan Pro inclus',
