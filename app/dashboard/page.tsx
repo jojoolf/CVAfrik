@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { createClient } from '@/lib/supabase/server'
 import { PLANS } from '@/lib/types'
+import { NewsletterPopup } from '@/components/newsletter-popup'
 
 export const metadata: Metadata = {
   title: 'Mon espace',
@@ -112,6 +113,7 @@ export default async function DashboardPage() {
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar user={user} />
+      <NewsletterPopup userEmail={user.email} userName={profile?.prenom || ''} />
       <main className="flex-1 bg-gradient-to-b from-secondary/40 to-background pb-20">
         <div className="container mx-auto max-w-6xl px-4 py-10 md:py-14">
 
