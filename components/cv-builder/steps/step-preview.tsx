@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Lock, Download, Loader2, Sparkles, FileText } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { CVDonnees, PlanConfig } from '@/lib/types'
-import html2canvas from 'html2canvas'
+import { toPng } from 'html-to-image'
 import { jsPDF } from 'jspdf'
 import { toast } from 'sonner'
 
@@ -80,14 +80,11 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
       // Small delay to ensure everything is rendered
       await new Promise(resolve => setTimeout(resolve, 500))
       
-      const canvas = await html2canvas(cvRef.current, {
-        scale: 2, // Higher quality
-        useCORS: true,
-        logging: false,
+      const dataUrl = await toPng(cvRef.current, {
+        quality: 1,
+        pixelRatio: 2,
         backgroundColor: '#ffffff'
       })
-      
-      const imgData = canvas.toDataURL('image/png')
       
       // Handle different module resolution in Next.js/Turbopack
       const JSPDFClass = typeof jsPDF === 'function' ? jsPDF : (jsPDF as any).jsPDF || (jsPDF as any).default;
@@ -103,9 +100,9 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
       })
       
       const imgWidth = 210 // A4 width in mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width
+      const imgHeight = (cvRef.current.offsetHeight * imgWidth) / cvRef.current.offsetWidth
       
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight)
+      pdf.addImage(dataUrl, 'PNG', 0, 0, imgWidth, imgHeight)
       pdf.save(`CV_${data.informations_personnelles.nom || 'CVAfrik'}.pdf`)
       toast.success('CV telecharge avec succes !')
     } catch (error: any) {
