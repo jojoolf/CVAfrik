@@ -17,7 +17,7 @@ const mockData = {
     email: "amina.coulibaly@email.com",
     phone: "+228 90 00 00 00",
     address: "Lomé, Togo",
-    summary: "Juriste passionnée avec plus de 8 ans d'expérience dans le conseil juridique aux entreprises en Afrique de l'Ouest. Spécialisée en droit OHADA, contrats commerciaux et conformité réglementaire. Excellente capacité d'analyse et de négociation.",
+    summary: "Juriste passionnée avec plus de 8 ans d'expérience dans le conseil juridique aux entreprises en Afrique. Spécialisée en droit OHADA, contrats commerciaux et conformité réglementaire. Excellente capacité d'analyse et de négociation.",
   },
   experiences: [
     {
@@ -71,7 +71,7 @@ export default function TemplatesPage() {
               </div>
               <h1 className="text-4xl md:text-5xl font-black text-foreground mb-4">Choisissez votre style</h1>
               <p className="text-muted-foreground leading-relaxed">
-                Chaque template a été validé par des experts RH pour maximiser vos chances de recrutement en Afrique de l'Ouest.
+                Chaque template a été validé par des experts RH pour maximiser vos chances de recrutement en Afrique.
               </p>
             </div>
 

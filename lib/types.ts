@@ -266,7 +266,7 @@ export const PLANS: PlanConfig[] = [
   },
 ]
 
-// Pays d'Afrique de l'Ouest supportes
+// Pays d'Afrique supportes
 export const PAYS_AFRIQUE_OUEST = [
   { code: 'BJ', nom: 'Benin', indicatif: '+229' },
   { code: 'BF', nom: 'Burkina Faso', indicatif: '+226' },

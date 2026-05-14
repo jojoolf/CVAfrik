@@ -24,7 +24,7 @@ export function HeroSection() {
           <div className="text-center lg:text-left">
             <Badge variant="secondary" className="mb-6 gap-2 px-4 py-2 text-sm">
               <Sparkles className="h-4 w-4 text-primary" />
-              Plus de 10 000 CV crees en Afrique de l&apos;Ouest
+              Plus de 10 000 CV crees en Afrique
             </Badge>
 
             <h1 className="text-balance text-4xl font-bold tracking-tight text-foreground md:text-5xl lg:text-6xl">
@@ -34,7 +34,7 @@ export function HeroSection() {
 
             <p className="mx-auto mt-6 max-w-xl text-pretty text-lg text-muted-foreground lg:mx-0">
               La premiere plateforme de creation de CV conçue pour le marche de l&apos;emploi 
-              en Afrique de l&apos;Ouest. Templates professionnels, conseils IA et paiement 
+              en Afrique. Templates professionnels, conseils IA et paiement 
               Mobile Money.
             </p>
 

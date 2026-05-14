@@ -1,5 +1,7 @@
 import { Star, Quote } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 
 const testimonials = [
   {
@@ -63,9 +65,14 @@ export function TestimonialsSection() {
             <span className="text-primary"> emploi de reve</span>
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Plus de 10 000 utilisateurs en Afrique de l&apos;Ouest nous font confiance 
+            Plus de 10 000 utilisateurs en Afrique nous font confiance 
             pour creer leur CV professionnel.
           </p>
+          <div className="mt-6">
+            <Button variant="outline" asChild className="rounded-full font-bold">
+              <Link href="/avis">Donner mon avis</Link>
+            </Button>
+          </div>
         </div>
 
         {/* Testimonials Grid */}

@@ -44,7 +44,7 @@ export function Footer() {
               </span>
             </Link>
             <p className="mt-4 max-w-sm text-muted-foreground">
-              La plateforme de creation de CV conçue pour l&apos;Afrique de l&apos;Ouest. 
+              La plateforme de creation de CV conçue pour l&apos;Afrique. 
               Des templates professionnels et des conseils IA pour decrocher votre emploi de reve.
             </p>
             
@@ -53,10 +53,6 @@ export function Footer() {
               <div className="flex items-center gap-2">
                 <Mail className="h-4 w-4" />
                 <span>contact@cvafrik.com</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Phone className="h-4 w-4" />
-                <span>+225 07 00 00 00 00</span>
               </div>
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4" />
