@@ -5,8 +5,9 @@ import { useState, useEffect } from 'react'
 import type { User } from '@supabase/supabase-js'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-import { Menu, FileText, LayoutDashboard, Sparkles, Star } from 'lucide-react'
+import { Menu, FileText, LayoutDashboard, Sparkles, Star, FileSignature, MessageSquareCode, LifeBuoy } from 'lucide-react'
 import { UserNav } from '@/components/layout/user-nav'
+import { ModeToggle } from '@/components/layout/mode-toggle'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 
@@ -50,23 +51,16 @@ export function Navbar({ user }: NavbarProps) {
 
     // Menu pour utilisateur connecté
     const baseMenu = [
-      { name: 'Mon Dashboard', href: '/dashboard', icon: LayoutDashboard },
-      { name: 'Créer un CV', href: '/cv-builder', icon: FileText },
-      { name: 'Modèles', href: '/templates' },
+      { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+      { name: 'CV', href: '/cv-builder', icon: FileText },
+      { name: 'Lettres', href: '/dashboard/lettres', icon: FileSignature },
+      { name: 'Entretien', href: '/dashboard/simulateur', icon: MessageSquareCode },
     ]
-
-    if (plan === 'pro' || plan === 'premium') {
-      return [
-        ...baseMenu,
-        { name: 'IA Tools', href: '/dashboard?tab=ia', icon: Sparkles },
-        { name: 'Donner mon avis', href: '/avis', icon: Star },
-      ]
-    }
 
     return [
       ...baseMenu,
-      { name: 'Tarifs', href: '/tarifs' },
-      { name: 'Donner mon avis', href: '/avis', icon: Star },
+      { name: 'Modèles', href: '/templates' },
+      { name: 'Support', href: '/dashboard/support', icon: LifeBuoy },
     ]
   }
 
@@ -86,13 +80,13 @@ export function Navbar({ user }: NavbarProps) {
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden items-center gap-1 md:flex">
+        <div className="hidden items-center gap-1 lg:flex">
           {navigation.map((item) => (
             <Link
               key={item.name}
               href={item.href}
               className={cn(
-                "flex items-center gap-2 px-4 py-2 text-sm font-medium transition-all rounded-full hover:bg-secondary/50",
+                "flex items-center gap-2 px-3 py-2 text-sm font-medium transition-all rounded-full hover:bg-secondary/50",
                 "text-muted-foreground hover:text-foreground"
               )}
             >
@@ -102,8 +96,9 @@ export function Navbar({ user }: NavbarProps) {
           ))}
         </div>
 
-        {/* Desktop Auth */}
-        <div className="hidden items-center gap-3 md:flex">
+        {/* Desktop Auth & Theme */}
+        <div className="hidden items-center gap-2 md:flex">
+          <ModeToggle />
           {user ? (
             <UserNav user={user} />
           ) : (
@@ -133,10 +128,11 @@ export function Navbar({ user }: NavbarProps) {
                   <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
                     <FileText className="h-5 w-5 text-primary-foreground" />
                   </div>
-                  <span className="text-xl font-bold font-syne">
+                  <span className="text-xl font-bold font-syne text-foreground">
                     CV<span className="text-primary">Afrik</span>
                   </span>
                 </Link>
+                <ModeToggle />
               </div>
 
               <nav className="flex flex-col gap-2">

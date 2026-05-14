@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import type { User } from '@supabase/supabase-js'
-import { LayoutDashboard, LogOut, UserRound } from 'lucide-react'
+import { LayoutDashboard, LogOut, UserRound, LifeBuoy } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -108,15 +108,17 @@ export function UserNav({ user, onNavigate, variant = 'dropdown' }: UserNavProps
             Mon profil
           </Link>
         </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/dashboard/support" className="cursor-pointer">
+            <LifeBuoy className="mr-2 h-4 w-4" />
+            Aide & Support
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          variant="destructive"
-          className="cursor-pointer"
+          className="cursor-pointer text-destructive focus:text-destructive"
           disabled={loading}
-          onSelect={(e) => {
-            e.preventDefault()
-            void handleSignOut()
-          }}
+          onClick={() => void handleSignOut()}
         >
           <LogOut className="mr-2 h-4 w-4" />
           Se déconnecter

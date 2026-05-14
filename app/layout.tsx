@@ -68,17 +68,26 @@ export const viewport: Viewport = {
   ],
 }
 
+import { ThemeProvider } from '@/components/theme-provider'
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
   return (
-    <html lang="fr" className={`${inter.variable} ${geistMono.variable} ${syne.variable} ${dmSans.variable} bg-background`}>
+    <html lang="fr" className={`${inter.variable} ${geistMono.variable} ${syne.variable} ${dmSans.variable} bg-background`} suppressHydrationWarning>
       <body className="font-sans antialiased min-h-screen">
-        {children}
-        <Toaster richColors position="top-center" />
-        {process.env.NODE_ENV === 'production' && <Analytics />}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+          <Toaster richColors position="top-center" />
+          {process.env.NODE_ENV === 'production' && <Analytics />}
+        </ThemeProvider>
       </body>
     </html>
   )
