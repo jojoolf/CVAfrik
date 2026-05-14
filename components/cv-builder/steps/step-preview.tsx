@@ -32,16 +32,16 @@ interface StepPreviewProps {
 }
 
 const templates = [
-  { id: 'classique', name: 'Classique', description: 'Design intemporel', plans: ['gratuit', 'pro', 'premium'] },
-  { id: 'moderne', name: 'Moderne', description: 'Design contemporain', plans: ['gratuit', 'pro', 'premium'] },
-  { id: 'creatif', name: 'Creatif', description: 'Design original', plans: ['pro', 'premium'] },
-  { id: 'executif', name: 'Executif', description: 'Design sobre', plans: ['pro', 'premium'] },
-  { id: 'tech', name: 'Tech', description: 'Pour developpeurs', plans: ['pro', 'premium'] },
-  { id: 'minimaliste', name: 'Minimaliste', description: 'L\'essentiel', plans: ['pro', 'premium'] },
-  { id: 'startup', name: 'Startup', description: 'Dynamique', plans: ['premium'] },
-  { id: 'luxe', name: 'Luxe', description: 'Elegant', plans: ['premium'] },
-  { id: 'elite', name: 'Elite', description: 'Design premium avec photo', plans: ['pro', 'premium'] },
-  { id: 'design', name: 'Design', description: 'Esthetique et chaleureux', plans: ['pro', 'premium'] },
+  { id: 'classique', name: 'Classique', description: 'Design intemporel', plans: ['gratuit', 'pro', 'premium'], color: 'bg-gray-800' },
+  { id: 'moderne', name: 'Moderne', description: 'Design contemporain', plans: ['gratuit', 'pro', 'premium'], color: 'bg-blue-600' },
+  { id: 'creatif', name: 'Creatif', description: 'Design original', plans: ['pro', 'premium'], color: 'bg-rose-500' },
+  { id: 'executif', name: 'Executif', description: 'Design sobre', plans: ['pro', 'premium'], color: 'bg-slate-700' },
+  { id: 'tech', name: 'Tech', description: 'Pour developpeurs', plans: ['pro', 'premium'], color: 'bg-cyan-600' },
+  { id: 'minimaliste', name: 'Minimaliste', description: 'L\'essentiel', plans: ['pro', 'premium'], color: 'bg-stone-500' },
+  { id: 'startup', name: 'Startup', description: 'Dynamique', plans: ['premium'], color: 'bg-orange-500' },
+  { id: 'luxe', name: 'Luxe', description: 'Elegant', plans: ['premium'], color: 'bg-amber-600' },
+  { id: 'elite', name: 'Elite', description: 'Premium avec photo', plans: ['pro', 'premium'], color: 'bg-[#0B1E36]' },
+  { id: 'design', name: 'Design', description: 'Esthetique chaleureux', plans: ['pro', 'premium'], color: 'bg-[#8B7355]' },
 ]
 
 function CVTemplateRenderer({ template, data, showWatermark }: { template: string; data: CVDonnees; showWatermark: boolean }) {
@@ -152,17 +152,18 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Template Selection */}
         <Card className="lg:col-span-1 h-fit">
-          <CardHeader>
+          <CardHeader className="pb-3">
             <CardTitle className="text-lg flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-primary" />
               Templates
             </CardTitle>
-            <CardDescription>Style de votre CV</CardDescription>
+            <CardDescription>Choisissez le style de votre CV</CardDescription>
           </CardHeader>
           <CardContent>
-            <RadioGroup value={template} onValueChange={onTemplateChange} className="space-y-2">
+            <RadioGroup value={template} onValueChange={onTemplateChange} className="grid grid-cols-2 gap-2">
               {templates.map((t) => {
                 const available = isTemplateAvailable(t.id)
+                const isSelected = template === t.id
                 return (
                   <div key={t.id}>
                     <RadioGroupItem
@@ -174,21 +175,42 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
                     <Label
                       htmlFor={t.id}
                       className={cn(
-                        'flex cursor-pointer items-center justify-between rounded-xl border-2 border-muted bg-popover p-3 transition-all hover:border-primary/50',
-                        'peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 [&:has([data-state=checked])]:border-primary',
-                        !available && 'cursor-not-allowed opacity-50'
+                        'flex flex-col cursor-pointer rounded-xl border-2 border-muted bg-popover overflow-hidden transition-all hover:border-primary/50 hover:shadow-md',
+                        isSelected && 'border-primary ring-2 ring-primary/20 shadow-md',
+                        !available && 'cursor-not-allowed opacity-60'
                       )}
                     >
-                      <div>
-                        <p className="font-semibold text-foreground text-sm">{t.name}</p>
-                        <p className="text-[10px] text-muted-foreground">{t.description}</p>
+                      {/* Color preview bar */}
+                      <div className={`h-12 w-full ${t.color} relative flex items-center justify-center`}>
+                        {/* Mini layout preview */}
+                        <div className="flex gap-1 opacity-60">
+                          <div className="w-3 h-6 bg-white/30 rounded-sm" />
+                          <div className="space-y-0.5">
+                            <div className="w-5 h-1 bg-white/40 rounded-full" />
+                            <div className="w-4 h-1 bg-white/30 rounded-full" />
+                            <div className="w-6 h-1 bg-white/20 rounded-full" />
+                          </div>
+                        </div>
+                        {!available && (
+                          <div className="absolute top-1 right-1">
+                            <span className="flex items-center gap-0.5 bg-black/50 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full">
+                              <Lock className="h-2 w-2" />
+                              {t.plans.includes('pro') ? 'PRO' : '★'}
+                            </span>
+                          </div>
+                        )}
+                        {isSelected && (
+                          <div className="absolute top-1 left-1">
+                            <div className="h-4 w-4 bg-white rounded-full flex items-center justify-center">
+                              <div className="h-2.5 w-2.5 bg-primary rounded-full" />
+                            </div>
+                          </div>
+                        )}
                       </div>
-                      {!available && (
-                        <Badge variant="secondary" className="gap-1 text-[10px] py-0">
-                          <Lock className="h-2.5 w-2.5" />
-                          {t.plans.includes('pro') ? 'Pro' : 'Premium'}
-                        </Badge>
-                      )}
+                      <div className="px-2 py-1.5">
+                        <p className="font-semibold text-foreground text-[11px] truncate">{t.name}</p>
+                        <p className="text-[9px] text-muted-foreground truncate">{t.description}</p>
+                      </div>
                     </Label>
                   </div>
                 )
