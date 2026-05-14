@@ -11,6 +11,12 @@ export default async function AdminPage() {
   const { count: usersCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true })
   const { count: postsCount } = await supabase.from('blog_posts').select('*', { count: 'exact', head: true })
   const { count: subsCount } = await supabase.from('newsletter_subscribers').select('*', { count: 'exact', head: true })
+  
+  // Get pending payments count
+  const { count: pendingPaymentsCount } = await supabase
+    .from('manual_payments')
+    .select('*', { count: 'exact', head: true })
+    .eq('status', 'en_attente')
 
   // Get recent posts
   const { data: posts } = await supabase
@@ -21,17 +27,25 @@ export default async function AdminPage() {
 
   return (
     <div className="container mx-auto px-4 py-10 max-w-6xl">
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <h1 className="text-3xl font-bold">Panel Administrateur</h1>
-        <Button asChild>
-          <Link href="/admin/blog/nouveau">Écrire un article</Link>
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" asChild className="border-amber-500 text-amber-700 hover:bg-amber-50">
+            <Link href="/admin/paiements">
+              Gérer les Paiements
+              {pendingPaymentsCount ? <span className="ml-2 bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full">{pendingPaymentsCount}</span> : null}
+            </Link>
+          </Button>
+          <Button asChild>
+            <Link href="/admin/blog/nouveau">Écrire un article</Link>
+          </Button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Utilisateurs inscrits</CardTitle>
+            <CardTitle className="text-sm font-medium">Utilisateurs</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -54,6 +68,15 @@ export default async function AdminPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{subsCount || 0}</div>
+          </CardContent>
+        </Card>
+        <Card className={pendingPaymentsCount ? "border-amber-400 bg-amber-50" : ""}>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Paiements en attente</CardTitle>
+            <div className="h-4 w-4 rounded-full bg-amber-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-amber-600">{pendingPaymentsCount || 0}</div>
           </CardContent>
         </Card>
       </div>
