@@ -31,7 +31,7 @@ export function FedaPayButton({ amount, planId, userEmail, userFirstname, userLa
   const openFedaPay = () => {
     if ((window as any).FedaPay) {
       (window as any).FedaPay.init({
-        public_key: 'pk_live_f6IuF-jRjG05qO764KclO1yY', // Ta clé PUBLIQUE (commence par pk_live)
+        public_key: 'pk_live_VxEEX9aYyVsaVSMQH4vdCgmx', // Ta clé PUBLIQUE (commence par pk_live)
         transaction: {
           amount: amount,
           description: `Abonnement CVAfrik - Plan ${planId}`,
