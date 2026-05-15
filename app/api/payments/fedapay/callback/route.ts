@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-const FedaPay = require('fedapay');
+import FedaPay from 'fedapay';
 
 export async function POST(req: Request) {
   try {

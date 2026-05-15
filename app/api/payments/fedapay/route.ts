@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-const FedaPay = require('fedapay');
+import FedaPay from 'fedapay';
 
 export async function POST(req: Request) {
   try {
@@ -9,8 +9,8 @@ export async function POST(req: Request) {
       Configuration de FedaPay avec ta clé secrète. 
       On utilise la variable d'environnement pour la sécurité.
     */
-    FedaPay.FedaPay.setApiKey(process.env.FEDAPAY_SECRET_KEY);
-    FedaPay.FedaPay.setEnvironment('live'); // Mode réel
+    FedaPay.setApiKey(process.env.FEDAPAY_SECRET_KEY);
+    FedaPay.setEnvironment('live'); // Mode réel
 
     const transaction = await FedaPay.Transaction.create({
       description: `Abonnement CVAfrik - Plan ${planId}`,
