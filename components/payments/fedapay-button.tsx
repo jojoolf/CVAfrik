@@ -14,45 +14,52 @@ interface FedaPayButtonProps {
 }
 
 export function FedaPayButton({ amount, planId, userEmail, userFirstname, userLastname }: FedaPayButtonProps) {
-  const [loading, setLoading] = useState(false);
+  const [isOpening, setIsOpening] = useState(false);
 
-  const handlePayment = async () => {
-    setLoading(true);
+  const openFedaPay = () => {
+    setIsOpening(true);
+    
     try {
-      /* 
-        On utilise le lien de paiement direct de FedaPay.
-        C'est la solution la plus robuste qui existe.
-      */
-      const baseUrl = "https://checkout.fedapay.com/pay";
-      const publicKey = "pk_live_VxEEX9aYyVsaVSMQH4vdCgmx";
-      
-      const params = new URLSearchParams({
-        public_key: publicKey,
-        amount: amount.toString(),
-        description: `Abonnement CVAfrik - Plan ${planId}`,
-        currency: "XOF",
-        callback_url: `${window.location.origin}/dashboard?payment=success`,
-        cancel_url: window.location.href,
-        "customer[firstname]": userFirstname || 'Client',
-        "customer[lastname]": userLastname || 'CVAfrik',
-        "customer[email]": userEmail,
-      });
-
-      // Redirection directe
-      window.location.href = `${baseUrl}?${params.toString()}`;
-    } catch (error: any) {
-      toast.error("Erreur lors de l'ouverture du paiement.");
-      setLoading(false);
+      if (typeof window !== 'undefined' && (window as any).FedaPay) {
+        const fp = (window as any).FedaPay;
+        
+        fp.init({
+          public_key: 'pk_live_VxEEX9aYyVsaVSMQH4vdCgmx',
+          transaction: {
+            amount: amount,
+            description: `Abonnement CVAfrik - Plan ${planId}`,
+          },
+          customer: {
+            firstname: userFirstname || 'Client',
+            lastname: userLastname || 'CVAfrik',
+            email: userEmail,
+          },
+          onComplete: (response: any) => {
+            if (response.status === 'approved') {
+              window.location.href = '/dashboard?payment=success';
+            }
+          }
+        });
+        
+        fp.open();
+      } else {
+        toast.error("Le système de paiement charge encore, veuillez réessayer dans 2 secondes.");
+      }
+    } catch (error) {
+      console.error("FedaPay Error:", error);
+      toast.error("Impossible d'ouvrir la fenêtre de paiement.");
+    } finally {
+      setIsOpening(false);
     }
   };
 
   return (
     <Button 
-      onClick={handlePayment} 
-      disabled={loading}
+      onClick={openFedaPay} 
+      disabled={isOpening}
       className="w-full h-14 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-lg shadow-lg shadow-emerald-600/20 gap-3"
     >
-      {loading ? (
+      {isOpening ? (
         <Loader2 className="h-6 w-6 animate-spin" />
       ) : (
         <>

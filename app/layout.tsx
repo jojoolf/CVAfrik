@@ -3,6 +3,7 @@ import { Inter, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { Toaster } from '@/components/ui/sonner'
 import './globals.css'
+import Script from 'next/script'
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -86,6 +87,10 @@ export default function RootLayout({
         >
           {children}
           <Toaster richColors position="top-center" />
+          <Script 
+            src="https://checkout.fedapay.com/js/checkout.js" 
+            strategy="beforeInteractive"
+          />
           {process.env.NODE_ENV === 'production' && <Analytics />}
         </ThemeProvider>
       </body>
