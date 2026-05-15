@@ -1,24 +1,21 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import FedaPay from 'fedapay';
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
     
-    // On vérifie que c'est bien une transaction approuvée
-    if (body.event === 'transaction.approved') {
-      const transaction = body.entity;
+    // On vérifie que c'est bien une transaction approuvée (Format Webhook FedaPay)
+    if (body.event === 'transaction.approved' || body.status === 'approved') {
+      const transaction = body.entity || body;
       const customer = transaction.customer;
-      const description = transaction.description; // Contient le nom du plan
+      const description = transaction.description;
       
-      // Extraire le planId de la description (ex: "Abonnement CVAfrik - Plan pro")
-      const planId = description.toLowerCase().includes('pro') ? 'pro' : 
-                     description.toLowerCase().includes('business') ? 'business' : 'starter';
+      const planId = description?.toLowerCase().includes('pro') ? 'pro' : 
+                     description?.toLowerCase().includes('business') ? 'business' : 'starter';
 
       const supabase = await createClient();
 
-      // 1. Trouver l'utilisateur par son email
       const { data: profile, error: userError } = await supabase
         .from('profiles')
         .select('id')
@@ -30,7 +27,6 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'User not found' }, { status: 404 });
       }
 
-      // 2. Mettre à jour son plan et sa date d'expiration (30 jours)
       const expiryDate = new Date();
       expiryDate.setDate(expiryDate.getDate() + 30);
 
