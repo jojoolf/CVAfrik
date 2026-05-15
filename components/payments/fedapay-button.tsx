@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { CreditCard } from 'lucide-react';
+import { CreditCard, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface FedaPayButtonProps {
   amount: number;
@@ -13,53 +14,52 @@ interface FedaPayButtonProps {
 }
 
 export function FedaPayButton({ amount, planId, userEmail, userFirstname, userLastname }: FedaPayButtonProps) {
-  
-  useEffect(() => {
-    // Chargement du script FedaPay Checkout
-    const script = document.createElement('script');
-    script.src = 'https://checkout.fedapay.com/js/checkout.js';
-    script.async = true;
-    document.body.appendChild(script);
+  const [loading, setLoading] = useState(false);
 
-    return () => {
-      // Nettoyage au démontage
-      const s = document.querySelector('script[src="https://checkout.fedapay.com/js/checkout.js"]');
-      if (s) s.remove();
-    };
-  }, []);
-
-  const openFedaPay = () => {
-    if ((window as any).FedaPay) {
-      (window as any).FedaPay.init({
-        public_key: 'pk_live_VxEEX9aYyVsaVSMQH4vdCgmx', // Ta clé PUBLIQUE (commence par pk_live)
-        transaction: {
-          amount: amount,
-          description: `Abonnement CVAfrik - Plan ${planId}`,
-        },
-        customer: {
-          firstname: userFirstname || 'Client',
-          lastname: userLastname || 'CVAfrik',
-          email: userEmail,
-        },
-        onComplete: (response: any) => {
-          if (response.status === 'approved') {
-            window.location.href = '/dashboard?payment=success';
-          }
-        }
+  const handlePayment = async () => {
+    setLoading(true);
+    try {
+      /* 
+        On utilise le lien de paiement direct de FedaPay.
+        C'est la solution la plus robuste qui existe.
+      */
+      const baseUrl = "https://checkout.fedapay.com/pay";
+      const publicKey = "pk_live_VxEEX9aYyVsaVSMQH4vdCgmx";
+      
+      const params = new URLSearchParams({
+        public_key: publicKey,
+        amount: amount.toString(),
+        description: `Abonnement CVAfrik - Plan ${planId}`,
+        currency: "XOF",
+        callback_url: `${window.location.origin}/dashboard?payment=success`,
+        cancel_url: window.location.href,
+        "customer[firstname]": userFirstname || 'Client',
+        "customer[lastname]": userLastname || 'CVAfrik',
+        "customer[email]": userEmail,
       });
-      (window as any).FedaPay.open();
-    } else {
-      console.error('FedaPay script not loaded yet');
+
+      // Redirection directe
+      window.location.href = `${baseUrl}?${params.toString()}`;
+    } catch (error: any) {
+      toast.error("Erreur lors de l'ouverture du paiement.");
+      setLoading(false);
     }
   };
 
   return (
     <Button 
-      onClick={openFedaPay} 
+      onClick={handlePayment} 
+      disabled={loading}
       className="w-full h-14 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-lg shadow-lg shadow-emerald-600/20 gap-3"
     >
-      <CreditCard className="h-6 w-6" />
-      Payer par Mobile Money / Carte
+      {loading ? (
+        <Loader2 className="h-6 w-6 animate-spin" />
+      ) : (
+        <>
+          <CreditCard className="h-6 w-6" />
+          Payer par Mobile Money / Carte
+        </>
+      )}
     </Button>
   );
 }
