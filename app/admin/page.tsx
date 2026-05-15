@@ -28,9 +28,9 @@ export default async function AdminPage() {
   return (
     <div className="container mx-auto px-4 py-10 max-w-6xl">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-        <h1 className="text-3xl font-bold">Panel Administrateur</h1>
+        <h1 className="text-3xl font-bold text-foreground">Panel Administrateur</h1>
         <div className="flex gap-2">
-          <Button variant="outline" asChild className="border-amber-500 text-amber-700 hover:bg-amber-50">
+          <Button variant="outline" asChild className="border-amber-500 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/30">
             <Link href="/admin/paiements">
               Gérer les Paiements
               {pendingPaymentsCount ? <span className="ml-2 bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full">{pendingPaymentsCount}</span> : null}
@@ -43,7 +43,7 @@ export default async function AdminPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-        <Card>
+        <Card className="bg-card text-card-foreground">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Utilisateurs</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
@@ -52,7 +52,7 @@ export default async function AdminPage() {
             <div className="text-2xl font-bold">{usersCount || 0}</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-card text-card-foreground">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Articles & Offres</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
@@ -61,7 +61,7 @@ export default async function AdminPage() {
             <div className="text-2xl font-bold">{postsCount || 0}</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-card text-card-foreground">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Abonnés Newsletter</CardTitle>
             <Mail className="h-4 w-4 text-muted-foreground" />
@@ -70,7 +70,7 @@ export default async function AdminPage() {
             <div className="text-2xl font-bold">{subsCount || 0}</div>
           </CardContent>
         </Card>
-        <Card className={pendingPaymentsCount ? "border-amber-400 bg-amber-50" : ""}>
+        <Card className={pendingPaymentsCount ? "border-amber-400 bg-amber-50 dark:bg-amber-950/20" : "bg-card text-card-foreground"}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Paiements en attente</CardTitle>
             <div className="h-4 w-4 rounded-full bg-amber-500" />
@@ -82,20 +82,19 @@ export default async function AdminPage() {
       </div>
 
       <div>
-        <h2 className="text-xl font-bold mb-4">Derniers Articles / Offres</h2>
-        <Card>
-          <div className="divide-y">
+        <h2 className="text-xl font-bold mb-4 text-foreground">Derniers Articles / Offres</h2>
+        <Card className="bg-card text-card-foreground overflow-hidden">
+          <div className="divide-y divide-border">
             {posts?.map(post => (
-              <div key={post.id} className="flex items-center justify-between p-4 hover:bg-slate-50">
+              <div key={post.id} className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors">
                 <div>
-                  <p className="font-semibold">{post.titre}</p>
-                  <p className="text-sm text-slate-500">Catégorie: {post.categorie} | État: {post.publie ? '🟢 Publié' : '⚪ Brouillon'}</p>
+                  <p className="font-semibold text-foreground">{post.titre}</p>
+                  <p className="text-sm text-muted-foreground">Catégorie: {post.categorie} | État: {post.publie ? '🟢 Publié' : '⚪ Brouillon'}</p>
                 </div>
-                {/* Plus tard on pourra ajouter un bouton Éditer */}
               </div>
             ))}
             {(!posts || posts.length === 0) && (
-              <div className="p-4 text-center text-slate-500">Aucun article n'a encore été écrit.</div>
+              <div className="p-8 text-center text-muted-foreground">Aucun article n'a encore été écrit.</div>
             )}
           </div>
         </Card>
