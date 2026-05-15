@@ -77,7 +77,11 @@ export default function AdminPaymentsPage() {
       const data = await response.json();
       if (data.success) {
         toast.success("Paiement validé avec succès !");
-        fetchPayments();
+        
+        // Mise à jour immédiate de l'état local pour changer le bouton
+        setPayments(prev => prev.map(p => 
+          p.id === payment.id ? { ...p, statut: 'valide' } : p
+        ));
       } else {
         throw new Error(data.error);
       }
