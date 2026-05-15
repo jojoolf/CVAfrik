@@ -83,7 +83,7 @@ export function UserNav({ user, onNavigate, variant = 'dropdown' }: UserNavProps
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="gap-2 border-border/60">
+        <Button variant="outline" className="gap-2 border-border/60 hover:bg-secondary/80 dark:hover:bg-slate-800 transition-colors">
           <UserRound className="h-4 w-4 shrink-0" />
           <span className="max-w-[140px] truncate text-sm font-medium">{label}</span>
         </Button>

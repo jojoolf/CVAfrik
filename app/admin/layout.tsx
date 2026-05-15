@@ -15,10 +15,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar user={user} />
-      <div className="bg-slate-900 text-white p-2 text-center text-sm font-bold tracking-widest">
-        ⚠️ MODE ADMINISTRATEUR ⚠️
+      <div className="bg-amber-500 text-amber-950 p-2 text-center text-[10px] font-black tracking-[0.3em] uppercase">
+        ⚠️ Mode Administrateur ⚠️
       </div>
-      <main className="flex-1 bg-slate-50">
+      <main className="flex-1 bg-background">
         {children}
       </main>
     </div>
