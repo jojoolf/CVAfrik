@@ -56,8 +56,10 @@ function PaymentContent() {
     );
   }
 
-  const selectedPlan = PLANS.find(p => p.id === planId);
-  const amount = billing === 'annual' ? (selectedPlan?.prix_annuel_fcfa || 0) : (selectedPlan?.prix_fcfa || 0);
+  const selectedPlan = PLANS?.find(p => p.id === planId) || null;
+  const amount = (selectedPlan && billing === 'annual') 
+    ? (selectedPlan.prix_annuel_fcfa || 0) 
+    : (selectedPlan?.prix_fcfa || 0);
 
   if (error || !selectedPlan) {
     return (

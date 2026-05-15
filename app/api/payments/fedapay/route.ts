@@ -5,7 +5,17 @@ export async function POST(req: Request) {
     const { amount, planId, userEmail, userFirstname, userLastname } = await req.json();
 
     const FEDAPAY_API_KEY = process.env.FEDAPAY_SECRET_KEY;
-    const isLive = FEDAPAY_API_KEY?.startsWith('sk_live');
+    const APP_URL = process.env.NEXT_PUBLIC_APP_URL;
+
+    if (!FEDAPAY_API_KEY) {
+      throw new Error('La clé API FedaPay est manquante dans la configuration.');
+    }
+
+    if (!APP_URL) {
+      throw new Error('L\'URL de l\'application est manquante dans la configuration.');
+    }
+
+    const isLive = FEDAPAY_API_KEY.startsWith('sk_live');
     const apiUrl = isLive 
       ? 'https://api.fedapay.com/v1/transactions' 
       : 'https://sandbox-api.fedapay.com/v1/transactions';
