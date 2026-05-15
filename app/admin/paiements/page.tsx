@@ -109,57 +109,57 @@ export default function AdminPaymentsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 py-12 px-6">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 py-12 px-6 transition-colors duration-300">
       <div className="max-w-5xl mx-auto">
         <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
           <div>
             <div className="flex items-center gap-2 text-primary font-black text-xs uppercase tracking-widest mb-2">
               <ShieldCheck size={14} /> Administration
             </div>
-            <h1 className="text-4xl font-black text-slate-900">Gestion des Paiements</h1>
+            <h1 className="text-4xl font-black text-slate-900 dark:text-white">Gestion des Paiements</h1>
           </div>
-          <Button onClick={fetchPayments} variant="outline" className="rounded-xl font-bold gap-2">
+          <Button onClick={fetchPayments} variant="outline" className="rounded-xl font-bold gap-2 dark:bg-slate-800 dark:border-slate-700">
             <RefreshCw size={18} /> Actualiser
           </Button>
         </header>
 
         <div className="space-y-4">
           {payments.length === 0 ? (
-            <div className="bg-white rounded-[2rem] p-20 text-center border border-dashed border-slate-200">
-              <Clock size={48} className="mx-auto text-slate-200 mb-4" />
+            <div className="bg-white dark:bg-slate-800 rounded-[2rem] p-20 text-center border border-dashed border-slate-200 dark:border-slate-700">
+              <Clock size={48} className="mx-auto text-slate-200 dark:text-slate-700 mb-4" />
               <p className="text-slate-400 font-bold">Aucune demande de paiement pour le moment.</p>
             </div>
           ) : (
             payments.map((p) => (
-              <div key={p.id} className="bg-white rounded-[2rem] p-6 shadow-xl shadow-slate-200/40 border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div key={p.id} className="bg-white dark:bg-slate-800 rounded-[2rem] p-6 shadow-xl shadow-slate-200/40 dark:shadow-none border border-slate-100 dark:border-slate-700 flex flex-col md:flex-row md:items-center justify-between gap-6 transition-all">
                 <div className="flex items-start gap-4">
                   <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${
-                    p.plan_id === 'premium' ? 'bg-amber-50 text-amber-500' : 'bg-blue-50 text-blue-500'
+                    p.plan_id === 'premium' ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-500' : 'bg-blue-50 dark:bg-blue-900/30 text-blue-500'
                   }`}>
                     <CreditCard size={24} />
                   </div>
                   <div>
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="font-black text-slate-900">{p.profiles?.prenom} {p.profiles?.nom}</span>
+                      <span className="font-black text-slate-900 dark:text-white">{p.profiles?.prenom} {p.profiles?.nom}</span>
                       <span className="text-slate-400 text-xs">• {p.profiles?.email}</span>
                     </div>
                     <div className="flex flex-wrap gap-2 text-xs font-bold">
-                      <span className="bg-slate-100 text-slate-600 px-3 py-1 rounded-full uppercase tracking-tighter">
+                      <span className="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-3 py-1 rounded-full uppercase tracking-tighter">
                         Plan: {p.plan_id}
                       </span>
-                      <span className="bg-slate-100 text-slate-600 px-3 py-1 rounded-full">
+                      <span className="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-3 py-1 rounded-full">
                         {p.montant} FCFA
                       </span>
-                      <span className="bg-slate-100 text-slate-600 px-3 py-1 rounded-full">
+                      <span className="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-3 py-1 rounded-full">
                         Via {p.methode}
                       </span>
                       {p.statut === 'valide' && p.profiles?.plan_expiry && (
-                        <span className="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full border border-emerald-100">
+                        <span className="bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 px-3 py-1 rounded-full border border-emerald-100 dark:border-emerald-800">
                           Expire le: {new Date(p.profiles.plan_expiry).toLocaleDateString('fr-FR')}
                         </span>
                       )}
                     </div>
-                    <div className="mt-3 font-mono text-[10px] text-slate-400 bg-slate-50 p-2 rounded-lg border border-slate-100">
+                    <div className="mt-3 font-mono text-[10px] text-slate-400 bg-slate-50 dark:bg-slate-900 p-2 rounded-lg border border-slate-100 dark:border-slate-800">
                       ID Transaction: {p.transaction_id || 'N/A'}
                     </div>
                   </div>
@@ -176,7 +176,7 @@ export default function AdminPaymentsPage() {
                       Approuver
                     </Button>
                   ) : (
-                    <div className="flex items-center gap-2 text-slate-500 bg-slate-100 px-6 py-4 rounded-2xl font-black text-sm border border-slate-200">
+                    <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-6 py-4 rounded-2xl font-black text-sm border border-slate-200 dark:border-slate-600">
                       <CheckCircle2 size={18} className="text-emerald-500" /> Déjà approuvé
                     </div>
                   )}
