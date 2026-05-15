@@ -37,7 +37,6 @@ function ManualPaymentContent() {
 
   const paymentMethods = [
     { id: "tmoney", name: "T-Money / Moov", number: "+228 90 64 32 52", color: "bg-yellow-400", text: "text-black", owner: "Mixx by yas" },
-    { id: "wave", name: "Wave", number: "+228 90 64 32 52", color: "bg-cyan-400", text: "text-white", owner: "Mixx by yas" },
   ];
 
   const handleCopy = (text: string) => {
