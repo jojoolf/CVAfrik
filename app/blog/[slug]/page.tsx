@@ -66,9 +66,9 @@ export default async function BlogPostPage({ params }: PageProps) {
     <div className="flex min-h-screen flex-col">
       <Navbar user={user} />
       
-      <main className="flex-1 bg-white pb-20 pt-10">
+      <main className="flex-1 bg-background pb-20 pt-10">
         <article className="container mx-auto px-4 max-w-4xl">
-          <Link href="/blog" className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-primary mb-8 transition-colors">
+          <Link href="/blog" className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-primary mb-8 transition-colors">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Retour au blog
           </Link>
@@ -76,18 +76,18 @@ export default async function BlogPostPage({ params }: PageProps) {
           <header className="mb-10 text-center">
             <div className="flex items-center justify-center gap-4 mb-6">
               <Badge variant="secondary" className="px-4 py-1.5 text-sm font-medium">
-                <span className="flex items-center text-slate-700">
+                <span className="flex items-center text-foreground/80">
                   {getCategoryIcon(post.categorie)}
                   {getCategoryLabel(post.categorie)}
                 </span>
               </Badge>
-              <div className="flex items-center text-sm text-slate-500">
+              <div className="flex items-center text-sm text-muted-foreground">
                 <Calendar className="mr-1.5 h-4 w-4" />
                 {format(new Date(post.created_at), 'dd MMMM yyyy', { locale: fr })}
               </div>
             </div>
             
-            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 mb-8 leading-tight">
+            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-foreground mb-8 leading-tight">
               {post.titre}
             </h1>
 
@@ -103,7 +103,7 @@ export default async function BlogPostPage({ params }: PageProps) {
           </header>
 
           <div 
-            className="prose prose-slate prose-lg md:prose-xl mx-auto prose-headings:font-bold prose-a:text-primary hover:prose-a:text-primary/80 prose-img:rounded-2xl"
+            className="prose prose-slate dark:prose-invert prose-lg md:prose-xl mx-auto prose-headings:font-bold prose-a:text-primary hover:prose-a:text-primary/80 prose-img:rounded-2xl"
             dangerouslySetInnerHTML={{ __html: post.contenu }}
           />
         </article>

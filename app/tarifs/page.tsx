@@ -38,8 +38,10 @@ export default async function TarifsPage({
       <Navbar user={user} />
       <main className="flex-1">
         {lockedMessage && (
-          <div className="bg-amber-100 border-b border-amber-200 py-3">
-            <div className="container mx-auto px-4 flex items-center justify-center gap-2 text-amber-800 font-medium text-sm">
+          <div className="bg-amber-100/50 dark:bg-amber-900/30 border-b border-amber-200 dark:border-amber-800/50 py-3">
+            <div className={cn(
+                "container mx-auto px-4 flex items-center justify-center gap-2 text-amber-900 dark:text-amber-200 font-medium text-sm text-center"
+              )}>
               <Lock className="h-4 w-4 shrink-0" />
               <span>{lockedMessage}</span>
             </div>

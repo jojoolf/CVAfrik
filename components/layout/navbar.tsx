@@ -88,7 +88,7 @@ export function Navbar({ user }: NavbarProps) {
               href={item.href}
               className={cn(
                 "flex items-center gap-2 px-3 py-2 text-sm font-medium transition-all rounded-full hover:bg-secondary/50",
-                "text-muted-foreground hover:text-foreground"
+                "text-muted-foreground hover:text-foreground dark:text-slate-300 dark:hover:text-white"
               )}
             >
               {item.icon && <item.icon className="h-4 w-4" />}
