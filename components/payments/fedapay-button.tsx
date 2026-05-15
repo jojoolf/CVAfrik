@@ -20,36 +20,49 @@ export function FedaPayButton({ amount, planId, userEmail, userFirstname, userLa
     setIsOpening(true);
     
     try {
-      if (typeof window !== 'undefined' && (window as any).FedaPay) {
-        const fp = (window as any).FedaPay;
-        
-        fp.init({
+      const FedaPay = (window as any).FedaPay;
+
+      if (FedaPay) {
+        FedaPay.init({
           public_key: 'pk_live_VxEEX9aYyVsaVSMQH4vdCgmx',
           transaction: {
             amount: amount,
-            description: `Abonnement CVAfrik - Plan ${planId}`,
+            description: `Abonnement CVAfrik - Plan ${planId}`
           },
           customer: {
             firstname: userFirstname || 'Client',
             lastname: userLastname || 'CVAfrik',
-            email: userEmail,
-          },
-          onComplete: (response: any) => {
-            if (response.status === 'approved') {
-              window.location.href = '/dashboard?payment=success';
-            }
+            email: userEmail
           }
         });
-        
-        fp.open();
+        FedaPay.open();
       } else {
-        toast.error("Le système de paiement charge encore, veuillez réessayer dans 2 secondes.");
+        // Si le script n'est pas chargé, on tente de le charger dynamiquement
+        const script = document.createElement('script');
+        script.src = "https://checkout.fedapay.com/js/checkout.js";
+        script.onload = () => {
+          const FP = (window as any).FedaPay;
+          FP.init({
+            public_key: 'pk_live_VxEEX9aYyVsaVSMQH4vdCgmx',
+            transaction: {
+              amount: amount,
+              description: `Abonnement CVAfrik - Plan ${planId}`
+            },
+            customer: {
+              firstname: userFirstname || 'Client',
+              lastname: userLastname || 'CVAfrik',
+              email: userEmail
+            }
+          });
+          FP.open();
+        };
+        document.body.appendChild(script);
       }
     } catch (error) {
       console.error("FedaPay Error:", error);
-      toast.error("Impossible d'ouvrir la fenêtre de paiement.");
+      toast.error("Erreur technique. Veuillez rafraîchir la page.");
     } finally {
-      setIsOpening(false);
+      setTimeout(() => setIsOpening(false), 2000);
     }
   };
 
