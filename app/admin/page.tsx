@@ -16,7 +16,7 @@ export default async function AdminPage() {
   const { count: pendingPaymentsCount } = await supabase
     .from('manual_payments')
     .select('*', { count: 'exact', head: true })
-    .eq('status', 'en_attente')
+    .eq('statut', 'en_attente')
 
   // Get recent posts
   const { data: posts } = await supabase

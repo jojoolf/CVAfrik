@@ -176,8 +176,8 @@ export default function AdminPaymentsPage() {
                       Approuver
                     </Button>
                   ) : (
-                    <div className="flex items-center gap-2 text-emerald-500 bg-emerald-50 px-6 py-4 rounded-2xl font-black text-sm border border-emerald-100">
-                      <CheckCircle2 size={18} /> Validé
+                    <div className="flex items-center gap-2 text-slate-500 bg-slate-100 px-6 py-4 rounded-2xl font-black text-sm border border-slate-200">
+                      <CheckCircle2 size={18} className="text-emerald-500" /> Déjà approuvé
                     </div>
                   )}
                 </div>
