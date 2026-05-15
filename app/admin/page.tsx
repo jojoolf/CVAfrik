@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Users, FileText, Mail } from 'lucide-react'
 import Link from 'next/link'
+import { AdminPostItem } from '@/components/admin/admin-post-item'
 
 export default async function AdminPage() {
   const supabase = await createClient()
@@ -86,12 +87,7 @@ export default async function AdminPage() {
         <Card className="bg-card text-card-foreground overflow-hidden border-border shadow-sm">
           <div className="divide-y divide-border">
             {posts?.map(post => (
-              <div key={post.id} className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors">
-                <div>
-                  <p className="font-semibold text-foreground">{post.titre}</p>
-                  <p className="text-sm text-muted-foreground">Catégorie: {post.categorie} | État: {post.publie ? '🟢 Publié' : '⚪ Brouillon'}</p>
-                </div>
-              </div>
+              <AdminPostItem key={post.id} post={post} />
             ))}
             {(!posts || posts.length === 0) && (
               <div className="p-8 text-center text-muted-foreground">Aucun article n'a encore été écrit.</div>

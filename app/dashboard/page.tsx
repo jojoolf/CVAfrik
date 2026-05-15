@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { createClient } from '@/lib/supabase/server'
 import { PLANS } from '@/lib/types'
 import { NewsletterPopup } from '@/components/newsletter-popup'
+import { CVActions } from '@/components/dashboard/cv-actions'
 
 export const metadata: Metadata = {
   title: 'Mon espace',
