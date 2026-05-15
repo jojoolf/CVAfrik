@@ -61,8 +61,11 @@ function PaymentContent() {
     );
   }
 
-  const selectedPlan = PLANS?.find(p => p.id === planId) || PLANS[1]; // Par défaut Pro
-  const amount = (selectedPlan.id === 'pro') ? 2600 : 6500;
+  const selectedPlan = PLANS?.find(p => p.id === planId) || PLANS[1];
+  const isAnnual = billing === 'annual';
+  const amount = isAnnual 
+    ? (selectedPlan.prix_annuel_fcfa || (selectedPlan.id === 'pro' ? 26000 : 65000))
+    : (selectedPlan.prix_fcfa || (selectedPlan.id === 'pro' ? 2600 : 6500));
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center p-4 md:p-8">
