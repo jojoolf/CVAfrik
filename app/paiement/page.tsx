@@ -125,9 +125,7 @@ function PaymentContent() {
               <FedaPayButton 
                 amount={amount}
                 planId={planId}
-                userEmail={userData?.email || ''}
-                userFirstname={userData?.firstname || ''}
-                userLastname={userData?.lastname || ''}
+                isAnnual={billing === 'annual'}
               />
               <div className="mt-4 flex items-center justify-center gap-4 opacity-40 grayscale group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/Wave_logo.png" alt="Wave" className="h-4 object-contain" />

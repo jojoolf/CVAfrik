@@ -7,23 +7,27 @@ import { CreditCard, Loader2 } from 'lucide-react';
 interface FedaPayButtonProps {
   amount: number;
   planId: string;
+  isAnnual?: boolean;
 }
 
-export function FedaPayButton({ amount, planId }: FedaPayButtonProps) {
+export function FedaPayButton({ amount, planId, isAnnual }: FedaPayButtonProps) {
   const [loading, setLoading] = useState(false);
 
   const handleClick = () => {
     setLoading(true);
     
-    // Liens vers tes pages de paiement FedaPay personnalisées
+    // Liens vers tes pages de paiement FedaPay réelles
     const links: Record<string, string> = {
-      'pro': 'https://me.fedapay.com/QQieaVUI', // Ton lien pour 2600 FCFA
-      'premium': 'https://me.fedapay.com/L-vS7A76' // Ton lien pour 6500 FCFA (à vérifier)
+      'pro_monthly': 'https://me.fedapay.com/QQieaVUI',
+      'pro_annual': 'https://me.fedapay.com/BBcNp6bS',
+      'premium_monthly': 'https://me.fedapay.com/TEcHFhRT',
+      'premium_annual': 'https://me.fedapay.com/dZShMsdh'
     };
 
-    const targetLink = links[planId] || links['pro'];
+    const key = `${planId}_${isAnnual ? 'annual' : 'monthly'}`;
+    const targetLink = links[key] || links['pro_monthly'];
     
-    // Redirection directe vers la page de paiement sécurisée
+    // Redirection directe
     window.location.href = targetLink;
   };
 
