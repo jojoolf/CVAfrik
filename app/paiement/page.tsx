@@ -130,12 +130,14 @@ function PaymentContent() {
                 planId={planId}
                 isAnnual={billing === 'annual'}
               />
-              <div className="mt-4 flex items-center justify-center gap-4 opacity-40 grayscale group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/Wave_logo.png" alt="Wave" className="h-4 object-contain" />
-                <div className="h-4 w-px bg-slate-200" />
-                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_xNqXf_lq76G-13mX3X3X3X3X3X3X3X3X3X&s" alt="MTN" className="h-4 object-contain" />
-                <div className="h-4 w-px bg-slate-200" />
-                <span className="text-[10px] font-bold text-slate-400">CARTES VISA / MC</span>
+              <div className="mt-6 flex flex-col items-center gap-4">
+                <div className="flex items-center justify-center gap-6 opacity-60">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/Wave_logo.png" alt="Wave" className="h-6 object-contain grayscale hover:grayscale-0 transition-all cursor-help" />
+                  <div className="h-6 w-px bg-slate-200" />
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/d/d6/Visa_2021.svg" alt="Visa" className="h-4 object-contain grayscale hover:grayscale-0 transition-all cursor-help" />
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" className="h-6 object-contain grayscale hover:grayscale-0 transition-all cursor-help" />
+                </div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Paiements 100% sécurisés par FedaPay</p>
               </div>
             </div>
 
