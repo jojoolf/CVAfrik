@@ -1,9 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Loader2, CreditCard } from 'lucide-react';
-import { toast } from 'sonner';
+import { CreditCard } from 'lucide-react';
 
 interface FedaPayButtonProps {
   amount: number;
@@ -14,52 +13,53 @@ interface FedaPayButtonProps {
 }
 
 export function FedaPayButton({ amount, planId, userEmail, userFirstname, userLastname }: FedaPayButtonProps) {
-  const [loading, setLoading] = useState(false);
+  
+  useEffect(() => {
+    // Chargement du script FedaPay Checkout
+    const script = document.createElement('script');
+    script.src = 'https://checkout.fedapay.com/js/checkout.js';
+    script.async = true;
+    document.body.appendChild(script);
 
-  const handlePayment = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch('/api/payments/fedapay', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount,
-          planId,
-          userEmail,
-          userFirstname,
-          userLastname,
-        }),
+    return () => {
+      // Nettoyage au démontage
+      const s = document.querySelector('script[src="https://checkout.fedapay.com/js/checkout.js"]');
+      if (s) s.remove();
+    };
+  }, []);
+
+  const openFedaPay = () => {
+    if ((window as any).FedaPay) {
+      (window as any).FedaPay.init({
+        public_key: 'pk_live_f6IuF-jRjG05qO764KclO1yY', // Ta clé PUBLIQUE (commence par pk_live)
+        transaction: {
+          amount: amount,
+          description: `Abonnement CVAfrik - Plan ${planId}`,
+        },
+        customer: {
+          firstname: userFirstname || 'Client',
+          lastname: userLastname || 'CVAfrik',
+          email: userEmail,
+        },
+        onComplete: (response: any) => {
+          if (response.status === 'approved') {
+            window.location.href = '/dashboard?payment=success';
+          }
+        }
       });
-
-      const data = await response.json();
-
-      if (data.url) {
-        // Redirection vers la page de paiement sécurisée de FedaPay
-        window.location.href = data.url;
-      } else {
-        throw new Error(data.error || 'Impossible de générer le lien de paiement');
-      }
-    } catch (error: any) {
-      toast.error('Erreur lors de l\'initialisation du paiement : ' + error.message);
-    } finally {
-      setLoading(false);
+      (window as any).FedaPay.open();
+    } else {
+      console.error('FedaPay script not loaded yet');
     }
   };
 
   return (
     <Button 
-      onClick={handlePayment} 
-      disabled={loading}
+      onClick={openFedaPay} 
       className="w-full h-14 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-lg shadow-lg shadow-emerald-600/20 gap-3"
     >
-      {loading ? (
-        <Loader2 className="h-6 w-6 animate-spin" />
-      ) : (
-        <>
-          <CreditCard className="h-6 w-6" />
-          Payer par Mobile Money / Carte
-        </>
-      )}
+      <CreditCard className="h-6 w-6" />
+      Payer par Mobile Money / Carte
     </Button>
   );
 }
