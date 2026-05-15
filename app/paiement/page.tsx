@@ -4,6 +4,7 @@ import React, { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Loader2, CreditCard, ShieldCheck, AlertCircle } from "lucide-react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { FedaPayButton } from "@/components/payments/fedapay-button";
 import { PLANS } from "@/lib/types";
@@ -20,29 +21,35 @@ function PaymentContent() {
 
   useEffect(() => {
     async function checkUser() {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        router.push(`/auth/connexion?redirect=/paiement?plan=${planId}`);
-        return;
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session) {
+          router.push(`/auth/connexion?redirect=/paiement?plan=${planId}`);
+          return;
+        }
+
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+
+        setUserData({
+          email: session.user.email,
+          firstname: profile?.prenom || '',
+          lastname: profile?.nom || '',
+        });
+
+        if (!planId) {
+          setError("Plan non spécifié.");
+        }
+      } catch (err) {
+        console.error("Auth check error:", err);
+        setError("Erreur lors de la vérification de session.");
+      } finally {
+        setLoading(false);
       }
-
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', session.user.id)
-        .single();
-
-      setUserData({
-        email: session.user.email,
-        firstname: profile?.prenom || '',
-        lastname: profile?.nom || '',
-      });
-
-      if (!planId) {
-        setError("Plan non spécifié.");
-      }
-      setLoading(false);
     }
 
     checkUser();
@@ -94,9 +101,9 @@ function PaymentContent() {
           <FedaPayButton 
             amount={amount}
             planId={planId as string}
-            userEmail={userData.email}
-            userFirstname={userData.firstname}
-            userLastname={userData.lastname}
+            userEmail={userData?.email || ''}
+            userFirstname={userData?.firstname || ''}
+            userLastname={userData?.lastname || ''}
           />
           
           <div className="relative">
