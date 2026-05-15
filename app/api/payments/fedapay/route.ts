@@ -43,11 +43,20 @@ export async function POST(req: Request) {
     const data = await response.json();
 
     if (!response.ok) {
+      console.error('FedaPay API Error Response:', data);
       throw new Error(data.message || 'Erreur lors de la création de la transaction');
     }
 
+    // FedaPay renvoie parfois l'id directement ou dans v1_transaction
+    const transactionId = data.v1_transaction?.id || data.id;
+
+    if (!transactionId) {
+      console.error('No transaction ID found in response:', data);
+      throw new Error('Identifiant de transaction introuvable dans la réponse de FedaPay');
+    }
+
     // 2. Générer le lien de paiement
-    const tokenResponse = await fetch(`${apiUrl}/${data.v1_transaction.id}/token`, {
+    const tokenResponse = await fetch(`${apiUrl}/${transactionId}/token`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${FEDAPAY_API_KEY}`,
@@ -57,7 +66,14 @@ export async function POST(req: Request) {
 
     const tokenData = await tokenResponse.json();
 
-    return NextResponse.json({ url: tokenData.v1_token.url });
+    if (!tokenResponse.ok) {
+       throw new Error(tokenData.message || 'Erreur lors de la génération du token');
+    }
+
+    // Même chose pour le token, on vérifie la structure
+    const tokenUrl = tokenData.v1_token?.url || tokenData.url;
+
+    return NextResponse.json({ url: tokenUrl });
   } catch (error: any) {
     console.error('FedaPay Fetch Error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
