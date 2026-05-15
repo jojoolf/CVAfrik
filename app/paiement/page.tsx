@@ -4,41 +4,62 @@ import React, { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Loader2, CreditCard, ShieldCheck, AlertCircle } from "lucide-react";
-import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { FedaPayButton } from "@/components/payments/fedapay-button";
+import { PLANS } from "@/lib/types";
 
 function PaymentContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const plan = searchParams.get("plan");
+  const planId = searchParams.get("plan");
+  const billing = searchParams.get("billing");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userData, setUserData] = useState<any>(null);
   const supabase = createClient();
 
   useEffect(() => {
-    async function checkUserAndPay() {
+    async function checkUser() {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
-        router.push(`/auth/connexion?redirect=/paiement?plan=${plan}`);
+        router.push(`/auth/connexion?redirect=/paiement?plan=${planId}`);
         return;
       }
 
-      if (!plan) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', session.user.id)
+        .single();
+
+      setUserData({
+        email: session.user.email,
+        firstname: profile?.prenom || '',
+        lastname: profile?.nom || '',
+      });
+
+      if (!planId) {
         setError("Plan non spécifié.");
-        setLoading(false);
-        return;
       }
-
-      // Rediriger directement vers le paiement manuel pour éviter les erreurs d'API non configurées
-      const billingParam = searchParams.get("billing") ? `&billing=${searchParams.get("billing")}` : "";
-      router.push(`/paiement/manuel?plan=${plan}${billingParam}`);
-      return;
+      setLoading(false);
     }
 
-    checkUserAndPay();
-  }, [plan, router, supabase]);
+    checkUser();
+  }, [planId, router, supabase]);
 
-  if (error) {
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <Loader2 className="w-10 h-10 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  const selectedPlan = PLANS.find(p => p.id === planId);
+  const amount = billing === 'annual' ? (selectedPlan?.prixAnnuel || 0) * 12 : (selectedPlan?.prixMensuel || 0);
+
+  if (error || !selectedPlan) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6 text-center">
         <div className="max-w-md w-full bg-white rounded-[2rem] p-10 shadow-2xl shadow-slate-200 border border-slate-100">
@@ -46,26 +67,10 @@ function PaymentContent() {
             <AlertCircle size={40} />
           </div>
           <h1 className="text-2xl font-black text-slate-900 mb-4">Oups ! Une erreur est survenue</h1>
-          <p className="text-slate-500 mb-10 leading-relaxed">{error}</p>
-          <div className="flex flex-col gap-3">
-            <Button asChild className="bg-slate-900 text-white py-6 rounded-2xl font-black text-sm hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/10">
-              <Link href={`/paiement/manuel?plan=${plan}${searchParams.get("billing") ? `&billing=${searchParams.get("billing")}` : ""}`}>
-                Payer manuellement (Wave / T-Money)
-              </Link>
-            </Button>
-            <Link 
-              href="/tarifs" 
-              className="text-slate-400 py-3 font-bold text-sm hover:text-slate-900 transition-colors"
-            >
-              Retour aux tarifs
-            </Link>
-            <Link 
-              href="/dashboard" 
-              className="text-slate-500 py-3 font-bold text-sm hover:text-slate-900 transition-colors"
-            >
-              Aller au tableau de bord
-            </Link>
-          </div>
+          <p className="text-slate-500 mb-10 leading-relaxed">{error || "Plan invalide"}</p>
+          <Button asChild className="w-full">
+            <Link href="/tarifs">Retour aux tarifs</Link>
+          </Button>
         </div>
       </div>
     );
@@ -73,26 +78,41 @@ function PaymentContent() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center">
-      <div className="w-24 h-24 relative mb-10">
-        <div className="absolute inset-0 bg-primary/20 rounded-full animate-ping" />
-        <div className="absolute inset-2 bg-primary rounded-full flex items-center justify-center shadow-2xl shadow-primary/40">
-          <CreditCard className="w-10 h-10 text-white" />
+      <div className="max-w-md w-full bg-white rounded-[3rem] p-10 shadow-2xl shadow-slate-200 border border-slate-100">
+        <div className="w-20 h-20 bg-primary/10 text-primary rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-inner">
+          <CreditCard size={32} />
         </div>
-      </div>
-      
-      <h1 className="text-3xl font-black text-slate-900 mb-4">Préparation du paiement</h1>
-      <p className="text-slate-500 max-w-sm mb-12 leading-relaxed">
-        Nous vous redirigeons vers l'interface sécurisée de <span className="font-bold text-slate-900">FedaPay</span> pour finaliser votre abonnement <span className="text-primary font-bold">{plan}</span>.
-      </p>
+        
+        <h1 className="text-3xl font-black text-slate-900 mb-2">Finalisez votre commande</h1>
+        <p className="text-slate-500 mb-8">
+          Vous avez choisi le plan <span className="text-primary font-bold">{selectedPlan.nom}</span> ({amount.toLocaleString()} FCFA)
+        </p>
 
-      <div className="flex items-center gap-4 text-slate-400 bg-white px-8 py-4 rounded-2xl border border-slate-100 shadow-sm mb-12 animate-pulse">
-        <Loader2 className="w-5 h-5 animate-spin text-primary" />
-        <span className="font-bold text-sm uppercase tracking-widest">Connexion sécurisée...</span>
-      </div>
+        <div className="space-y-4 mb-8">
+          <FedaPayButton 
+            amount={amount}
+            planId={planId as string}
+            userEmail={userData.email}
+            userFirstname={userData.firstname}
+            userLastname={userData.lastname}
+          />
+          
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-slate-100"></span></div>
+            <div className="relative flex justify-center text-xs uppercase tracking-widest font-bold"><span className="bg-white px-4 text-slate-300">Ou</span></div>
+          </div>
 
-      <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 bg-emerald-50 px-4 py-2 rounded-full border border-emerald-100">
-        <ShieldCheck size={14} />
-        Paiement Mobile Money Sécurisé
+          <Button variant="outline" asChild className="w-full h-14 rounded-2xl border-slate-200 text-slate-600 font-bold hover:bg-slate-50">
+            <Link href={`/paiement/manuel?plan=${planId}${billing === 'annual' ? '&billing=annual' : ''}`}>
+              Payer par transfert manuel (Wave, T-Money)
+            </Link>
+          </Button>
+        </div>
+
+        <div className="flex items-center justify-center gap-2 text-xs font-bold text-emerald-600 bg-emerald-50 px-4 py-3 rounded-2xl border border-emerald-100">
+          <ShieldCheck size={16} />
+          Paiement 100% sécurisé via FedaPay
+        </div>
       </div>
     </div>
   );
