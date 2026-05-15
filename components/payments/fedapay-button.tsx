@@ -16,7 +16,13 @@ export function FedaPayButton({ amount, planId, isAnnual }: FedaPayButtonProps) 
   const handleClick = () => {
     setLoading(true);
     
-    // Liens vers tes pages de paiement FedaPay réelles
+    // Si le montant dépasse 20 000 FCFA (limite FedaPay non-vérifié), on redirige vers le manuel
+    if (amount >= 20000) {
+      window.location.href = `/paiement/manuel?plan=${planId}&billing=annual`;
+      return;
+    }
+
+    // Liens vers tes pages de paiement FedaPay réelles (pour les montants < 20k)
     const links: Record<string, string> = {
       'pro_monthly': 'https://me.fedapay.com/QQieaVUI',
       'pro_annual': 'https://me.fedapay.com/BBcNp6bS',
