@@ -57,7 +57,7 @@ function PaymentContent() {
   }
 
   const selectedPlan = PLANS.find(p => p.id === planId);
-  const amount = billing === 'annual' ? (selectedPlan?.prixAnnuel || 0) * 12 : (selectedPlan?.prixMensuel || 0);
+  const amount = billing === 'annual' ? (selectedPlan?.prix_annuel_fcfa || 0) : (selectedPlan?.prix_fcfa || 0);
 
   if (error || !selectedPlan) {
     return (
