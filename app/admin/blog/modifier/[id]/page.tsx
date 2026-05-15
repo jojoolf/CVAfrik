@@ -140,7 +140,7 @@ export default function ModifierPost({ params }: ModifierPostProps) {
             id="contenu" 
             value={contenu} 
             onChange={e => setContenu(e.target.value)} 
-            className="min-h-[300px]" 
+            className="min-h-[400px] font-mono text-sm leading-relaxed" 
             placeholder="Écrivez votre article ici..."
             required 
           />

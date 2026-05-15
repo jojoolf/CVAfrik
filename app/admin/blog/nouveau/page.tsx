@@ -113,8 +113,8 @@ export default function NouveauPost() {
             id="contenu" 
             value={contenu} 
             onChange={e => setContenu(e.target.value)} 
-            className="min-h-[300px]" 
-            placeholder="Écrivez votre article ici..."
+            className="min-h-[400px] font-mono text-sm leading-relaxed" 
+            placeholder="Écrivez votre article ici en sautant des lignes pour aérer..."
             required 
           />
         </div>
