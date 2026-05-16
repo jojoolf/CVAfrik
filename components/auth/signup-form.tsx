@@ -72,8 +72,8 @@ export function SignupForm() {
         return
       }
 
-      toast.success('Compte cree avec succes! Verifiez votre email pour confirmer.')
-      router.push('/auth/verification-email')
+      toast.success('Compte cree ! Si vous ne recevez pas l\'email, essayez la connexion Google.')
+      router.push('/auth/connexion?info=check-email')
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Une erreur est survenue')
     } finally {

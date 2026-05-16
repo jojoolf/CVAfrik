@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -102,8 +102,17 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
     }
   }
 
+  const searchParams = useSearchParams()
+  const showEmailInfo = searchParams.get('info') === 'check-email'
+
   return (
     <div className="mt-8 space-y-6">
+      {showEmailInfo && (
+        <div className="rounded-lg bg-amber-50 p-4 border border-amber-100 text-sm text-amber-800 dark:bg-amber-950/20 dark:border-amber-900/50 dark:text-amber-200">
+          <p className="font-semibold mb-1">📧 Verifiez vos spams</p>
+          <p>Nous avons envoye un email de confirmation. Si vous ne le voyez pas apres 5 minutes, nous vous conseillons d&apos;utiliser <strong>Google</strong> (bouton ci-dessous) pour un acces instantane.</p>
+        </div>
+      )}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="email">Adresse email</Label>
