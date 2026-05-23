@@ -24,7 +24,8 @@ export default async function SimulateurPage() {
   const planId = profile?.plan ?? 'gratuit'
   const planInfo = PLANS.find(p => p.id === planId) || PLANS[0]
 
-  if (!planInfo.limites.simulation_entretien) {
+  // Plan gratuit → redirection vers tarifs
+  if (planId === 'gratuit') {
     redirect('/tarifs?locked=simulateur')
   }
 
@@ -44,13 +45,26 @@ export default async function SimulateurPage() {
               Simulateur d&apos;Entretien IA
             </h1>
             <p className="text-muted-foreground mt-2">
-              Entrainez-vous avec notre coach IA pour decrocher votre prochain emploi.
+              Entrainez-vous avec notre coach IA pour décrocher votre prochain emploi.
             </p>
           </div>
 
           <div className="grid gap-8 lg:grid-cols-3">
             <div className="lg:col-span-2">
-              <InterviewChat cvs={cvs || []} />
+              {cvs && cvs.length > 0 ? (
+                <InterviewChat cvs={cvs} />
+              ) : (
+                <Card className="border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-900">
+                  <CardContent className="p-8 text-center">
+                    <p className="text-amber-800 dark:text-amber-200 font-medium">
+                      Vous devez d&apos;abord créer un CV avant de lancer une simulation d&apos;entretien.
+                    </p>
+                    <a href="/cv-builder" className="mt-4 inline-block text-primary underline underline-offset-4">
+                      Créer mon premier CV →
+                    </a>
+                  </CardContent>
+                </Card>
+              )}
             </div>
 
             <div className="space-y-6">
@@ -58,22 +72,14 @@ export default async function SimulateurPage() {
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">
                     <Sparkles className="h-4 w-4 text-primary" />
-                    Comment ca marche ?
+                    Comment ça marche ?
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="text-sm text-muted-foreground space-y-4">
-                  <p>
-                    1. Choisissez votre CV et indiquez le poste vise.
-                  </p>
-                  <p>
-                    2. Le coach IA vous posera une serie de questions personnalisees.
-                  </p>
-                  <p>
-                    3. Repondez aux questions du mieux que vous pouvez.
-                  </p>
-                  <p>
-                    4. Recevez un rapport detaille avec votre score et des conseils precieux.
-                  </p>
+                <CardContent className="text-sm text-muted-foreground space-y-3">
+                  <p>1. Choisissez votre CV et le poste visé.</p>
+                  <p>2. Le coach IA vous pose des questions personnalisées.</p>
+                  <p>3. Répondez naturellement, comme dans un vrai entretien.</p>
+                  <p>4. Recevez un score et des conseils détaillés à la fin.</p>
                 </CardContent>
               </Card>
 
@@ -85,7 +91,7 @@ export default async function SimulateurPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="text-sm text-primary/80 italic">
-                  &quot;Soyez honnete et precis. L&apos;IA analyse non seulement le contenu mais aussi la structure de vos reponses pour vous aider a progresser.&quot;
+                  &quot;Soyez honnête et précis. L&apos;IA analyse non seulement le contenu mais aussi la structure de vos réponses pour vous aider à progresser.&quot;
                 </CardContent>
               </Card>
             </div>
