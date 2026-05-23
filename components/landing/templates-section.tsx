@@ -98,7 +98,7 @@ export function TemplatesSection() {
             <span className="text-primary"> chaque profil</span>
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Plus de 25 designs professionnels pour mettre en valeur votre parcours.
+            Plus de 100 designs professionnels pour mettre en valeur votre parcours.
             Du classique au creatif, trouvez le style qui vous correspond.
           </p>
         </div>

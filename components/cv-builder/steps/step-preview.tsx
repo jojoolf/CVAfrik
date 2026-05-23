@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
@@ -13,34 +13,7 @@ import { toPng } from 'html-to-image'
 import { jsPDF } from 'jspdf'
 import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-
-import { CVPreviewClassique } from '../templates/cv-preview-classique'
-import { CVPreviewModerne } from '../templates/cv-preview-moderne'
-import { CVPreviewCreatif } from '../templates/cv-preview-creatif'
-import { CVPreviewExecutif } from '../templates/cv-preview-executif'
-import { CVPreviewTech } from '../templates/cv-preview-tech'
-import { CVPreviewMinimaliste } from '../templates/cv-preview-minimaliste'
-import { CVPreviewStartup } from '../templates/cv-preview-startup'
-import { CVPreviewLuxe } from '../templates/cv-preview-luxe'
-import { CVPreviewElite } from '../templates/cv-preview-elite'
-import { CVPreviewDesign } from '../templates/cv-preview-design'
-import {
-  CVPreviewNeoClassique,
-  CVPreviewMarine,
-  CVPreviewTerracotta,
-  CVPreviewForest,
-  CVPreviewRoyal,
-  CVPreviewAqua,
-  CVPreviewBordeaux,
-  CVPreviewMint,
-  CVPreviewNoirOr,
-  CVPreviewSunset,
-  CVPreviewLavande,
-  CVPreviewGraphite,
-  CVPreviewRuby,
-  CVPreviewNordic,
-  CVPreviewAurora,
-} from '../templates/cv-preview-collection'
+import { renderCvTemplate, templateCatalog, type TemplateCatalogItem } from '../templates/cv-preview-collection'
 
 interface StepPreviewProps {
   data: CVDonnees
@@ -49,106 +22,20 @@ interface StepPreviewProps {
   plan: PlanConfig
 }
 
-const templates: Array<{ id: string; name: string; description: string; plans: string[]; color: string }> = [
-  { id: 'classique', name: 'Classique', description: 'Design intemporel', plans: ['gratuit', 'pro', 'premium'], color: 'bg-gray-800' },
-  { id: 'moderne', name: 'Moderne', description: 'Design contemporain', plans: ['gratuit', 'pro', 'premium'], color: 'bg-blue-600' },
-  { id: 'creatif', name: 'Creatif', description: 'Design original', plans: ['pro', 'premium'], color: 'bg-rose-500' },
-  { id: 'executif', name: 'Executif', description: 'Design sobre', plans: ['pro', 'premium'], color: 'bg-slate-700' },
-  { id: 'tech', name: 'Tech', description: 'Pour developpeurs', plans: ['pro', 'premium'], color: 'bg-cyan-600' },
-  { id: 'minimaliste', name: 'Minimaliste', description: "L'essentiel", plans: ['pro', 'premium'], color: 'bg-stone-500' },
-  { id: 'startup', name: 'Startup', description: 'Dynamique', plans: ['premium'], color: 'bg-orange-500' },
-  { id: 'luxe', name: 'Luxe', description: 'Elegant', plans: ['premium'], color: 'bg-amber-600' },
-  { id: 'elite', name: 'Elite', description: 'Premium avec photo', plans: ['pro', 'premium'], color: 'bg-[#0B1E36]' },
-  { id: 'design', name: 'Design', description: 'Esthetique chaleureux', plans: ['pro', 'premium'], color: 'bg-[#8B7355]' },
-
-  { id: 'neo-classique', name: 'Neo Classique', description: 'Classique revisite', plans: ['pro', 'premium'], color: 'bg-zinc-700' },
-  { id: 'marine', name: 'Marine', description: 'Professionnel bleu profond', plans: ['pro', 'premium'], color: 'bg-blue-800' },
-  { id: 'terracotta', name: 'Terracotta', description: 'Chaleureux et audacieux', plans: ['pro', 'premium'], color: 'bg-orange-700' },
-  { id: 'forest', name: 'Forest', description: 'Sobre avec touche verte', plans: ['pro', 'premium'], color: 'bg-emerald-700' },
-  { id: 'royal', name: 'Royal', description: 'Elegance executive', plans: ['premium'], color: 'bg-indigo-700' },
-  { id: 'aqua', name: 'Aqua', description: 'Tech lumineux', plans: ['pro', 'premium'], color: 'bg-cyan-500' },
-  { id: 'bordeaux', name: 'Bordeaux', description: 'Premium contraste', plans: ['premium'], color: 'bg-rose-800' },
-  { id: 'mint', name: 'Mint', description: 'Clair et epure', plans: ['gratuit', 'pro', 'premium'], color: 'bg-emerald-500' },
-  { id: 'noir-or', name: 'Noir Or', description: 'Impact visuel fort', plans: ['premium'], color: 'bg-neutral-900' },
-  { id: 'sunset', name: 'Sunset', description: 'Energie startup', plans: ['pro', 'premium'], color: 'bg-amber-500' },
-  { id: 'lavande', name: 'Lavande', description: 'Creatif moderne', plans: ['pro', 'premium'], color: 'bg-violet-600' },
-  { id: 'graphite', name: 'Graphite', description: 'Corporate minimal', plans: ['gratuit', 'pro', 'premium'], color: 'bg-slate-500' },
-  { id: 'ruby', name: 'Ruby', description: 'Chic et memorable', plans: ['premium'], color: 'bg-red-700' },
-  { id: 'nordic', name: 'Nordic', description: 'Minimal scandinave', plans: ['pro', 'premium'], color: 'bg-sky-600' },
-  { id: 'aurora', name: 'Aurora', description: 'Tech futuriste', plans: ['premium'], color: 'bg-teal-600' },
-]
-
-function CVTemplateRenderer({ template, data, showWatermark }: { template: string; data: CVDonnees; showWatermark: boolean }) {
-  switch (template) {
-    case 'classique':
-      return <CVPreviewClassique data={data} showWatermark={showWatermark} />
-    case 'moderne':
-      return <CVPreviewModerne data={data} showWatermark={showWatermark} />
-    case 'creatif':
-      return <CVPreviewCreatif data={data} showWatermark={showWatermark} />
-    case 'executif':
-      return <CVPreviewExecutif data={data} showWatermark={showWatermark} />
-    case 'tech':
-      return <CVPreviewTech data={data} showWatermark={showWatermark} />
-    case 'minimaliste':
-      return <CVPreviewMinimaliste data={data} showWatermark={showWatermark} />
-    case 'startup':
-      return <CVPreviewStartup data={data} showWatermark={showWatermark} />
-    case 'luxe':
-      return <CVPreviewLuxe data={data} showWatermark={showWatermark} />
-    case 'elite':
-      return <CVPreviewElite data={data} showWatermark={showWatermark} />
-    case 'design':
-      return <CVPreviewDesign data={data} showWatermark={showWatermark} />
-    case 'neo-classique':
-      return <CVPreviewNeoClassique data={data} showWatermark={showWatermark} />
-    case 'marine':
-      return <CVPreviewMarine data={data} showWatermark={showWatermark} />
-    case 'terracotta':
-      return <CVPreviewTerracotta data={data} showWatermark={showWatermark} />
-    case 'forest':
-      return <CVPreviewForest data={data} showWatermark={showWatermark} />
-    case 'royal':
-      return <CVPreviewRoyal data={data} showWatermark={showWatermark} />
-    case 'aqua':
-      return <CVPreviewAqua data={data} showWatermark={showWatermark} />
-    case 'bordeaux':
-      return <CVPreviewBordeaux data={data} showWatermark={showWatermark} />
-    case 'mint':
-      return <CVPreviewMint data={data} showWatermark={showWatermark} />
-    case 'noir-or':
-      return <CVPreviewNoirOr data={data} showWatermark={showWatermark} />
-    case 'sunset':
-      return <CVPreviewSunset data={data} showWatermark={showWatermark} />
-    case 'lavande':
-      return <CVPreviewLavande data={data} showWatermark={showWatermark} />
-    case 'graphite':
-      return <CVPreviewGraphite data={data} showWatermark={showWatermark} />
-    case 'ruby':
-      return <CVPreviewRuby data={data} showWatermark={showWatermark} />
-    case 'nordic':
-      return <CVPreviewNordic data={data} showWatermark={showWatermark} />
-    case 'aurora':
-      return <CVPreviewAurora data={data} showWatermark={showWatermark} />
-    default:
-      return <CVPreviewModerne data={data} showWatermark={showWatermark} />
-  }
+function getLockLabel(templatePlans: string[]) {
+  if (templatePlans.length === 1 && templatePlans[0] === 'premium') return 'PREM'
+  if (templatePlans.includes('pro')) return 'PRO'
+  return 'LOCK'
 }
 
 export function StepPreview({ data, template, onTemplateChange, plan }: StepPreviewProps) {
   const cvRef = useRef<HTMLDivElement>(null)
   const [isExporting, setIsExporting] = useState(false)
 
-  const isTemplateAvailable = (templateId: string) => {
-    const t = templates.find((item) => item.id === templateId)
-    return t?.plans.includes(plan.id) || false
-  }
+  const templates = useMemo(() => templateCatalog, [])
 
-  const getLockLabel = (templatePlans: string[]) => {
-    if (templatePlans.length === 1 && templatePlans[0] === 'premium') return 'PREM'
-    if (templatePlans.includes('pro')) return 'PRO'
-    return 'LOCK'
-  }
+  const isTemplateAvailable = (templateConfig: TemplateCatalogItem) =>
+    templateConfig.plans.includes(plan.id)
 
   const handleDownloadPDF = async () => {
     if (!cvRef.current) return
@@ -220,7 +107,7 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
                     transformOrigin: 'top center',
                   }}
                 >
-                  <CVTemplateRenderer template={template} data={data} showWatermark={plan.limites.filigrane} />
+                  {renderCvTemplate(template, { data, showWatermark: plan.limites.filigrane })}
                 </div>
               </div>
             </DialogContent>
@@ -275,21 +162,26 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
               onValueChange={onTemplateChange}
               className="grid max-h-[560px] grid-cols-2 gap-2 overflow-y-auto pr-1 sm:grid-cols-3"
             >
-              {templates.map((t) => {
-                const available = isTemplateAvailable(t.id)
-                const isSelected = template === t.id
+              {templates.map((templateConfig) => {
+                const available = isTemplateAvailable(templateConfig)
+                const isSelected = template === templateConfig.id
                 return (
-                  <div key={t.id}>
-                    <RadioGroupItem value={t.id} id={t.id} disabled={!available} className="peer sr-only" />
+                  <div key={templateConfig.id}>
+                    <RadioGroupItem
+                      value={templateConfig.id}
+                      id={templateConfig.id}
+                      disabled={!available}
+                      className="peer sr-only"
+                    />
                     <Label
-                      htmlFor={t.id}
+                      htmlFor={templateConfig.id}
                       className={cn(
                         'flex cursor-pointer flex-col overflow-hidden rounded-xl border-2 border-muted bg-popover transition-all hover:border-primary/50 hover:shadow-md',
                         isSelected && 'border-primary ring-2 ring-primary/20 shadow-md',
                         !available && 'cursor-not-allowed opacity-60',
                       )}
                     >
-                      <div className={`relative flex h-12 w-full items-center justify-center ${t.color}`}>
+                      <div className={`relative flex h-12 w-full items-center justify-center ${templateConfig.color}`}>
                         <div className="flex gap-1 opacity-60">
                           <div className="h-6 w-3 rounded-sm bg-white/30" />
                           <div className="space-y-0.5">
@@ -302,7 +194,7 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
                           <div className="absolute right-1 top-1">
                             <span className="flex items-center gap-0.5 rounded-full bg-black/50 px-1.5 py-0.5 text-[8px] font-bold text-white">
                               <Lock className="h-2 w-2" />
-                              {getLockLabel(t.plans)}
+                              {getLockLabel(templateConfig.plans)}
                             </span>
                           </div>
                         )}
@@ -315,8 +207,8 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
                         )}
                       </div>
                       <div className="px-2 py-1.5">
-                        <p className="truncate text-[11px] font-semibold text-foreground">{t.name}</p>
-                        <p className="truncate text-[9px] text-muted-foreground">{t.description}</p>
+                        <p className="truncate text-[11px] font-semibold text-foreground">{templateConfig.name}</p>
+                        <p className="truncate text-[9px] text-muted-foreground">{templateConfig.description}</p>
                       </div>
                     </Label>
                   </div>
@@ -337,7 +229,7 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
                   minHeight: '297mm',
                 }}
               >
-                <CVTemplateRenderer template={template} data={data} showWatermark={plan.limites.filigrane} />
+                {renderCvTemplate(template, { data, showWatermark: plan.limites.filigrane })}
               </div>
             </div>
 

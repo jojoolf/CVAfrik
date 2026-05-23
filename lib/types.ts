@@ -237,7 +237,7 @@ export const PLANS: PlanConfig[] = [
     fonctionnalites: [
       'CV illimités',
       'Lettres de motivation illimitées',
-      '25+ templates premium',
+      '45+ templates premium',
       'Export PDF sans watermark',
       'Score ATS détaillé + conseils',
       'Simulateur entretien illimité',

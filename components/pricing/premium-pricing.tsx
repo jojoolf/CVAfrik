@@ -48,7 +48,7 @@ export function PremiumPricing({ user }: PremiumPricingProps) {
       popular: true,
       features: [
         { text: "CV illimités", active: true },
-        { text: "25+ templates premium", active: true, badge: "NOUVEAU" },
+        { text: "45+ templates premium", active: true, badge: "NOUVEAU" },
         { text: "Export PDF sans watermark", active: true },
         { text: "Score ATS détaillé + conseils", active: true },
         { text: "Simulateur entretien illimité", active: true },

@@ -168,7 +168,7 @@ export function PricingCards({ currentPlan }: PricingCardsProps) {
             <tbody className="text-sm">
               {[
                 { name: 'CV par mois', starter: '2', pro: 'Illimite', business: 'Illimite' },
-                { name: 'Templates', starter: '3 basiques', pro: '25+ premium', business: 'Premium + Custom' },
+                { name: 'Templates', starter: '3 basiques', pro: '45+ premium', business: '100+ premium + custom' },
                 { name: 'Export PDF', starter: 'Avec filigrane', pro: 'Sans filigrane', business: 'Sans filigrane' },
                 { name: 'Score ATS', starter: 'Basique', pro: 'Detaille', business: 'Detaille' },
                 { name: 'Simulation entretien', starter: '3/mois', pro: 'Illimite', business: 'Illimite' },
