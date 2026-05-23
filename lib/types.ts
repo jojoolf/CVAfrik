@@ -237,7 +237,7 @@ export const PLANS: PlanConfig[] = [
     fonctionnalites: [
       'CV illimités',
       'Lettres de motivation illimitées',
-      '15+ templates premium',
+      '25+ templates premium',
       'Export PDF sans watermark',
       'Score ATS détaillé + conseils',
       'Simulateur entretien illimité',
@@ -317,3 +317,4 @@ export const OPERATEURS_MOBILE_MONEY = [
   { id: 'wave', nom: 'Wave', pays: ['SN', 'CI', 'ML', 'BF'] },
   { id: 'flooz', nom: 'Flooz', pays: ['TG', 'BJ'] },
 ]
+

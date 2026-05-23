@@ -7,7 +7,20 @@ import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { ArrowRight, Lock } from 'lucide-react'
 
-const templates = [
+type TemplatePlan = 'gratuit' | 'pro' | 'premium'
+
+interface TemplateCard {
+  id: string
+  name: string
+  description: string
+  plan: TemplatePlan
+  colors: {
+    primary: string
+    secondary: string
+  }
+}
+
+const templates: TemplateCard[] = [
   {
     id: 'classique',
     name: 'Classique',
@@ -66,7 +79,7 @@ const templates = [
   },
 ]
 
-const planColors = {
+const planColors: Record<TemplatePlan, string> = {
   gratuit: 'bg-muted text-muted-foreground',
   pro: 'bg-primary/10 text-primary',
   premium: 'bg-accent/10 text-accent',
@@ -85,7 +98,7 @@ export function TemplatesSection() {
             <span className="text-primary"> chaque profil</span>
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            8 designs professionnels pour mettre en valeur votre parcours. 
+            Plus de 25 designs professionnels pour mettre en valeur votre parcours.
             Du classique au creatif, trouvez le style qui vous correspond.
           </p>
         </div>

@@ -13,7 +13,7 @@ const features = [
   {
     icon: FileText,
     title: 'Templates professionnels',
-    description: 'Choisissez parmi 8 templates modernes et adaptes au marche africain. Design elegant et structure claire.',
+    description: 'Choisissez parmi 25+ templates modernes et adaptes au marche africain. Design elegant et structure claire.',
   },
   {
     icon: Sparkles,
