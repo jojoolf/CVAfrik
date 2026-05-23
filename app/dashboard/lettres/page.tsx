@@ -52,7 +52,7 @@ export default async function LettresPage({
   const generatedThisMonth = lettres?.filter(l => new Date(l.created_at) >= currentMonthStart).length || 0
   const resolvedPlanInfo = await planInfo
   const letterLimit = resolvedPlanInfo.limites.lettres_par_mois
-  const limitReached = generatedThisMonth >= letterLimit
+  const limitReached = letterLimit !== null && generatedThisMonth >= letterLimit
 
   if (isCreating && limitReached) {
     redirect('/tarifs?locked=lettres')
@@ -88,11 +88,11 @@ export default async function LettresPage({
                   Generer une nouvelle lettre
                 </CardTitle>
                 <CardDescription>
-                  Remplissez les informations ci-dessous pour que l&apos;IA redige votre lettre.
+                  Remplissez une seule fois le formulaire et comparez 3 lettres generees par l&apos;IA.
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <LettreGeneratorForm cvs={cvs || []} profile={profile} />
+                <LettreGeneratorForm cvs={cvs || []} />
               </CardContent>
             </Card>
           ) : (

@@ -4,7 +4,7 @@ import { Navbar } from '@/components/layout/navbar'
 import { Footer } from '@/components/layout/footer'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Copy, Download, Trash2 } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { LettreContentEditor } from './lettre-content-editor'
 
@@ -47,22 +47,10 @@ export default async function LettreViewPage({
 
           <Card className="border-primary/20 shadow-lg">
             <CardHeader className="border-b bg-muted/50">
-              <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-                <CardTitle className="text-xl">{lettre.titre}</CardTitle>
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" className="bg-background">
-                    <Download className="mr-2 h-4 w-4" />
-                    PDF
-                  </Button>
-                  <Button size="sm" className="bg-primary">
-                    <Copy className="mr-2 h-4 w-4" />
-                    Copier
-                  </Button>
-                </div>
-              </div>
+              <CardTitle className="text-xl">{lettre.titre}</CardTitle>
             </CardHeader>
             <CardContent className="p-8">
-              <LettreContentEditor initialContent={lettre.contenu} id={lettre.id} />
+              <LettreContentEditor initialContent={lettre.contenu} id={lettre.id} title={lettre.titre} />
             </CardContent>
           </Card>
         </div>

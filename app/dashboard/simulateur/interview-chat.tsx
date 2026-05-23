@@ -1,14 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Loader2, Send, Sparkles, User, Bot, CheckCircle2 } from 'lucide-react'
+import { Loader2, Send, Sparkles, User, Bot, CheckCircle2, Maximize2, Minimize2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { cn } from '@/lib/utils'
 import { startSimulation, sendMessage } from './actions'
 
 interface Message {
@@ -28,15 +28,21 @@ export function InterviewChat({ cvs }: { cvs: { id: string; titre: string | null
   const [simulationId, setSimulationId] = useState<string | null>(null)
   const [feedback, setFeedback] = useState<string | null>(null)
   const [score, setScore] = useState<number | null>(null)
+  const [isExpanded, setIsExpanded] = useState(false)
+  const messagesEndRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages, loading])
 
   const handleStart = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!setupData.poste) return toast.error('Veuillez indiquer le poste.')
-    
+
     setLoading(true)
     try {
       const result = await startSimulation(setupData)
-      if (result.success) {
+      if (result.success && result.id && result.firstQuestion) {
         setSimulationId(result.id)
         setMessages([{ role: 'assistant', content: result.firstQuestion }])
         setStep('chat')
@@ -58,20 +64,22 @@ export function InterviewChat({ cvs }: { cvs: { id: string; titre: string | null
     setInput('')
     const newMessages: Message[] = [...messages, { role: 'user', content: userMsg }]
     setMessages(newMessages)
-    
+
     setLoading(true)
     try {
       const result = await sendMessage(simulationId!, userMsg, newMessages)
       if (result.success) {
         if (result.isFinished) {
-          setFeedback(result.feedback)
-          setScore(result.score)
+          setFeedback(result.feedback ?? 'Feedback indisponible pour cette simulation.')
+          setScore(typeof result.score === 'number' ? result.score : 0)
           setStep('result')
-        } else {
+        } else if (result.nextQuestion) {
           setMessages([...newMessages, { role: 'assistant', content: result.nextQuestion }])
+        } else {
+          toast.error('Reponse du coach invalide.')
         }
       } else {
-        toast.error('Erreur lors de l\'envoi.')
+        toast.error(result.error || "Erreur lors de l'envoi.")
       }
     } catch (error) {
       toast.error('Une erreur est survenue.')
@@ -90,26 +98,28 @@ export function InterviewChat({ cvs }: { cvs: { id: string; titre: string | null
           <form onSubmit={handleStart} className="space-y-4">
             <div className="space-y-2">
               <Label>Choisissez le CV avec lequel vous postulez</Label>
-              <Select 
-                value={setupData.cvId} 
-                onValueChange={(val) => setSetupData(prev => ({ ...prev, cvId: val }))}
+              <Select
+                value={setupData.cvId}
+                onValueChange={(val) => setSetupData((prev) => ({ ...prev, cvId: val }))}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Choisir un CV" />
                 </SelectTrigger>
                 <SelectContent>
-                  {cvs.map(cv => (
-                    <SelectItem key={cv.id} value={cv.id}>{cv.titre || 'Sans titre'}</SelectItem>
+                  {cvs.map((cv) => (
+                    <SelectItem key={cv.id} value={cv.id}>
+                      {cv.titre || 'Sans titre'}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
               <Label>Quel poste visez-vous ?</Label>
-              <Input 
-                placeholder="Ex: Developpeur Front-end, Commercial..." 
+              <Input
+                placeholder="Ex: Developpeur Front-end, Commercial..."
                 value={setupData.poste}
-                onChange={(e) => setSetupData(prev => ({ ...prev, poste: e.target.value }))}
+                onChange={(e) => setSetupData((prev) => ({ ...prev, poste: e.target.value }))}
                 required
               />
             </div>
@@ -125,23 +135,46 @@ export function InterviewChat({ cvs }: { cvs: { id: string; titre: string | null
 
   if (step === 'chat') {
     return (
-      <Card className="border-primary/20 flex flex-col h-[600px] shadow-xl overflow-hidden">
+      <Card
+        className={cn(
+          'border-primary/20 flex flex-col shadow-xl overflow-hidden transition-all duration-200',
+          isExpanded
+            ? 'h-[calc(100vh-140px)] max-h-[900px]'
+            : 'h-[calc(100vh-260px)] min-h-[480px] max-h-[680px]',
+        )}
+      >
         <CardHeader className="bg-primary/5 border-b py-3">
-          <CardTitle className="text-sm font-medium flex items-center gap-2">
-            <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-            Simulation en cours — {setupData.poste}
-          </CardTitle>
+          <div className="flex items-center justify-between gap-3">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+              Simulation en cours -- {setupData.poste}
+            </CardTitle>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 shrink-0"
+              onClick={() => setIsExpanded((prev) => !prev)}
+              aria-label={isExpanded ? 'Reduire la fenetre' : 'Agrandir la fenetre'}
+              title={isExpanded ? 'Reduire la fenetre' : 'Agrandir la fenetre'}
+            >
+              {isExpanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+            </Button>
+          </div>
         </CardHeader>
-        <CardContent className="flex-1 flex flex-col p-0 overflow-hidden bg-background">
-          <ScrollArea className="flex-1 p-4">
+
+        <CardContent className="flex-1 min-h-0 flex flex-col p-0 overflow-hidden bg-background">
+          <div className="flex-1 min-h-0 overflow-y-auto p-4">
             <div className="space-y-4 pb-4">
               {messages.map((msg, i) => (
                 <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm ${
-                    msg.role === 'user' 
-                      ? 'bg-primary text-primary-foreground rounded-tr-none' 
-                      : 'bg-muted text-foreground rounded-tl-none border border-border/50'
-                  }`}>
+                  <div
+                    className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm ${
+                      msg.role === 'user'
+                        ? 'bg-primary text-primary-foreground rounded-tr-none'
+                        : 'bg-muted text-foreground rounded-tl-none border border-border/50'
+                    }`}
+                  >
                     <div className="flex items-center gap-1.5 mb-1 opacity-70 text-[10px] uppercase font-bold tracking-wider">
                       {msg.role === 'assistant' ? <Bot className="h-3 w-3" /> : <User className="h-3 w-3" />}
                       {msg.role === 'assistant' ? 'Coach IA' : 'Vous'}
@@ -157,14 +190,15 @@ export function InterviewChat({ cvs }: { cvs: { id: string; titre: string | null
                   </div>
                 </div>
               )}
+              <div ref={messagesEndRef} />
             </div>
-          </ScrollArea>
-          
+          </div>
+
           <form onSubmit={handleSend} className="p-4 border-t bg-muted/20 flex gap-2">
-            <Input 
-              value={input} 
-              onChange={(e) => setInput(e.target.value)} 
-              placeholder="Tapez votre reponse ici..." 
+            <Input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Tapez votre reponse ici..."
               className="bg-background rounded-full px-4"
               disabled={loading}
             />

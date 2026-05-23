@@ -6,119 +6,274 @@ import { PLANS } from '@/lib/types'
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
 
-export async function generateCoverLetter(formData: {
+type LetterStyleId = 'classique' | 'dynamique' | 'moderne'
+
+export interface GeneratedLetter {
+  styleId: LetterStyleId
+  styleLabel: string
+  styleDescription: string
+  content: string
+}
+
+const LETTER_STYLES: Array<{
+  styleId: LetterStyleId
+  styleLabel: string
+  styleDescription: string
+  promptTone: string
+  promptInstructions: string
+}> = [
+  {
+    styleId: 'classique',
+    styleLabel: 'Classique & Formel',
+    styleDescription: 'Structure traditionnelle, ton serieux, ideal pour grands groupes et postes seniors.',
+    promptTone: 'classique et formel',
+    promptInstructions:
+      'Utilise un style institutionnel, des transitions soignees et une conclusion polie orientee engagement.',
+  },
+  {
+    styleId: 'dynamique',
+    styleLabel: 'Dynamique & Percutant',
+    styleDescription: "Accroche forte, verbes d'action, ideal pour startups et postes commerciaux.",
+    promptTone: 'dynamique et percutant',
+    promptInstructions:
+      "Commence par une accroche energique, mets en avant les resultats et utilise des verbes d'action.",
+  },
+  {
+    styleId: 'moderne',
+    styleLabel: 'Moderne & Concis',
+    styleDescription: 'Direct, lisible et adapte aux pratiques RH actuelles.',
+    promptTone: 'moderne et concis',
+    promptInstructions:
+      'Va droit au but avec des paragraphes courts, un langage clair et une proposition de valeur immediate.',
+  },
+]
+
+function cleanModelText(text: string) {
+  return text
+    .replace(/^```(?:text|markdown)?/i, '')
+    .replace(/```$/i, '')
+    .trim()
+}
+
+function buildCandidateSummary(cvData: any) {
+  const prenom = cvData?.informations_personnelles?.prenom || ''
+  const nom = cvData?.informations_personnelles?.nom || ''
+  const titre = cvData?.titre_professionnel || 'Profil polyvalent'
+
+  const experiences = Array.isArray(cvData?.experiences)
+    ? cvData.experiences
+        .map((e: any) => `${e?.poste || 'Poste'} chez ${e?.entreprise || 'Entreprise'}`)
+        .slice(0, 6)
+        .join(', ')
+    : ''
+
+  const competences = Array.isArray(cvData?.competences)
+    ? cvData.competences
+        .map((c: any) => c?.nom)
+        .filter(Boolean)
+        .slice(0, 12)
+        .join(', ')
+    : ''
+
+  return {
+    fullName: `${prenom} ${nom}`.trim() || 'Candidat',
+    titre,
+    experiences: experiences || 'A preciser',
+    competences: competences || 'A preciser',
+  }
+}
+
+function getMonthlyLimitError(limit: number) {
+  return `Vous avez atteint votre limite de ${limit} lettres ce mois-ci. Passez au plan Pro pour un acces illimite !`
+}
+
+async function getProfileAndLetterLimit(userId: string) {
+  const supabase = await createClient()
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('plan, lettres_generees_ce_mois')
+    .eq('id', userId)
+    .single()
+
+  if (!profile) {
+    return { profile: null, limit: null as number | null }
+  }
+
+  const plan = PLANS.find((p) => p.id === profile.plan) || PLANS[0]
+  return {
+    profile,
+    limit: plan.limites.lettres_par_mois,
+  }
+}
+
+export async function generateThreeLetters(formData: {
   cvId: string
   destinataire: string
   entreprise: string
   poste: string
   offreEmploi: string
-  style: string
+  secteurActivite: string
 }) {
   try {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
 
     if (!user) {
-      return { success: false, error: 'Non authentifie' }
+      return { success: false, error: 'Non authentifie' as const }
     }
 
-    // 1. Verifier le profil et les limites
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single()
-
-    if (!profile) return { success: false, error: 'Profil non trouve' }
-
-    const plan = PLANS.find(p => p.id === profile.plan) || PLANS[0]
-    const limit = plan.limites.lettres_par_mois
-
-    if (limit !== null && profile.lettres_generees_ce_mois >= limit) {
-      return { 
-        success: false, 
-        error: `Vous avez atteint votre limite de ${limit} lettres ce mois-ci. Passez au plan Pro pour un acces illimite !` 
-      }
+    const limitCheck = await getProfileAndLetterLimit(user.id)
+    if (!limitCheck.profile) {
+      return { success: false, error: 'Profil non trouve' as const }
     }
 
-    // 2. Recuperer les donnees du CV
+    if (
+      limitCheck.limit !== null &&
+      (limitCheck.profile.lettres_generees_ce_mois || 0) >= limitCheck.limit
+    ) {
+      return { success: false, error: getMonthlyLimitError(limitCheck.limit) }
+    }
+
     const { data: cv } = await supabase
       .from('cvs')
-      .select('*')
+      .select('donnees')
       .eq('id', formData.cvId)
+      .eq('user_id', user.id)
       .single()
 
-    if (!cv) return { success: false, error: 'CV non trouve' }
+    if (!cv) return { success: false, error: 'CV non trouve' as const }
 
-    const cvData = cv.donnees
-
-    // 3. Preparer le prompt pour Gemini
+    const candidate = buildCandidateSummary(cv.donnees)
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
 
-    const prompt = `
-      Tu es un expert en recrutement en Afrique de l'Ouest. 
-      Redige une lettre de motivation percutante et professionnelle en francais.
-      
-      INFOS CANDIDAT (Basees sur son CV) :
-      - Nom: ${cvData.informations_personnelles.prenom} ${cvData.informations_personnelles.nom}
-      - Titre actuel: ${cvData.titre_professionnel}
-      - Experiences cles: ${cvData.experiences.map((e: any) => `${e.poste} chez ${e.entreprise}`).join(', ')}
-      - Competences: ${cvData.competences.map((c: any) => c.nom).join(', ')}
-      
-      INFOS POSTE :
-      - Entreprise: ${formData.entreprise}
-      - Poste vise: ${formData.poste}
-      - Destinataire: ${formData.destinataire || 'Responsable du recrutement'}
-      - Style souhaite: ${formData.style}
-      ${formData.offreEmploi ? `- Contexte de l'offre: ${formData.offreEmploi}` : ''}
-      
-      CONSIGNES :
-      - La lettre doit etre structuree : En-tete, Objet, Salutations, Corps (Moi, Vous, Nous), Conclusion.
-      - Adapte le ton au style "${formData.style}".
-      - Ne depasse pas une page.
-      - Ne mets pas de faux numeros de telephone ou adresses si elles ne sont pas fournies.
-      - Retourne uniquement le texte de la lettre, sans commentaires additionnels.
-    `
+    const commonPrompt = `
+Tu es un expert en recrutement en Afrique francophone.
+Redige une lettre de motivation en francais, professionnelle, realiste et convaincante.
 
-    const result = await model.generateContent(prompt)
-    const response = await result.response
-    const text = response.text()
+INFOS CANDIDAT :
+- Nom: ${candidate.fullName}
+- Titre actuel: ${candidate.titre}
+- Experiences cles: ${candidate.experiences}
+- Competences cles: ${candidate.competences}
 
-    // 4. Enregistrer la lettre dans la base de donnees
+INFOS POSTE :
+- Entreprise: ${formData.entreprise}
+- Poste vise: ${formData.poste}
+- Secteur d'activite: ${formData.secteurActivite || 'Non precise'}
+- Destinataire: ${formData.destinataire || 'Responsable du recrutement'}
+${formData.offreEmploi ? `- Extrait offre d'emploi: ${formData.offreEmploi}` : ''}
+
+CONSIGNES COMMUNES :
+- Structure attendue: En-tete, Objet, Salutation, Corps, Conclusion, Signature.
+- Pas de fausses informations (contacts, chiffres, dates).
+- Longueur cible: 250 a 420 mots.
+- Retourne uniquement la lettre finale, sans commentaire externe.
+`.trim()
+
+    const letters = await Promise.all(
+      LETTER_STYLES.map(async (style) => {
+        const styledPrompt = `
+${commonPrompt}
+
+STYLE A APPLIQUER :
+- Ton attendu: ${style.promptTone}
+- Contraintes stylistiques: ${style.promptInstructions}
+        `.trim()
+
+        const result = await model.generateContent(styledPrompt)
+        const response = await result.response
+        const text = cleanModelText(response.text())
+
+        return {
+          styleId: style.styleId,
+          styleLabel: style.styleLabel,
+          styleDescription: style.styleDescription,
+          content: text,
+        } satisfies GeneratedLetter
+      }),
+    )
+
+    return { success: true as const, letters }
+  } catch (error) {
+    console.error('Generation Three Letters Error:', error)
+    return { success: false, error: 'Erreur technique lors de la generation.' as const }
+  }
+}
+
+export async function saveLetter(data: {
+  content: string
+  titre: string
+  cvId: string
+  offreEmploi?: string
+}) {
+  try {
+    const supabase = await createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) return { success: false, error: 'Non authentifie' as const }
+
+    const content = data.content?.trim()
+    if (!content) {
+      return { success: false, error: 'Le contenu de la lettre est vide.' as const }
+    }
+
+    const limitCheck = await getProfileAndLetterLimit(user.id)
+    if (!limitCheck.profile) {
+      return { success: false, error: 'Profil non trouve' as const }
+    }
+
+    if (
+      limitCheck.limit !== null &&
+      (limitCheck.profile.lettres_generees_ce_mois || 0) >= limitCheck.limit
+    ) {
+      return { success: false, error: getMonthlyLimitError(limitCheck.limit) }
+    }
+
     const { data: newLettre, error: saveError } = await supabase
       .from('lettres_motivation')
       .insert({
         user_id: user.id,
-        cv_id: formData.cvId,
-        titre: `Lettre - ${formData.poste} (${formData.entreprise})`,
-        contenu: text,
-        offre_emploi: formData.offreEmploi,
+        cv_id: data.cvId,
+        titre: data.titre || 'Lettre de motivation',
+        contenu: content,
+        offre_emploi: data.offreEmploi || null,
       })
-      .select()
+      .select('id')
       .single()
 
     if (saveError) {
-      console.error(saveError)
-      return { success: false, error: 'Erreur lors de la sauvegarde.' }
+      console.error('Save letter error:', saveError)
+      return { success: false, error: 'Erreur lors de la sauvegarde.' as const }
     }
 
-    // 5. Incrementer le compteur de l'utilisateur
-    await supabase
+    const { error: profileError } = await supabase
       .from('profiles')
-      .update({ lettres_generees_ce_mois: (profile.lettres_generees_ce_mois || 0) + 1 })
+      .update({
+        lettres_generees_ce_mois: (limitCheck.profile.lettres_generees_ce_mois || 0) + 1,
+      })
       .eq('id', user.id)
 
-    return { success: true, id: newLettre.id }
+    if (profileError) {
+      console.error('Profile counter update error:', profileError)
+    }
+
+    return { success: true as const, id: newLettre.id }
   } catch (error) {
-    console.error('Generation Error:', error)
-    return { success: false, error: 'Erreur technique lors de la generation.' }
+    console.error('Save Letter Error:', error)
+    return { success: false, error: 'Erreur technique lors de la sauvegarde.' as const }
   }
 }
 
 export async function updateLettreContent(id: string, contenu: string) {
   try {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
 
     if (!user) return { success: false, error: 'Non authentifie' }
 
