@@ -32,7 +32,7 @@ export async function startSimulation(data: { cvId: string; poste: string }) {
       .eq('id', data.cvId)
       .single()
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
     const prompt = `
       Tu es un recruteur expert. Tu vas mener un entretien d'embauche pour le poste de "${data.poste}".
       Voici les infos du candidat (CV) : ${JSON.stringify(cv?.donnees)}.
@@ -84,7 +84,7 @@ export async function startSimulation(data: { cvId: string; poste: string }) {
 export async function sendMessage(id: string, message: string, history: any[]) {
   try {
     const supabase = await createClient()
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
 
     const totalMessages = history.length
     

@@ -53,7 +53,7 @@ export async function generateCoverLetter(formData: {
     const cvData = cv.donnees
 
     // 3. Preparer le prompt pour Gemini
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
 
     const prompt = `
       Tu es un expert en recrutement en Afrique de l'Ouest. 
