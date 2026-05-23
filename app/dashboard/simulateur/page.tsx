@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import { Navbar } from '@/components/layout/navbar'
 import { Footer } from '@/components/layout/footer'
 import { InterviewChat } from './interview-chat'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { MessageSquareCode, Sparkles, Trophy } from 'lucide-react'
 import { PLANS } from '@/lib/types'
 

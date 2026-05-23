@@ -7,6 +7,7 @@ import { FAQ } from '@/components/pricing/faq'
 import { createClient } from '@/lib/supabase/server'
 
 import { Lock } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 export const metadata: Metadata = {
   title: 'Tarifs',

@@ -220,7 +220,7 @@ export const PLANS: PlanConfig[] = [
       filigrane: true,
       export_pdf: true,
       conseils_ia: false,
-      simulation_entretien: false,
+      simulation_entretien: true,
       suivi_candidatures: false,
       profil_linkedin: false,
       adaptation_offre: false,

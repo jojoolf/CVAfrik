@@ -56,12 +56,28 @@ export async function startSimulation(data: { cvId: string; poste: string }) {
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      console.error("Erreur insertion simulations_entretien:", error)
+      throw new Error(`Erreur lors de la creation de la simulation: ${error.message}`)
+    }
+
+    // Increment user simulation count in profile
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .update({
+        simulations_faites_ce_mois: (profile?.simulations_faites_ce_mois || 0) + 1
+      })
+      .eq('id', user.id)
+
+    if (profileError) {
+      console.error("Erreur update profile simulations_faites_ce_mois:", profileError)
+      // On continue quand même car la simulation a été insérée
+    }
 
     return { success: true, id: sim.id, firstQuestion }
   } catch (error) {
-    console.error(error)
-    return { success: false, error: 'Erreur technique.' }
+    console.error("Erreur startSimulation:", error)
+    return { success: false, error: error instanceof Error ? error.message : 'Erreur technique.' }
   }
 }
 
@@ -86,9 +102,19 @@ export async function sendMessage(id: string, message: string, history: any[]) {
       `
       const result = await model.generateContent(prompt)
       const response = await result.response
-      const data = JSON.parse(response.text().replace(/```json|```/g, ''))
+      
+      let data;
+      try {
+        const text = response.text()
+        const jsonMatch = text.match(/\{[\s\S]*\}/)
+        const jsonStr = jsonMatch ? jsonMatch[0] : text
+        data = JSON.parse(jsonStr)
+      } catch (parseError) {
+        console.error("Erreur parse feedback JSON:", parseError)
+        data = { score: 70, feedback: response.text() }
+      }
 
-      await supabase
+      const { error: updateError } = await supabase
         .from('simulations_entretien')
         .update({ 
           messages: history, 
@@ -96,6 +122,11 @@ export async function sendMessage(id: string, message: string, history: any[]) {
           score: data.score 
         })
         .eq('id', id)
+
+      if (updateError) {
+        console.error("Erreur update simulations_entretien:", updateError)
+        throw new Error(`Erreur lors de la mise à jour finale de la simulation: ${updateError.message}`)
+      }
 
       return { success: true, isFinished: true, feedback: data.feedback, score: data.score }
     }
@@ -110,14 +141,19 @@ export async function sendMessage(id: string, message: string, history: any[]) {
     const result = await model.generateContent(prompt)
     const nextQuestion = (await result.response).text()
 
-    await supabase
+    const { error: updateError } = await supabase
       .from('simulations_entretien')
       .update({ messages: [...history, { role: 'assistant', content: nextQuestion }] })
       .eq('id', id)
 
+    if (updateError) {
+      console.error("Erreur update simulations_entretien:", updateError)
+      throw new Error(`Erreur lors de la mise à jour de la simulation: ${updateError.message}`)
+    }
+
     return { success: true, isFinished: false, nextQuestion }
   } catch (error) {
-    console.error(error)
-    return { success: false, error: 'Erreur lors de la generation.' }
+    console.error("Erreur sendMessage:", error)
+    return { success: false, error: error instanceof Error ? error.message : 'Erreur lors de la génération.' }
   }
 }
