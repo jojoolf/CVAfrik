@@ -11,8 +11,9 @@ import { LettreContentEditor } from './lettre-content-editor'
 export default async function LettreViewPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
+  const { id } = await params
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -23,7 +24,7 @@ export default async function LettreViewPage({
   const { data: lettre } = await supabase
     .from('lettres_motivation')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .eq('user_id', user.id)
     .single()
 

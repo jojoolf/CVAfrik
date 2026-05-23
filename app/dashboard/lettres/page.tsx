@@ -13,7 +13,7 @@ import { fr } from 'date-fns/locale'
 export default async function LettresPage({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | string[] | undefined }
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -22,7 +22,9 @@ export default async function LettresPage({
     redirect('/auth/connexion')
   }
 
-  const isCreating = searchParams.new === 'true'
+  const resolvedSearchParams = await searchParams
+  const newParam = resolvedSearchParams?.new
+  const isCreating = Array.isArray(newParam) ? newParam.includes('true') : newParam === 'true'
 
   const { data: profile } = await supabase
     .from('profiles')
