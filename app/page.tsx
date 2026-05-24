@@ -6,24 +6,22 @@ import { TemplatesSection } from '@/components/landing/templates-section'
 import { PricingSection } from '@/components/landing/pricing-section'
 import { CTASection } from '@/components/landing/cta-section'
 import { createClient } from '@/lib/supabase/server'
-import { createTranslator } from '@/lib/i18n/server'
 
 export const dynamic = 'force-dynamic'
 
 export default async function HomePage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  const { locale, t } = await createTranslator()
 
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar user={user} />
       <main className="flex-1">
-        <HeroSection t={t} />
-        <FeaturesSection t={t} />
+        <HeroSection />
+        <FeaturesSection />
         <TemplatesSection />
         <PricingSection />
-        <CTASection t={t} />
+        <CTASection />
       </main>
       <Footer />
     </div>

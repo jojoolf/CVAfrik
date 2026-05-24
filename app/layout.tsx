@@ -2,8 +2,11 @@ import type { Metadata, Viewport } from 'next'
 import { Inter, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { Toaster } from '@/components/ui/sonner'
+import { createTranslator } from '@/lib/i18n/server'
+import { LocaleProvider } from '@/lib/i18n/locale-provider'
 import './globals.css'
 import Script from 'next/script'
+import { ThemeProvider } from '@/components/theme-provider'
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -69,15 +72,15 @@ export const viewport: Viewport = {
   ],
 }
 
-import { ThemeProvider } from '@/components/theme-provider'
-
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const { locale } = await createTranslator()
+
   return (
-    <html lang="fr" className={`${inter.variable} ${geistMono.variable} ${syne.variable} ${dmSans.variable} bg-background`} suppressHydrationWarning>
+    <html lang={locale} className={`${inter.variable} ${geistMono.variable} ${syne.variable} ${dmSans.variable} bg-background`} suppressHydrationWarning>
       <body className="font-sans antialiased min-h-screen">
         <ThemeProvider
           attribute="class"
@@ -85,13 +88,15 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
-          <Toaster richColors position="top-center" />
-          <Script 
-            src="https://checkout.fedapay.com/js/checkout.js" 
-            strategy="beforeInteractive"
-          />
-          {process.env.NODE_ENV === 'production' && <Analytics />}
+          <LocaleProvider serverLocale={locale}>
+            {children}
+            <Toaster richColors position="top-center" />
+            <Script 
+              src="https://checkout.fedapay.com/js/checkout.js" 
+              strategy="beforeInteractive"
+            />
+            {process.env.NODE_ENV === 'production' && <Analytics />}
+          </LocaleProvider>
         </ThemeProvider>
       </body>
     </html>

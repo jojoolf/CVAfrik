@@ -1,3 +1,5 @@
+'use client'
+
 import {
   FileText,
   Sparkles,
@@ -8,12 +10,11 @@ import {
   Zap,
   Target
 } from 'lucide-react'
+import { useLocale } from '@/lib/i18n/locale-provider'
 
-interface FeaturesSectionProps {
-  t: (path: string) => string
-}
+export function FeaturesSection() {
+  const { t } = useLocale()
 
-export async function FeaturesSection({ t }: FeaturesSectionProps) {
   const features = [
     {
       icon: FileText,

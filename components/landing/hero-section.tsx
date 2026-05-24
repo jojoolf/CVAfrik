@@ -1,14 +1,14 @@
+'use client'
+
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ArrowRight, CheckCircle2, Sparkles, FileText } from 'lucide-react'
 import { LiveCounter } from './live-counter'
+import { useLocale } from '@/lib/i18n/locale-provider'
 
-interface HeroSectionProps {
-  t: (path: string) => string
-}
-
-export async function HeroSection({ t }: HeroSectionProps) {
+export function HeroSection() {
+  const { t } = useLocale()
 
   const features = [
     t('hero.feature1'),

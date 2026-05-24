@@ -1,12 +1,13 @@
+'use client'
+
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ArrowRight, CheckCircle2 } from 'lucide-react'
+import { useLocale } from '@/lib/i18n/locale-provider'
 
-interface CTASectionProps {
-  t: (path: string) => string
-}
+export function CTASection() {
+  const { t } = useLocale()
 
-export function CTASection({ t }: CTASectionProps) {
   const benefits = [
     t('cta.benefit1'),
     t('cta.benefit2'),
