@@ -11,6 +11,7 @@ import { createClient } from '@/lib/supabase/server'
 import { PLANS } from '@/lib/types'
 import { NewsletterPopup } from '@/components/newsletter-popup'
 import { CVActions } from '@/components/dashboard/cv-actions'
+import { CVAnalyzeButton } from '@/components/dashboard/cv-analyze-button'
 import { OnboardingTour } from '@/components/onboarding-tour'
 
 export const metadata: Metadata = {
@@ -272,28 +273,35 @@ export default async function DashboardPage() {
                       <Card className="group transition-all duration-200 hover:border-primary/40 hover:shadow-md hover:-translate-y-0.5">
                         <CardHeader className="pb-2">
                           <div className="flex items-start justify-between">
-                            <CardTitle className="text-base font-medium group-hover:text-primary transition-colors">
-                              {cv.titre || 'Sans titre'}
-                            </CardTitle>
-                            <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                          </div>
-                          <CardDescription className="text-xs flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            Modifie le{' '}
-                            {cv.updated_at
-                              ? new Date(cv.updated_at).toLocaleDateString('fr-FR', {
-                                  day: 'numeric',
-                                  month: 'short',
-                                  year: 'numeric',
-                                })
-                              : '—'}
-                          </CardDescription>
-                        </CardHeader>
-                      </Card>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+              <CardTitle className="text-base font-medium group-hover:text-primary transition-colors">
+                {cv.titre || 'Sans titre'}
+              </CardTitle>
+              <div className="flex items-center gap-1">
+                <CVAnalyzeButton
+                  cvId={cv.id}
+                  userEmail={user.email}
+                  userName={displayName}
+                />
+                <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
+            </div>
+            <CardDescription className="text-xs flex items-center gap-1">
+              <Clock className="h-3 w-3" />
+              Modifie le{' '}
+              {cv.updated_at
+                ? new Date(cv.updated_at).toLocaleDateString('fr-FR', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric',
+                  })
+                : '—'}
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </Link>
+    </li>
+  ))}
+</ul>
             )}
           </section>
         </div>

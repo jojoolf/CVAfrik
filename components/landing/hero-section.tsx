@@ -3,17 +3,19 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ArrowRight, CheckCircle2, Sparkles, FileText } from 'lucide-react'
 import { LiveCounter } from './live-counter'
+import { createTranslator } from '@/lib/i18n/server'
 
-const features = [
-  'CV professionnels en 10 minutes',
-  'Paiement Mobile Money',
-  'Conseils IA personnalises',
-]
+export async function HeroSection() {
+  const { t } = await createTranslator()
 
-export function HeroSection() {
+  const features = [
+    t('hero.feature1'),
+    t('hero.feature2'),
+    t('hero.feature3'),
+  ]
+
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-secondary/50 to-background py-20 md:py-28">
-      {/* Background Pattern */}
       <div className="absolute inset-0 -z-10 opacity-30">
         <div className="absolute left-1/4 top-1/4 h-72 w-72 rounded-full bg-primary/20 blur-3xl" />
         <div className="absolute right-1/4 bottom-1/4 h-72 w-72 rounded-full bg-accent/20 blur-3xl" />
@@ -21,25 +23,21 @@ export function HeroSection() {
 
       <div className="container mx-auto px-4">
         <div className="grid items-center gap-12 lg:grid-cols-2">
-          {/* Content */}
           <div className="text-center lg:text-left">
             <Badge variant="secondary" className="mb-6 gap-2 px-4 py-2 text-sm">
               <Sparkles className="h-4 w-4 text-primary" />
-              Sois parmi les premiers en Afrique
+              {t('hero.badge')}
             </Badge>
 
             <h1 className="text-balance text-4xl font-bold tracking-tight text-foreground md:text-5xl lg:text-6xl">
-              Creez un CV qui vous
-              <span className="text-primary"> ouvre des portes</span>
+              {t('hero.title')}
+              <span className="text-primary"> {t('hero.titleAccent')}</span>
             </h1>
 
             <p className="mx-auto mt-6 max-w-xl text-pretty text-lg text-muted-foreground lg:mx-0">
-              La premiere plateforme de creation de CV conçue pour le marche de l&apos;emploi 
-              en Afrique. Templates professionnels, conseils IA et paiement 
-              Mobile Money.
+              {t('hero.subtitle')}
             </p>
 
-            {/* Features List */}
             <ul className="mx-auto mt-8 flex flex-col gap-3 lg:mx-0">
               {features.map((feature) => (
                 <li key={feature} className="flex items-center justify-center gap-2 lg:justify-start">
@@ -49,33 +47,28 @@ export function HeroSection() {
               ))}
             </ul>
 
-            {/* CTA Buttons */}
             <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row lg:justify-start">
               <Button size="lg" className="h-12 px-8 text-base" asChild>
                 <Link href="/auth/inscription">
-                  Creer mon CV gratuitement
+                  {t('hero.cta')}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
               <Button size="lg" variant="outline" className="h-12 px-8 text-base" asChild>
                 <Link href="/#templates">
-                  Voir les templates
+                  {t('hero.ctaTemplates')}
                 </Link>
               </Button>
             </div>
 
-            {/* Live Counter */}
             <div className="mt-10 flex items-center justify-center lg:justify-start">
               <LiveCounter />
             </div>
           </div>
 
-          {/* Hero Image / CV Preview */}
           <div className="relative mx-auto max-w-lg lg:mx-0">
             <div className="relative rounded-2xl bg-card p-4 shadow-2xl ring-1 ring-border">
-              {/* CV Preview Card */}
               <div className="aspect-[8.5/11] overflow-hidden rounded-lg bg-white p-6 shadow-inner">
-                {/* CV Header */}
                 <div className="flex items-start gap-4 border-b border-gray-200 pb-4">
                   <div className="h-16 w-16 rounded-full bg-gradient-to-br from-primary to-accent" />
                   <div className="flex-1">
@@ -88,7 +81,6 @@ export function HeroSection() {
                   </div>
                 </div>
 
-                {/* CV Content Skeleton */}
                 <div className="mt-4 space-y-4">
                   <div>
                     <div className="h-3 w-20 rounded bg-primary/60" />
@@ -124,7 +116,6 @@ export function HeroSection() {
                 </div>
               </div>
 
-              {/* Floating Badges */}
               <div className="absolute -right-4 -top-4 rounded-lg bg-card p-3 shadow-lg ring-1 ring-border">
                 <div className="flex items-center gap-2">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100">
