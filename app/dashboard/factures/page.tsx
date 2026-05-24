@@ -15,10 +15,14 @@ export default async function FacturesPage() {
 
   if (!user) redirect('/auth/connexion')
 
-  const [paymentsRes, manualRes] = await Promise.all([
+  const [paymentsRes, manualRes, profileRes] = await Promise.all([
     supabase.from('payments').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
     supabase.from('manual_payments').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
+    supabase.from('profiles').select('prenom, nom, email').eq('id', user.id).maybeSingle(),
   ])
+
+  const displayName = [profileRes.data?.prenom, profileRes.data?.nom].filter(Boolean).join(' ') || user.email || ''
+  const userEmail = user.email || ''
 
   const autoPayments = (paymentsRes.data || []).map(p => ({
     id: p.id,
@@ -69,7 +73,7 @@ export default async function FacturesPage() {
             </p>
           </div>
 
-          <InvoicesList payments={allPayments} plans={PLANS} />
+          <InvoicesList payments={allPayments} plans={PLANS} userName={displayName} userEmail={userEmail} />
         </div>
       </main>
       <Footer />

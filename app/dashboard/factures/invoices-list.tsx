@@ -26,7 +26,7 @@ interface Plan {
   prix_usd: number
 }
 
-export function InvoicesList({ payments, plans }: { payments: Payment[]; plans: Plan[] }) {
+export function InvoicesList({ payments, plans, userName, userEmail }: { payments: Payment[]; plans: Plan[]; userName: string; userEmail: string }) {
   const getPlanName = (planId: string) => {
     return plans.find(p => p.id === planId)?.nom || planId
   }
@@ -44,52 +44,190 @@ export function InvoicesList({ payments, plans }: { payments: Payment[]; plans: 
 
   const generatePDF = async (payment: Payment) => {
     const pdf = new jsPDF('p', 'mm', 'a4')
+    const pageW = 210
     const margin = 20
+    const bodyW = pageW - margin * 2
     let y = margin
 
-    pdf.setFont('helvetica', 'bold')
-    pdf.setFontSize(24)
-    pdf.setTextColor(200, 80, 50)
-    pdf.text('CVAfrik', margin, y)
-    y += 6
-    pdf.setFontSize(12)
-    pdf.setTextColor(100, 100, 100)
-    pdf.text('Facture de paiement', margin, y)
-    y += 14
+    const primary = [200, 80, 50] as const
+    const gray = [100, 100, 100] as const
+    const lightGray = [240, 240, 240] as const
+    const dark = [40, 40, 40] as const
 
-    pdf.setFont('helvetica', 'normal')
-    pdf.setFontSize(10)
-    pdf.setTextColor(60, 60, 60)
+    // ---- Header bar ----
+    pdf.setFillColor(248, 248, 248)
+    pdf.rect(margin, y, bodyW, 36, 'F')
+    pdf.setDrawColor(220, 220, 220)
+    pdf.rect(margin, y, bodyW, 36, 'S')
 
-    const lines = [
-      ['Facture N°', `FACT-${payment.id.slice(0, 8).toUpperCase()}`],
-      ['Date', format(new Date(payment.created_at), 'dd MMMM yyyy', { locale: fr })],
-      ['Plan', getPlanName(payment.plan_achete)],
-      ['Montant', `${payment.montant_fcfa.toLocaleString()} FCFA`],
-      ['Methode', payment.methode],
-      ['Transaction', payment.transaction_id],
-      ['Statut', payment.statut === 'accepte' ? 'Paye' : payment.statut],
-    ]
-
-    for (const [label, value] of lines) {
-      if (y > 270) {
-        pdf.addPage()
-        y = margin
-      }
+    // Try to add logo, if not available use text
+    try {
+      const imgData = await fetch('/logo-cvafrik.jpeg').then(r => r.blob()).then(b => {
+        return new Promise<string>((resolve, reject) => {
+          const reader = new FileReader()
+          reader.onload = () => resolve(reader.result as string)
+          reader.onerror = reject
+          reader.readAsDataURL(b)
+        })
+      })
+      pdf.addImage(imgData, 'JPEG', margin + 6, y + 4, 28, 28)
+    } catch {
       pdf.setFont('helvetica', 'bold')
-      pdf.text(label, margin, y)
-      pdf.setFont('helvetica', 'normal')
-      pdf.text(value, margin + 50, y)
-      y += 8
+      pdf.setFontSize(22)
+      pdf.setTextColor(...primary)
+      pdf.text('CVAfrik', margin + 6, y + 22)
     }
 
-    y += 10
+    pdf.setFont('helvetica', 'bold')
+    pdf.setFontSize(20)
+    pdf.setTextColor(...dark)
+    pdf.text('FACTURE', pageW - margin - 6, y + 14, { align: 'right' })
     pdf.setFont('helvetica', 'normal')
     pdf.setFontSize(8)
-    pdf.setTextColor(150, 150, 150)
-    pdf.text('Realise avec CVAfrik', margin, y)
+    pdf.setTextColor(...gray)
+    const invoiceNum = `FACT-${payment.id.slice(0, 8).toUpperCase()}`
+    pdf.text(`N° ${invoiceNum}`, pageW - margin - 6, y + 22, { align: 'right' })
+    y += 44
 
-    pdf.save(`facture-${payment.plan_achete}-${format(new Date(payment.created_at), 'yyyy-MM-dd')}.pdf`)
+    // ---- From / To section ----
+    pdf.setFont('helvetica', 'bold')
+    pdf.setFontSize(8)
+    pdf.setTextColor(...gray)
+    pdf.text('FACTURE DE', margin, y)
+    pdf.setFont('helvetica', 'normal')
+    pdf.setFontSize(10)
+    pdf.setTextColor(...dark)
+    const fromLines = ['CVAfrik', 'contact@cvafrik.com', 'Cotonou, Benin']
+    fromLines.forEach((line, i) => {
+      pdf.text(line, margin, y + 4 + i * 4.5)
+    })
+
+    pdf.setFont('helvetica', 'bold')
+    pdf.setFontSize(8)
+    pdf.setTextColor(...gray)
+    pdf.text('FACTURE POUR', margin + 80, y)
+    pdf.setFont('helvetica', 'normal')
+    pdf.setFontSize(10)
+    pdf.setTextColor(...dark)
+    const toLines = [userName || 'Client', userEmail || '']
+    toLines.forEach((line, i) => {
+      if (line) pdf.text(line, margin + 80, y + 4 + i * 4.5)
+    })
+
+    // Invoice info on the right
+    const infoX = margin + 120
+    pdf.setFont('helvetica', 'bold')
+    pdf.setFontSize(8)
+    pdf.setTextColor(...gray)
+    pdf.text('DATE', infoX, y)
+    pdf.text('STATUT', infoX + 44, y)
+    pdf.setFont('helvetica', 'normal')
+    pdf.setFontSize(9)
+    pdf.setTextColor(...dark)
+    const d = new Date(payment.created_at)
+    pdf.text(format(d, 'dd MMMM yyyy', { locale: fr }), infoX, y + 4)
+    pdf.text(format(d, 'HH:mm', { locale: fr }), infoX, y + 9)
+    pdf.setTextColor(...primary)
+    pdf.setFont('helvetica', 'bold')
+    pdf.text(payment.statut === 'accepte' ? 'PAYE' : payment.statut.toUpperCase(), infoX + 44, y + 4)
+
+    y += 22
+
+    // ---- Table header ----
+    const colX = [margin, margin + 90, margin + 135, pageW - margin - 30]
+    const colW = [colX[1] - colX[0], colX[2] - colX[1], colX[3] - colX[2], 30]
+
+    pdf.setFillColor(...primary)
+    pdf.rect(margin, y, bodyW, 8, 'F')
+    pdf.setTextColor(255, 255, 255)
+    pdf.setFont('helvetica', 'bold')
+    pdf.setFontSize(8)
+    const headers = ['DESCRIPTION', 'ABONNEMENT', 'MONTANT', 'TOTAL']
+    headers.forEach((h, i) => {
+      pdf.text(h, colX[i] + 3, y + 5.5)
+    })
+    y += 8
+
+    // ---- Table row ----
+    pdf.setFillColor(250, 250, 250)
+    pdf.rect(margin, y, bodyW, 10, 'F')
+    pdf.setDrawColor(235, 235, 235)
+    pdf.line(margin, y, pageW - margin, y)
+
+    pdf.setTextColor(...dark)
+    pdf.setFont('helvetica', 'normal')
+    pdf.setFontSize(9)
+    pdf.text(`Abonnement ${getPlanName(payment.plan_achete)}`, colX[0] + 3, y + 6.5)
+
+    pdf.setFont('helvetica', 'normal')
+    pdf.setFontSize(9)
+    pdf.text(`${format(d, 'MMM yyyy', { locale: fr })}`, colX[1] + 3, y + 6.5)
+
+    pdf.setFont('helvetica', 'normal')
+    pdf.setFontSize(9)
+    pdf.text(`${payment.montant_fcfa.toLocaleString()} FCFA`, colX[2] + 3, y + 6.5)
+
+    pdf.setFont('helvetica', 'bold')
+    pdf.setFontSize(9)
+    pdf.text(`${payment.montant_fcfa.toLocaleString()} FCFA`, colX[3] + 3, y + 6.5)
+    y += 10
+
+    // ---- Bottom border ----
+    pdf.setDrawColor(235, 235, 235)
+    pdf.line(margin, y, pageW - margin, y)
+    y += 3
+
+    // ---- Total row ----
+    pdf.setFillColor(...primary)
+    pdf.rect(colX[2], y, colX[3] + colW[3] - colX[2], 8, 'F')
+    pdf.setTextColor(255, 255, 255)
+    pdf.setFont('helvetica', 'bold')
+    pdf.setFontSize(9)
+    pdf.text('TOTAL', colX[2] + 3, y + 5.5)
+    pdf.text(`${payment.montant_fcfa.toLocaleString()} FCFA`, colX[3] + 3, y + 5.5)
+    y += 14
+
+    // ---- Payment details ----
+    pdf.setFont('helvetica', 'bold')
+    pdf.setFontSize(8)
+    pdf.setTextColor(...gray)
+    pdf.text('INFORMATIONS DE PAIEMENT', margin, y)
+    y += 4
+
+    pdf.setDrawColor(235, 235, 235)
+    pdf.line(margin, y, pageW - margin, y)
+    y += 4
+
+    const payDetails: [string, string][] = [
+      ['Mode de paiement', payment.methode === 'Manuel' ? 'Mobile Money' : payment.methode],
+      ['Transaction', payment.transaction_id],
+      ['Operateur', payment.operateur || 'N/A'],
+    ]
+
+    payDetails.forEach(([label, value]) => {
+      pdf.setFont('helvetica', 'bold')
+      pdf.setFontSize(9)
+      pdf.setTextColor(...gray)
+      pdf.text(label, margin, y + 4)
+      pdf.setFont('helvetica', 'normal')
+      pdf.setTextColor(...dark)
+      pdf.text(value, margin + 50, y + 4)
+      y += 6
+    })
+
+    y += 6
+
+    // ---- Footer ----
+    pdf.setDrawColor(235, 235, 235)
+    pdf.line(margin, y, pageW - margin, y)
+    y += 4
+    pdf.setFont('helvetica', 'normal')
+    pdf.setFontSize(7)
+    pdf.setTextColor(...gray)
+    pdf.text('CVAfrik - Creation de CV professionnels pour l Afrique', margin, y)
+    pdf.text('contact@cvafrik.com', pageW - margin, y, { align: 'right' })
+
+    pdf.save(`facture-${payment.plan_achete}-${format(d, 'yyyy-MM-dd')}.pdf`)
   }
 
   if (payments.length === 0) {
