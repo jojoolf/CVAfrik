@@ -60,6 +60,15 @@ export default function NouveauPost() {
 
       if (error) throw error
 
+      // Envoyer la newsletter aux abonnés
+      if (publie) {
+        fetch('/api/newsletter/send-blog', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title: titre, slug, category: categorie }),
+        }).catch(() => {})
+      }
+
       toast.success('Article publié avec succès !')
       router.push('/admin')
       router.refresh()

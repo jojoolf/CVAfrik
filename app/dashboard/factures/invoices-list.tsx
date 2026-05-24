@@ -3,7 +3,7 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { FileText, Download, CheckCircle2, Clock, XCircle } from 'lucide-react'
-import { format } from 'date-fns'
+import { format, addDays } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import jsPDF from 'jspdf'
 
@@ -50,17 +50,9 @@ export function InvoicesList({ payments, plans, userName, userEmail }: { payment
     let y = margin
 
     const primary = [200, 80, 50] as const
-    const gray = [100, 100, 100] as const
-    const lightGray = [240, 240, 240] as const
-    const dark = [40, 40, 40] as const
+    const gray = [120, 120, 120] as const
 
-    // ---- Header bar ----
-    pdf.setFillColor(248, 248, 248)
-    pdf.rect(margin, y, bodyW, 36, 'F')
-    pdf.setDrawColor(220, 220, 220)
-    pdf.rect(margin, y, bodyW, 36, 'S')
-
-    // Try to add logo, if not available use text
+    // Logo
     try {
       const imgData = await fetch('/logo-cvafrik.jpeg').then(r => r.blob()).then(b => {
         return new Promise<string>((resolve, reject) => {
@@ -70,162 +62,172 @@ export function InvoicesList({ payments, plans, userName, userEmail }: { payment
           reader.readAsDataURL(b)
         })
       })
-      pdf.addImage(imgData, 'JPEG', margin + 6, y + 4, 28, 28)
+      pdf.addImage(imgData, 'JPEG', margin, y, 40, 40)
     } catch {
       pdf.setFont('helvetica', 'bold')
-      pdf.setFontSize(22)
+      pdf.setFontSize(26)
       pdf.setTextColor(...primary)
-      pdf.text('CVAfrik', margin + 6, y + 22)
+      pdf.text('CVAfrik', margin, y + 20)
     }
 
+    // Invoice title
     pdf.setFont('helvetica', 'bold')
-    pdf.setFontSize(20)
-    pdf.setTextColor(...dark)
-    pdf.text('FACTURE', pageW - margin - 6, y + 14, { align: 'right' })
-    pdf.setFont('helvetica', 'normal')
-    pdf.setFontSize(8)
-    pdf.setTextColor(...gray)
+    pdf.setFontSize(28)
+    pdf.setTextColor(50, 50, 50)
+    pdf.text('FACTURE', pageW - margin, y + 16, { align: 'right' })
     const invoiceNum = `FACT-${payment.id.slice(0, 8).toUpperCase()}`
-    pdf.text(`N° ${invoiceNum}`, pageW - margin - 6, y + 22, { align: 'right' })
-    y += 44
-
-    // ---- From / To section ----
-    pdf.setFont('helvetica', 'bold')
-    pdf.setFontSize(8)
-    pdf.setTextColor(...gray)
-    pdf.text('FACTURE DE', margin, y)
     pdf.setFont('helvetica', 'normal')
-    pdf.setFontSize(10)
-    pdf.setTextColor(...dark)
-    const fromLines = ['CVAfrik', 'contact@cvafrik.com', 'Cotonou, Benin']
-    fromLines.forEach((line, i) => {
-      pdf.text(line, margin, y + 4 + i * 4.5)
-    })
-
-    pdf.setFont('helvetica', 'bold')
-    pdf.setFontSize(8)
+    pdf.setFontSize(11)
     pdf.setTextColor(...gray)
-    pdf.text('FACTURE POUR', margin + 80, y)
-    pdf.setFont('helvetica', 'normal')
-    pdf.setFontSize(10)
-    pdf.setTextColor(...dark)
-    const toLines = [userName || 'Client', userEmail || '']
-    toLines.forEach((line, i) => {
-      if (line) pdf.text(line, margin + 80, y + 4 + i * 4.5)
-    })
+    pdf.text(`N° ${invoiceNum}`, pageW - margin, y + 28, { align: 'right' })
 
-    // Invoice info on the right
-    const infoX = margin + 120
-    pdf.setFont('helvetica', 'bold')
-    pdf.setFontSize(8)
-    pdf.setTextColor(...gray)
-    pdf.text('DATE', infoX, y)
-    pdf.text('STATUT', infoX + 44, y)
-    pdf.setFont('helvetica', 'normal')
-    pdf.setFontSize(9)
-    pdf.setTextColor(...dark)
-    const d = new Date(payment.created_at)
-    pdf.text(format(d, 'dd MMMM yyyy', { locale: fr }), infoX, y + 4)
-    pdf.text(format(d, 'HH:mm', { locale: fr }), infoX, y + 9)
-    pdf.setTextColor(...primary)
-    pdf.setFont('helvetica', 'bold')
-    pdf.text(payment.statut === 'accepte' ? 'PAYE' : payment.statut.toUpperCase(), infoX + 44, y + 4)
+    y += 50
 
-    y += 22
-
-    // ---- Table header ----
-    const colX = [margin, margin + 90, margin + 135, pageW - margin - 30]
-    const colW = [colX[1] - colX[0], colX[2] - colX[1], colX[3] - colX[2], 30]
-
-    pdf.setFillColor(...primary)
-    pdf.rect(margin, y, bodyW, 8, 'F')
-    pdf.setTextColor(255, 255, 255)
-    pdf.setFont('helvetica', 'bold')
-    pdf.setFontSize(8)
-    const headers = ['DESCRIPTION', 'ABONNEMENT', 'MONTANT', 'TOTAL']
-    headers.forEach((h, i) => {
-      pdf.text(h, colX[i] + 3, y + 5.5)
-    })
-    y += 8
-
-    // ---- Table row ----
-    pdf.setFillColor(250, 250, 250)
-    pdf.rect(margin, y, bodyW, 10, 'F')
-    pdf.setDrawColor(235, 235, 235)
+    // Separator line
+    pdf.setDrawColor(220, 220, 220)
     pdf.line(margin, y, pageW - margin, y)
-
-    pdf.setTextColor(...dark)
-    pdf.setFont('helvetica', 'normal')
-    pdf.setFontSize(9)
-    pdf.text(`Abonnement ${getPlanName(payment.plan_achete)}`, colX[0] + 3, y + 6.5)
-
-    pdf.setFont('helvetica', 'normal')
-    pdf.setFontSize(9)
-    pdf.text(`${format(d, 'MMM yyyy', { locale: fr })}`, colX[1] + 3, y + 6.5)
-
-    pdf.setFont('helvetica', 'normal')
-    pdf.setFontSize(9)
-    pdf.text(`${payment.montant_fcfa.toLocaleString()} FCFA`, colX[2] + 3, y + 6.5)
-
-    pdf.setFont('helvetica', 'bold')
-    pdf.setFontSize(9)
-    pdf.text(`${payment.montant_fcfa.toLocaleString()} FCFA`, colX[3] + 3, y + 6.5)
     y += 10
 
-    // ---- Bottom border ----
-    pdf.setDrawColor(235, 235, 235)
-    pdf.line(margin, y, pageW - margin, y)
-    y += 3
+    // From / To
+    pdf.setFont('helvetica', 'bold')
+    pdf.setFontSize(9)
+    pdf.setTextColor(...gray)
+    pdf.text('ÉMETTEUR', margin, y)
+    pdf.setFont('helvetica', 'normal')
+    pdf.setFontSize(11)
+    pdf.setTextColor(50, 50, 50)
+    pdf.text('CVAfrik', margin, y + 6)
+    pdf.text('contact@cvafrik.com', margin, y + 12)
+    pdf.text('Cotonou, Bénin', margin, y + 18)
 
-    // ---- Total row ----
-    pdf.setFillColor(...primary)
-    pdf.rect(colX[2], y, colX[3] + colW[3] - colX[2], 8, 'F')
+    const toX = margin + 90
+    pdf.setFont('helvetica', 'bold')
+    pdf.setFontSize(9)
+    pdf.setTextColor(...gray)
+    pdf.text('CLIENT', toX, y)
+    pdf.setFont('helvetica', 'normal')
+    pdf.setFontSize(11)
+    pdf.setTextColor(50, 50, 50)
+    pdf.text(userName || 'Client', toX, y + 6)
+    if (userEmail) pdf.text(userEmail, toX, y + 12)
+
+    const infoX = toX + 70
+    pdf.setFont('helvetica', 'bold')
+    pdf.setFontSize(9)
+    pdf.setTextColor(...gray)
+    pdf.text('DATE', infoX, y)
+    pdf.text('ÉCHÉANCE', infoX + 40, y)
+
+    const d = new Date(payment.created_at)
+    const endDate = addDays(d, 30)
+    pdf.setFont('helvetica', 'normal')
+    pdf.setFontSize(10)
+    pdf.setTextColor(50, 50, 50)
+    pdf.text(format(d, 'dd/MM/yyyy', { locale: fr }), infoX, y + 6)
+    pdf.text(format(d, 'HH:mm', { locale: fr }), infoX, y + 12)
+    pdf.text(format(endDate, 'dd/MM/yyyy', { locale: fr }), infoX + 40, y + 6)
+
+    // Status badge
+    const statusColor = payment.statut === 'accepte' ? [22, 163, 74] as const : [245, 158, 11] as const
+    pdf.setFillColor(...statusColor)
+    pdf.roundedRect(infoX + 40, y + 14, 24, 6, 1, 1, 'F')
+    pdf.setTextColor(255, 255, 255)
+    pdf.setFont('helvetica', 'bold')
+    pdf.setFontSize(7)
+    pdf.text(payment.statut === 'accepte' ? 'PAYÉ' : 'EN ATTENTE', infoX + 40 + 12, y + 18.5, { align: 'center' })
+
+    y += 34
+
+    // ---- Table ----
+    const colDefs = [
+      { x: margin, w: bodyW - 100 },
+      { x: margin + (bodyW - 100), w: 45 },
+      { x: pageW - margin - 45, w: 45 },
+    ]
+
+    // Table header
+    pdf.setFillColor(50, 50, 50)
+    pdf.rect(margin, y, bodyW, 9, 'F')
     pdf.setTextColor(255, 255, 255)
     pdf.setFont('helvetica', 'bold')
     pdf.setFontSize(9)
-    pdf.text('TOTAL', colX[2] + 3, y + 5.5)
-    pdf.text(`${payment.montant_fcfa.toLocaleString()} FCFA`, colX[3] + 3, y + 5.5)
-    y += 14
+    pdf.text('DESCRIPTION', colDefs[0].x + 4, y + 6)
+    pdf.text('PÉRIODE', colDefs[1].x + 4, y + 6)
+    pdf.text('PRIX', colDefs[2].x + 4, y + 6, { align: 'right' })
+    y += 9
 
-    // ---- Payment details ----
+    // Table row
+    pdf.setFillColor(248, 248, 248)
+    pdf.rect(margin, y, bodyW, 12, 'F')
+    pdf.line(margin, y, pageW - margin, y)
+
+    pdf.setTextColor(50, 50, 50)
+    pdf.setFont('helvetica', 'normal')
+    pdf.setFontSize(11)
+    pdf.text(`Abonnement ${getPlanName(payment.plan_achete)}`, colDefs[0].x + 4, y + 8)
+
+    pdf.setFont('helvetica', 'normal')
+    pdf.setFontSize(11)
+    pdf.text(format(d, 'MMM yyyy', { locale: fr }), colDefs[1].x + 4, y + 8)
+
     pdf.setFont('helvetica', 'bold')
-    pdf.setFontSize(8)
+    pdf.setFontSize(11)
+    pdf.text(`${payment.montant_fcfa.toLocaleString()} FCFA`, colDefs[2].x + colDefs[2].w - 4, y + 8, { align: 'right' })
+
+    y += 12
+
+    // Bottom border
+    pdf.line(margin, y, pageW - margin, y)
+    y += 2
+
+    // Total row
+    const totalX = colDefs[1].x
+    pdf.setFillColor(50, 50, 50)
+    pdf.rect(totalX, y, colDefs[1].w + colDefs[2].w, 9, 'F')
+    pdf.setTextColor(255, 255, 255)
+    pdf.setFont('helvetica', 'bold')
+    pdf.setFontSize(10)
+    pdf.text('TOTAL', totalX + 4, y + 6)
+    pdf.text(`${payment.montant_fcfa.toLocaleString()} FCFA`, pageW - margin - 4, y + 6, { align: 'right' })
+
+    y += 18
+
+    // ---- Infos de paiement ----
+    pdf.setFont('helvetica', 'bold')
+    pdf.setFontSize(9)
     pdf.setTextColor(...gray)
     pdf.text('INFORMATIONS DE PAIEMENT', margin, y)
-    y += 4
-
-    pdf.setDrawColor(235, 235, 235)
+    y += 5
     pdf.line(margin, y, pageW - margin, y)
-    y += 4
+    y += 6
 
     const payDetails: [string, string][] = [
       ['Mode de paiement', payment.methode === 'Manuel' ? 'Mobile Money' : payment.methode],
-      ['Transaction', payment.transaction_id],
-      ['Operateur', payment.operateur || 'N/A'],
+      ['Référence transaction', payment.transaction_id],
+      ['Opérateur', payment.operateur || '—'],
+      ['Date de souscription', format(d, 'dd MMMM yyyy à HH:mm', { locale: fr })],
+      ['Fin d\'abonnement', format(endDate, 'dd MMMM yyyy', { locale: fr })],
     ]
 
     payDetails.forEach(([label, value]) => {
       pdf.setFont('helvetica', 'bold')
-      pdf.setFontSize(9)
+      pdf.setFontSize(10)
       pdf.setTextColor(...gray)
       pdf.text(label, margin, y + 4)
       pdf.setFont('helvetica', 'normal')
-      pdf.setTextColor(...dark)
-      pdf.text(value, margin + 50, y + 4)
-      y += 6
+      pdf.setTextColor(50, 50, 50)
+      pdf.text(value, margin + 55, y + 4)
+      y += 7
     })
 
-    y += 6
-
     // ---- Footer ----
-    pdf.setDrawColor(235, 235, 235)
-    pdf.line(margin, y, pageW - margin, y)
-    y += 4
+    const footerY = 275
+    pdf.line(margin, footerY, pageW - margin, footerY)
     pdf.setFont('helvetica', 'normal')
-    pdf.setFontSize(7)
-    pdf.setTextColor(...gray)
-    pdf.text('CVAfrik - Creation de CV professionnels pour l Afrique', margin, y)
-    pdf.text('contact@cvafrik.com', pageW - margin, y, { align: 'right' })
+    pdf.setFontSize(8)
+    pdf.setTextColor(160, 160, 160)
+    pdf.text('CVAfrik — Création de CV professionnels pour l\'Afrique', margin, footerY + 5)
+    pdf.text('contact@cvafrik.com', pageW - margin, footerY + 5, { align: 'right' })
 
     pdf.save(`facture-${payment.plan_achete}-${format(d, 'yyyy-MM-dd')}.pdf`)
   }

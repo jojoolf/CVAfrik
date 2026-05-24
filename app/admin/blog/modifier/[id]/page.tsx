@@ -28,6 +28,7 @@ export default function ModifierPost({ params }: ModifierPostProps) {
   const [imageUrl, setImageUrl] = useState('')
   const [contenu, setContenu] = useState('')
   const [publie, setPublie] = useState(true)
+  const [slug, setSlug] = useState('')
 
   useEffect(() => {
     async function loadPost() {
@@ -49,6 +50,7 @@ export default function ModifierPost({ params }: ModifierPostProps) {
       setImageUrl(post.image_url || '')
       setContenu(post.contenu)
       setPublie(post.publie)
+      setSlug(post.slug)
       setLoading(false)
     }
 
@@ -79,6 +81,15 @@ export default function ModifierPost({ params }: ModifierPostProps) {
         .eq('id', resolvedParams.id)
 
       if (error) throw error
+
+      // Envoyer la newsletter si l'article est publié
+      if (publie) {
+        fetch('/api/newsletter/send-blog', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title: titre, slug, category: categorie }),
+        }).catch(() => {})
+      }
 
       toast.success('Article mis à jour avec succès !')
       router.push('/admin')
