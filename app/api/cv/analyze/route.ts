@@ -7,19 +7,54 @@ export async function POST(req: Request) {
     const { cvData, userEmail, userName } = await req.json();
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.5-flash",
+      generationConfig: {
+        temperature: 0,
+        topP: 1,
+        responseMimeType: "application/json",
+      },
+    });
 
-    const prompt = `Tu es un expert en recrutement en Afrique. Analyse ce CV et donne UNIQUEMENT un score de 0 à 100 en fonction de : la clarté, l'impact, les mots-clés, la structure, l'expérience. Réponds UNIQUEMENT par le nombre.
+    const prompt = `Tu es un expert en recrutement en Afrique. Analyse ce CV et retourne UNIQUEMENT un objet JSON valide avec cette structure exacte :
+{
+  "score": <nombre entier 0-100>,
+  "details": {
+    "clarte": <nombre 0-20>,
+    "impact": <nombre 0-20>,
+    "motsCles": <nombre 0-20>,
+    "structure": <nombre 0-20>,
+    "experience": <nombre 0-20>
+  }
+}
 
-CV:
-${JSON.stringify(cvData)}`;
+Grille de notation:
+- clarte (0-20): Mise en page propre, sections bien definies, police lisible, informations faciles a trouver
+- impact (0-20): Realisations chiffrees, verbes d'action, resultats concrets, propositions de valeur fortes
+- motsCles (0-20): Mots-cles du secteur presents, competences techniques listees, certifications, langues
+- structure (0-20): Ordre logique, sections appropriees, longueur adaptee, pas de fautes d'orthographe
+- experience (0-20): Experience pertinente, progression de carriere, dates coherentes, descriptions detaillees
+
+Le score TOTAL est la SOMME des 5 categories. Sois TRES strict et professionnel dans ta notation.
+
+CV A ANALYSER:
+${JSON.stringify(cvData, null, 2)}
+
+REPONDS UNIQUEMENT AVEC LE JSON, rien d'autre.`;
 
     const result = await model.generateContent(prompt);
-    const response = result.response.text().trim();
-    const score = parseInt(response, 10);
-    const finalScore = isNaN(score) ? 50 : Math.min(100, Math.max(0, score));
+    const text = result.response.text().trim();
 
-    // Send notification if score is high
+    let parsed;
+    try {
+      parsed = JSON.parse(text);
+    } catch {
+      const match = text.match(/\{[\s\S]*\}/);
+      parsed = match ? JSON.parse(match[0]) : { score: 50, details: { clarte: 10, impact: 10, motsCles: 10, structure: 10, experience: 10 } };
+    }
+
+    const finalScore = Math.min(100, Math.max(0, parsed.score || 50));
+
     if (finalScore >= 85 && userEmail) {
       try {
         const resend = new Resend(process.env.RESEND_API_KEY);
@@ -38,7 +73,7 @@ ${JSON.stringify(cvData)}`;
                     <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;">
                       <tr>
                         <td style="background:linear-gradient(135deg,#c85032,#e8783a);padding:30px;text-align:center;">
-                          <h1 style="color:#fff;margin:0;font-size:28px;">Bravo ${userName || "!"} !</h1>
+                          <h1 style="color:#fff;margin:0;font-size:28px;">Bravo ${userName || ""} !</h1>
                         </td>
                       </tr>
                       <tr>
@@ -47,8 +82,8 @@ ${JSON.stringify(cvData)}`;
                             <span style="color:#fff;font-size:36px;font-weight:bold;">${finalScore}</span>
                           </div>
                           <h2 style="color:#222;font-size:22px;margin:0 0 10px;">Excellent CV !</h2>
-                          <p style="color:#555;font-size:15px;line-height:1.6;margin:0 0 25px;">Votre CV a obtenu un score de <strong>${finalScore}/100</strong>. C'est un excellent résultat ! Les recruteurs vont l'apprécier.</p>
-                          <p style="color:#555;font-size:15px;line-height:1.6;margin:0 0 25px;">Continuez à mettre à jour votre CV régulièrement pour maximiser vos chances.</p>
+                          <p style="color:#555;font-size:15px;line-height:1.6;margin:0 0 25px;">Votre CV a obtenu un score de <strong>${finalScore}/100</strong>. C'est un excellent resultat ! Les recruteurs vont l'apprecier.</p>
+                          <p style="color:#555;font-size:15px;line-height:1.6;margin:0 0 25px;">Continuez a mettre a jour votre CV regulierement pour maximiser vos chances.</p>
                           <table cellpadding="0" cellspacing="0" style="margin:0 auto;">
                             <tr>
                               <td style="background:#c85032;border-radius:8px;padding:12px 30px;">
@@ -57,7 +92,7 @@ ${JSON.stringify(cvData)}`;
                             </tr>
                           </table>
                           <hr style="border:none;border-top:1px solid #eee;margin:30px 0;">
-                          <p style="color:#999;font-size:12px;margin:0;">CVAfrik — Création de CV professionnels pour l'Afrique</p>
+                          <p style="color:#999;font-size:12px;margin:0;">CVAfrik — Creation de CV professionnels pour l'Afrique</p>
                         </td>
                       </tr>
                     </table>
@@ -73,7 +108,12 @@ ${JSON.stringify(cvData)}`;
       }
     }
 
-    return NextResponse.json({ success: true, score: finalScore, notified: finalScore >= 85 });
+    return NextResponse.json({
+      success: true,
+      score: finalScore,
+      details: parsed?.details || null,
+      notified: finalScore >= 85,
+    });
   } catch (error: any) {
     console.error("CV analyze error:", error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });

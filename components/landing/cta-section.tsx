@@ -1,11 +1,12 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ArrowRight, CheckCircle2 } from 'lucide-react'
-import { createTranslator } from '@/lib/i18n/server'
 
-export async function CTASection() {
-  const { t } = await createTranslator()
+interface CTASectionProps {
+  t: (path: string) => string
+}
 
+export function CTASection({ t }: CTASectionProps) {
   const benefits = [
     t('cta.benefit1'),
     t('cta.benefit2'),

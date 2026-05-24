@@ -8,11 +8,12 @@ import {
   Zap,
   Target
 } from 'lucide-react'
-import { createTranslator } from '@/lib/i18n/server'
 
-export async function FeaturesSection() {
-  const { t } = await createTranslator()
+interface FeaturesSectionProps {
+  t: (path: string) => string
+}
 
+export async function FeaturesSection({ t }: FeaturesSectionProps) {
   const features = [
     {
       icon: FileText,

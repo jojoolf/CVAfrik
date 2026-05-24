@@ -3,10 +3,12 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ArrowRight, CheckCircle2, Sparkles, FileText } from 'lucide-react'
 import { LiveCounter } from './live-counter'
-import { createTranslator } from '@/lib/i18n/server'
 
-export async function HeroSection() {
-  const { t } = await createTranslator()
+interface HeroSectionProps {
+  t: (path: string) => string
+}
+
+export async function HeroSection({ t }: HeroSectionProps) {
 
   const features = [
     t('hero.feature1'),
