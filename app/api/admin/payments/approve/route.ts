@@ -17,24 +17,40 @@ export async function POST(req: Request) {
 
     const { paymentId, userId, planId, billing } = await req.json();
 
+    // Use service-role client to bypass RLS
+    const supabaseAdmin = createAdminClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
     // 1. Update the manual payment status
-    const { error: payError } = await supabase
+    const { error: payError } = await supabaseAdmin
       .from("manual_payments")
       .update({ statut: "valide" })
       .eq("id", paymentId);
 
     if (payError) throw payError;
 
-    // 2. Update the user profile plan and expiry date
-    const expiryDate = new Date();
+    // 2. Get current profile to check existing expiry
+    const { data: currentProfile } = await supabaseAdmin
+      .from("profiles")
+      .select("plan_expiry")
+      .eq("id", userId)
+      .maybeSingle();
+
+    // Calculate new expiry: extend from now or from remaining days
+    const now = new Date();
+    const currentExpiry = currentProfile?.plan_expiry ? new Date(currentProfile.plan_expiry) : null;
+    const baseDate = (currentExpiry && currentExpiry > now) ? currentExpiry : now;
+    const expiryDate = new Date(baseDate);
     expiryDate.setDate(expiryDate.getDate() + 30);
 
-    const { error: profileError } = await supabase
+    const { error: profileError } = await supabaseAdmin
       .from("profiles")
       .update({ 
         plan: planId,
         plan_expiry: expiryDate.toISOString(),
-        updated_at: new Date().toISOString()
+        updated_at: now.toISOString()
       })
       .eq("id", userId);
 
@@ -42,11 +58,6 @@ export async function POST(req: Request) {
 
     // 3. Send email receipt
     try {
-      const supabaseAdmin = createAdminClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-      );
-
       const { data: userData } = await supabaseAdmin.auth.admin.getUserById(userId);
       const userEmail = userData?.user?.email;
       const userName = userData?.user?.user_metadata?.full_name || userEmail?.split('@')[0] || 'Utilisateur';

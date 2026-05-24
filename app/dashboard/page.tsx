@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { FileText, FileSignature, MessageSquareCode, LifeBuoy, ArrowRight, Crown, TrendingUp, Sparkles, Clock } from 'lucide-react'
+import { FileText, FileSignature, MessageSquareCode, LifeBuoy, ArrowRight, Crown, TrendingUp, Sparkles, Clock, Receipt } from 'lucide-react'
 import { Navbar } from '@/components/layout/navbar'
 import { Footer } from '@/components/layout/footer'
 import { Button } from '@/components/ui/button'
@@ -211,6 +211,26 @@ export default async function DashboardPage() {
                 </Link>
               ))}
             </div>
+          </div>
+
+          {/* Lien factures */}
+          <div className="mb-12">
+            <Link href="/dashboard/factures">
+              <Card className="group cursor-pointer border-dashed border-border/50 transition-all duration-300 hover:border-primary/40 hover:shadow-md hover:-translate-y-0.5">
+                <CardContent className="flex items-center justify-between p-5">
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/80 text-white shadow-sm">
+                      <Receipt className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">Mes factures</h3>
+                      <p className="text-xs text-muted-foreground">Historique de vos paiements et abonnements</p>
+                    </div>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                </CardContent>
+              </Card>
+            </Link>
           </div>
 
           {/* Mes CV recents */}
