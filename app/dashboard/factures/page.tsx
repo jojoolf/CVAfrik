@@ -15,11 +15,38 @@ export default async function FacturesPage() {
 
   if (!user) redirect('/auth/connexion')
 
-  const { data: payments } = await supabase
-    .from('payments')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false })
+  const [paymentsRes, manualRes] = await Promise.all([
+    supabase.from('payments').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
+    supabase.from('manual_payments').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
+  ])
+
+  const autoPayments = (paymentsRes.data || []).map(p => ({
+    id: p.id,
+    transaction_id: p.cinetpay_transaction_id,
+    montant_fcfa: p.montant_fcfa,
+    montant_usd: p.montant_usd,
+    plan_achete: p.plan_achete,
+    operateur: p.operateur,
+    statut: p.statut,
+    created_at: p.created_at,
+    methode: 'CinetPay',
+  }))
+
+  const manualPayments = (manualRes.data || []).map(p => ({
+    id: p.id,
+    transaction_id: p.transaction_id,
+    montant_fcfa: p.montant,
+    montant_usd: null,
+    plan_achete: p.plan_id,
+    operateur: p.methode,
+    statut: p.statut === 'valide' ? 'accepte' : p.statut,
+    created_at: p.created_at,
+    methode: 'Manuel',
+  }))
+
+  const allPayments = [...autoPayments, ...manualPayments].sort(
+    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  )
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -42,7 +69,7 @@ export default async function FacturesPage() {
             </p>
           </div>
 
-          <InvoicesList payments={payments || []} plans={PLANS} />
+          <InvoicesList payments={allPayments} plans={PLANS} />
         </div>
       </main>
       <Footer />

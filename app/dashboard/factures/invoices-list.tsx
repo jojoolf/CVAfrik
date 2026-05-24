@@ -9,11 +9,12 @@ import jsPDF from 'jspdf'
 
 interface Payment {
   id: string
-  cinetpay_transaction_id: string
+  transaction_id: string
   montant_fcfa: number
   montant_usd: number | null
   plan_achete: string
   operateur: string | null
+  methode: string
   statut: string
   created_at: string
 }
@@ -65,7 +66,8 @@ export function InvoicesList({ payments, plans }: { payments: Payment[]; plans: 
       ['Date', format(new Date(payment.created_at), 'dd MMMM yyyy', { locale: fr })],
       ['Plan', getPlanName(payment.plan_achete)],
       ['Montant', `${payment.montant_fcfa.toLocaleString()} FCFA`],
-      ['Transaction', payment.cinetpay_transaction_id],
+      ['Methode', payment.methode],
+      ['Transaction', payment.transaction_id],
       ['Statut', payment.statut === 'accepte' ? 'Paye' : payment.statut],
     ]
 
@@ -124,6 +126,8 @@ export function InvoicesList({ payments, plans }: { payments: Payment[]; plans: 
                       <span className="font-medium">
                         {payment.montant_fcfa.toLocaleString()} FCFA
                       </span>
+                      <span>•</span>
+                      <span className="capitalize">{payment.methode === 'Manuel' ? 'Mobile Money' : payment.methode}</span>
                       <span>•</span>
                       <span>{format(new Date(payment.created_at), 'dd MMM yyyy', { locale: fr })}</span>
                       <span>•</span>
