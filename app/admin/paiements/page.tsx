@@ -42,10 +42,10 @@ export default function AdminPaymentsPage() {
       if (result.success) {
         setPayments(result.data || []);
       } else {
-        toast.error("Erreur lors de la récupération des paiements");
+        toast.error("Erreur: " + (result.error || "inconnue"));
       }
-    } catch (error) {
-      toast.error("Erreur lors de la récupération des paiements");
+    } catch (error: any) {
+      toast.error("Erreur: " + (error.message || "inconnue"));
     }
     setLoading(false);
   };
