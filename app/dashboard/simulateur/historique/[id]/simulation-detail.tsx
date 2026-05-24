@@ -50,7 +50,7 @@ export function SimulationDetail({ sim }: { sim: Simulation }) {
 
         try {
           const img = new Image()
-          img.src = '/placeholder-logo.png'
+          img.src = '/logo-cvafrik.jpeg'
           pdf.addImage(img, 'PNG', margin, footerY, 30, 8)
         } catch {
           pdf.setFont('helvetica', 'bold')

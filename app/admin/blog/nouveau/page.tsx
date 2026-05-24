@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
+import { ImageUpload } from '@/components/admin/image-upload'
 import { ArrowLeft, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -102,9 +103,9 @@ export default function NouveauPost() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="image">URL de l'image (Optionnel)</Label>
-          <Input id="image" value={imageUrl} onChange={e => setImageUrl(e.target.value)} placeholder="https://exemple.com/image.jpg" />
-          <p className="text-xs text-muted-foreground">Collez le lien direct d'une image (vous pouvez héberger l'image sur Imgur, etc.)</p>
+          <Label>Image de l'article (Optionnel)</Label>
+          <ImageUpload value={imageUrl} onChange={setImageUrl} />
+          <p className="text-xs text-muted-foreground">Formats acceptes : PNG, JPG, WEBP. Max 5 Mo.</p>
         </div>
 
         <div className="space-y-2">

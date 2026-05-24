@@ -2,7 +2,6 @@ import { Shield, Lock, CreditCard } from 'lucide-react'
 
 const mobileMoneyOperators = [
   { name: 'Orange Money', color: 'bg-orange-500', countries: 'CI, SN, ML, BF, GN, CM' },
-  { name: 'Wave', color: 'bg-blue-500', countries: 'SN, CI, ML, BF' },
   { name: 'MTN Mobile Money', color: 'bg-yellow-500', countries: 'CI, BJ, CM, CG, GN' },
   { name: 'Moov Money', color: 'bg-blue-600', countries: 'CI, BJ, TG, NE, BF' },
   { name: 'Flooz', color: 'bg-green-500', countries: 'TG, BJ' },

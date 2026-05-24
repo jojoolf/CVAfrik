@@ -33,11 +33,11 @@ const dmSans = DM_Sans({
 
 export const metadata: Metadata = {
   title: {
-    default: 'CVAfrik - Creez votre CV professionnel pour l\'Afrique de l\'Ouest',
+    default: 'CVAfrik - Creez votre CV professionnel pour l\'Afrique',
     template: '%s | CVAfrik',
   },
-  description: 'Creez des CV professionnels adaptes au marche de l\'emploi en Afrique de l\'Ouest. Paiement Mobile Money (Orange, Wave, MTN, Moov). Templates modernes et conseils IA.',
-  keywords: ['CV', 'curriculum vitae', 'Afrique', 'emploi', 'recrutement', 'Mobile Money', 'Orange Money', 'Wave', 'MTN', 'Moov', 'CinetPay'],
+  description: 'Creez des CV professionnels adaptes au marche de l\'emploi africain. Paiement Mobile Money (Orange, MTN, Moov). Templates modernes et conseils IA.',
+  keywords: ['CV', 'curriculum vitae', 'Afrique', 'emploi', 'recrutement', 'Mobile Money', 'Orange Money', 'MTN', 'Moov', 'CinetPay'],
   authors: [{ name: 'CVAfrik' }],
   creator: 'CVAfrik',
   openGraph: {
@@ -45,12 +45,12 @@ export const metadata: Metadata = {
     locale: 'fr_FR',
     url: 'https://cvafrik.com',
     siteName: 'CVAfrik',
-    title: 'CVAfrik - CV Professionnels pour l\'Afrique de l\'Ouest',
+    title: 'CVAfrik - CV Professionnels pour l\'Afrique',
     description: 'Creez des CV qui font la difference. Paiement Mobile Money accepte.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'CVAfrik - CV Professionnels pour l\'Afrique de l\'Ouest',
+    title: 'CVAfrik - CV Professionnels pour l\'Afrique',
     description: 'Creez des CV qui font la difference. Paiement Mobile Money accepte.',
   },
   robots: {

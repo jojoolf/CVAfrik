@@ -28,12 +28,12 @@ const features = [
   {
     icon: Smartphone,
     title: 'Paiement Mobile Money',
-    description: 'Payez facilement avec Orange Money, Wave, MTN, Moov ou Flooz. Pas besoin de carte bancaire.',
+    description: 'Payez facilement avec Orange Money, MTN, Moov ou Flooz. Pas besoin de carte bancaire.',
   },
   {
     icon: Globe,
-    title: 'Adapte a l\'Afrique de l\'Ouest',
-    description: 'Contenus et exemples adaptes aux realites du marche de l\'emploi en Afrique francophone.',
+title: 'Adapte a toute l\'Afrique',
+description: 'Contenus et exemples adaptes aux realites du marche de l\'emploi africain.',
   },
   {
     icon: Shield,

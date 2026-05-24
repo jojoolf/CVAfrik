@@ -66,7 +66,7 @@ export default async function ConnexionPage({ searchParams }: PageProps) {
           <div className="flex h-full flex-col items-center justify-center p-12 text-center text-primary-foreground">
             <h3 className="text-3xl font-bold">Creez des CV qui font la difference</h3>
             <p className="mt-4 max-w-md text-lg text-primary-foreground/90">
-              Plus de 10 000 utilisateurs en Afrique de l&apos;Ouest nous font confiance 
+              Plus de 10 000 utilisateurs en Afrique nous font confiance 
               pour creer leur CV professionnel.
             </p>
             <div className="mt-8 grid grid-cols-2 gap-8">

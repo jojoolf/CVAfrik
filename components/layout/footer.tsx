@@ -6,7 +6,6 @@ const footerLinks = {
     { name: 'Créer un CV', href: '/cv-builder' },
     { name: 'Modèles de CV', href: '/templates' },
     { name: 'Tarifs', href: '/tarifs' },
-    { name: 'Avis utilisateurs', href: '/avis' },
   ],
   ressources: [
     { name: 'Blog Carrière', href: '/blog' },
@@ -24,7 +23,6 @@ const footerLinks = {
 const paymentMethods = [
   { name: 'Carte Bancaire', color: 'bg-blue-600', icon: CreditCard },
   { name: 'Orange Money', color: 'bg-orange-500' },
-  { name: 'Wave', color: 'bg-blue-400' },
   { name: 'MTN Money', color: 'bg-yellow-500' },
   { name: 'Moov Money', color: 'bg-blue-700' },
 ]

@@ -88,7 +88,7 @@ export default async function SupportPage() {
                   </div>
                   <div>
                     <p className="font-bold">Quels sont les modes de paiement ?</p>
-                    <p>Nous acceptons Orange Money, MTN, Moov et Wave via CinetPay.</p>
+                    <p>Nous acceptons Orange Money, MTN et Moov via CinetPay.</p>
                   </div>
                 </CardContent>
               </Card>

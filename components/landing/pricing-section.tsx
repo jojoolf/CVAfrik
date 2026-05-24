@@ -133,7 +133,7 @@ export function PricingSection() {
             Paiement securise par CinetPay
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4">
-            {['Orange Money', 'Wave', 'MTN Money', 'Moov Money', 'Flooz'].map((method) => (
+            {['Orange Money', 'MTN Money', 'Moov Money', 'Flooz'].map((method) => (
               <div
                 key={method}
                 className="rounded-full bg-card px-4 py-2 text-sm font-medium shadow-sm ring-1 ring-border"

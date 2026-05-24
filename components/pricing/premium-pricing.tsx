@@ -239,7 +239,7 @@ export function PremiumPricing({ user }: PremiumPricingProps) {
               { q: "Puis-je annuler à tout moment ?", a: "Oui, sans frais ni engagement. Tu reviens automatiquement sur le plan gratuit à la fin de ta période." },
               { q: "C'est quoi le Score ATS ?", a: "Les recruteurs utilisent des logiciels qui filtrent les CV avant même de les lire. Le Score ATS te dit si ton CV passe ce filtre." },
               { q: "Le plan Business, c'est pour qui ?", a: "Pour les universités, écoles, incubateurs, et coachs carrière qui veulent offrir CVAfrik à leurs étudiants." },
-              { q: "Quels modes de paiement ?", a: "Carte bancaire via Stripe, et Mobile Money (Orange Money, Wave, MTN) via CinetPay." }
+              { q: "Quels modes de paiement ?", a: "Carte bancaire via Stripe, et Mobile Money (Orange Money, MTN) via CinetPay." }
             ].map((faq, i) => (
               <div key={i} className="bg-[#151C16] border border-[#1E2B20] p-8 rounded-3xl">
                 <h4 className="font-bold text-sm mb-2 text-[#E8F0E9] font-syne">{faq.q}</h4>

@@ -33,7 +33,7 @@ export default async function InscriptionPage() {
           <div className="flex h-full flex-col items-center justify-center p-12 text-center text-primary-foreground">
             <h3 className="text-3xl font-bold">Rejoignez la communaute CVAfrik</h3>
             <p className="mt-4 max-w-md text-lg text-primary-foreground/90">
-              Plus de 10 000 professionnels en Afrique de l&apos;Ouest utilisent CVAfrik 
+              Plus de 10 000 professionnels en Afrique utilisent CVAfrik 
               pour creer des CV qui font la difference.
             </p>
             <ul className="mt-8 space-y-4 text-left">
