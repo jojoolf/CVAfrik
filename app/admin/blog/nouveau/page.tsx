@@ -69,6 +69,16 @@ export default function NouveauPost() {
         }).catch(() => {})
       }
 
+      // Log admin action
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        fetch('/api/admin/logs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ adminEmail: user.email, action: 'create_post', details: { title: titre, category: categorie, published: publie } }),
+        }).catch(() => {})
+      }
+
       toast.success('Article publié avec succès !')
       router.push('/admin')
       router.refresh()

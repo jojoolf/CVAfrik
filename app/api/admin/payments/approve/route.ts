@@ -83,6 +83,13 @@ export async function POST(req: Request) {
       console.error("Failed to send receipt email:", emailError);
     }
 
+    // Log admin action
+    await supabaseAdmin.from("admin_logs").insert({
+      admin_email: user.email,
+      action: "approve_payment",
+      details: { paymentId, userId, planId, amount: billing }
+    }).catch(() => {});
+
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error("Admin Approval Error:", error);

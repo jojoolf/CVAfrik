@@ -91,6 +91,16 @@ export default function ModifierPost({ params }: ModifierPostProps) {
         }).catch(() => {})
       }
 
+      // Log admin action
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        fetch('/api/admin/logs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ adminEmail: user.email, action: 'update_post', details: { title: titre, category: categorie, published: publie } }),
+        }).catch(() => {})
+      }
+
       toast.success('Article mis à jour avec succès !')
       router.push('/admin')
       router.refresh()

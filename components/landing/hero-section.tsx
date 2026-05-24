@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { ArrowRight, CheckCircle2, Sparkles, FileText, Star } from 'lucide-react'
+import { ArrowRight, CheckCircle2, Sparkles, FileText } from 'lucide-react'
+import { LiveCounter } from './live-counter'
 
 const features = [
   'CV professionnels en 10 minutes',
@@ -63,29 +64,9 @@ export function HeroSection() {
               </Button>
             </div>
 
-            {/* Social Proof */}
-            <div className="mt-10 flex items-center justify-center gap-4 lg:justify-start">
-              <div className="flex -space-x-2">
-                <div className="h-10 w-10 overflow-hidden rounded-full border-2 border-background bg-muted">
-                  <img src="https://i.pravatar.cc/100?img=1" alt="Utilisateur" className="h-full w-full object-cover" />
-                </div>
-                <div className="h-10 w-10 overflow-hidden rounded-full border-2 border-background bg-muted">
-                  <img src="https://i.pravatar.cc/100?img=2" alt="Utilisateur" className="h-full w-full object-cover" />
-                </div>
-                <div className="h-10 w-10 overflow-hidden rounded-full border-2 border-background bg-muted">
-                  <img src="https://i.pravatar.cc/100?img=3" alt="Utilisateur" className="h-full w-full object-cover" />
-                </div>
-              </div>
-              <div className="text-left">
-                <div className="flex items-center gap-1">
-                  <Badge variant="outline" className="text-primary border-primary/20 bg-primary/5">
-                    Nouveau 🚀
-                  </Badge>
-                </div>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Rejoignez la communaute
-                </p>
-              </div>
+            {/* Live Counter */}
+            <div className="mt-10 flex items-center justify-center lg:justify-start">
+              <LiveCounter />
             </div>
           </div>
 

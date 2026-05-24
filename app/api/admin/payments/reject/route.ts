@@ -1,9 +1,18 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase/server";
+import { createClient as createAdminClient } from "@supabase/supabase-js";
+
+const ADMIN_EMAILS = ["nokejoel@gmail.com", "jojoolf@gmail.com"];
 
 export async function POST(req: Request) {
   try {
-    const supabase = createClient(
+    const auth = await createClient();
+    const { data: { user } } = await auth.auth.getUser();
+    if (!user || !ADMIN_EMAILS.includes(user.email || "")) {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
+    }
+
+    const supabase = createAdminClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
@@ -16,6 +25,12 @@ export async function POST(req: Request) {
       .eq("id", paymentId);
 
     if (error) throw error;
+
+    await supabase.from("admin_logs").insert({
+      admin_email: user.email,
+      action: "reject_payment",
+      details: { paymentId }
+    }).catch(() => {});
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

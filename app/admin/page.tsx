@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Users, FileText, Mail } from 'lucide-react'
+import { Users, FileText, Mail, BarChart3, Activity } from 'lucide-react'
 import Link from 'next/link'
 import { AdminPostItem } from '@/components/admin/admin-post-item'
 
@@ -31,6 +31,16 @@ export default async function AdminPage() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <h1 className="text-3xl font-black text-foreground tracking-tight">Panel Administrateur</h1>
         <div className="flex gap-2">
+          <Button variant="outline" asChild>
+            <Link href="/admin/statistiques">
+              <BarChart3 className="h-4 w-4 mr-1" /> Stats
+            </Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link href="/admin/logs">
+              <Activity className="h-4 w-4 mr-1" /> Logs
+            </Link>
+          </Button>
           <Button variant="outline" asChild className="border-amber-500 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/30">
             <Link href="/admin/paiements">
               Gérer les Paiements
