@@ -36,23 +36,16 @@ export default function AdminPaymentsPage() {
     
     setIsAdmin(true);
 
-    const { data, error } = await supabase
-      .from("manual_payments")
-      .select(`
-        *,
-        profiles (
-          email,
-          nom,
-          prenom,
-          plan_expiry
-        )
-      `)
-      .order("created_at", { ascending: false });
-
-    if (error) {
+    try {
+      const response = await fetch("/api/admin/payments/list");
+      const result = await response.json();
+      if (result.success) {
+        setPayments(result.data || []);
+      } else {
+        toast.error("Erreur lors de la récupération des paiements");
+      }
+    } catch (error) {
       toast.error("Erreur lors de la récupération des paiements");
-    } else {
-      setPayments(data || []);
     }
     setLoading(false);
   };
@@ -144,8 +137,8 @@ export default function AdminPaymentsPage() {
                   </div>
                   <div>
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="font-black text-slate-900 dark:text-white">{p.profiles?.prenom} {p.profiles?.nom}</span>
-                      <span className="text-slate-400 text-xs">• {p.profiles?.email}</span>
+                      <span className="font-black text-slate-900 dark:text-white">Utilisateur</span>
+                      <span className="text-slate-400 text-xs">• {p.user_id}</span>
                     </div>
                     <div className="flex flex-wrap gap-2 text-xs font-bold">
                       <span className="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-3 py-1 rounded-full uppercase tracking-tighter">
@@ -157,9 +150,9 @@ export default function AdminPaymentsPage() {
                       <span className="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-3 py-1 rounded-full">
                         Via {p.methode}
                       </span>
-                      {p.statut === 'valide' && p.profiles?.plan_expiry && (
+                      {p.statut === 'valide' && (
                         <span className="bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 px-3 py-1 rounded-full border border-emerald-100 dark:border-emerald-800">
-                          Expire le: {new Date(p.profiles.plan_expiry).toLocaleDateString('fr-FR')}
+                          Valide
                         </span>
                       )}
                     </div>
