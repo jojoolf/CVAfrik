@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Loader2, Send, Sparkles, User, Bot, CheckCircle2, Maximize2, Minimize2 } from 'lucide-react'
+import { Loader2, Send, Sparkles, User, Bot, CheckCircle2, Maximize2, Minimize2, Target, TrendingUp, Lightbulb, Star } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { startSimulation, sendMessage } from './actions'
@@ -16,12 +16,195 @@ interface Message {
   content: string
 }
 
+function getNombreQuestions(value: string): number {
+  if (value === 'aleatoire') {
+    return Math.floor(Math.random() * 8) + 8
+  }
+  return parseInt(value)
+}
+
+function AutoResizeTextarea({ value, onChange, placeholder, disabled, onKeyDown, className }: {
+  value: string
+  onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void
+  placeholder: string
+  disabled?: boolean
+  onKeyDown?: (e: React.KeyboardEvent) => void
+  className?: string
+}) {
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  useEffect(() => {
+    const el = textareaRef.current
+    if (el) {
+      el.style.height = 'auto'
+      el.style.height = `${Math.min(el.scrollHeight, 200)}px`
+    }
+  }, [value])
+
+  return (
+    <textarea
+      ref={textareaRef}
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+      disabled={disabled}
+      onKeyDown={onKeyDown}
+      rows={1}
+      className={cn(
+        'flex w-full rounded-xl border border-input bg-background px-4 py-3',
+        'text-sm ring-offset-background placeholder:text-muted-foreground',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+        'disabled:cursor-not-allowed disabled:opacity-50',
+        'resize-none min-h-[44px] max-h-[200px]',
+        'scrollbar-thin',
+        className
+      )}
+    />
+  )
+}
+
+function ScoreGauge({ score }: { score: number }) {
+  const radius = 56
+  const circumference = 2 * Math.PI * radius
+  const offset = circumference - (score / 100) * circumference
+  const color = score >= 80 ? '#22c55e' : score >= 60 ? '#eab308' : '#ef4444'
+
+  return (
+    <div className="flex flex-col items-center gap-2">
+      <div className="relative inline-flex items-center justify-center">
+        <svg width="140" height="140" className="-rotate-90">
+          <circle cx="70" cy="70" r={radius} fill="none" stroke="hsl(var(--muted))" strokeWidth="10" />
+          <circle
+            cx="70" cy="70" r={radius}
+            fill="none"
+            stroke={color}
+            strokeWidth="10"
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+            className="transition-all duration-1000 ease-out"
+          />
+        </svg>
+        <div className="absolute flex flex-col items-center">
+          <span className="text-4xl font-black" style={{ color }}>{score}</span>
+          <span className="text-xs font-medium text-muted-foreground">/100</span>
+        </div>
+      </div>
+      <span className="text-sm font-medium" style={{ color }}>
+        {score >= 80 ? 'Excellent !' : score >= 60 ? 'Bon travail' : 'À améliorer'}
+      </span>
+    </div>
+  )
+}
+
+function FeedbackSection({ feedback }: { feedback: string }) {
+  const sections = feedback.split(/\*\*/).filter(Boolean)
+
+  const pointsForts = [] as string[]
+  const axesAmelioration = [] as string[]
+  const conseils = [] as string[]
+  let currentSection = ''
+
+  const lines = feedback.split('\n')
+  for (const line of lines) {
+    const trimmed = line.trim()
+    if (!trimmed) continue
+
+    const lower = trimmed.toLowerCase()
+    if (lower.includes('point fort') || lower.includes('points forts')) {
+      currentSection = 'forts'
+      continue
+    }
+    if (lower.includes("axe d'am") || lower.includes("axes d'am") || lower.includes('amelioration')) {
+      currentSection = 'amelioration'
+      continue
+    }
+    if (lower.includes('conseil')) {
+      currentSection = 'conseils'
+      continue
+    }
+
+    const bullet = trimmed.replace(/^[\s•\-*]+/, '')
+    if (!bullet) continue
+
+    if (currentSection === 'forts') pointsForts.push(bullet)
+    else if (currentSection === 'amelioration') axesAmelioration.push(bullet)
+    else if (currentSection === 'conseils') conseils.push(bullet)
+  }
+
+  if (pointsForts.length === 0 && axesAmelioration.length === 0 && conseils.length === 0) {
+    return (
+      <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground whitespace-pre-wrap leading-relaxed">
+        {feedback}
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-6">
+      {pointsForts.length > 0 && (
+        <div className="rounded-xl border border-green-200 bg-green-50/50 dark:border-green-900 dark:bg-green-950/20 p-5">
+          <h4 className="flex items-center gap-2 font-bold text-green-700 dark:text-green-400 mb-3">
+            <TrendingUp className="h-5 w-5" />
+            Points forts
+          </h4>
+          <ul className="space-y-2">
+            {pointsForts.map((item, i) => (
+              <li key={i} className="flex gap-2 text-sm text-green-800 dark:text-green-300">
+                <Star className="h-4 w-4 mt-0.5 shrink-0 fill-green-500 text-green-500" />
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {axesAmelioration.length > 0 && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50/50 dark:border-amber-900 dark:bg-amber-950/20 p-5">
+          <h4 className="flex items-center gap-2 font-bold text-amber-700 dark:text-amber-400 mb-3">
+            <Target className="h-5 w-5" />
+            Axes d&apos;amélioration
+          </h4>
+          <ul className="space-y-2">
+            {axesAmelioration.map((item, i) => (
+              <li key={i} className="flex gap-2 text-sm text-amber-800 dark:text-amber-300">
+                <span className="h-4 w-4 mt-0.5 shrink-0 rounded-full border-2 border-amber-400 flex items-center justify-center">
+                  <span className="text-[10px] font-bold text-amber-500">!</span>
+                </span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {conseils.length > 0 && (
+        <div className="rounded-xl border border-blue-200 bg-blue-50/50 dark:border-blue-900 dark:bg-blue-950/20 p-5">
+          <h4 className="flex items-center gap-2 font-bold text-blue-700 dark:text-blue-400 mb-3">
+            <Lightbulb className="h-5 w-5" />
+            Conseils pratiques
+          </h4>
+          <ul className="space-y-2">
+            {conseils.map((item, i) => (
+              <li key={i} className="flex gap-2 text-sm text-blue-800 dark:text-blue-300">
+                <Lightbulb className="h-4 w-4 mt-0.5 shrink-0 text-blue-500" />
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export function InterviewChat({ cvs }: { cvs: { id: string; titre: string | null }[] }) {
   const [step, setStep] = useState<'setup' | 'chat' | 'result'>('setup')
   const [loading, setLoading] = useState(false)
   const [setupData, setSetupData] = useState({
     cvId: cvs.length > 0 ? cvs[0].id : '',
     poste: '',
+    nombreQuestions: '8',
   })
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
@@ -30,10 +213,17 @@ export function InterviewChat({ cvs }: { cvs: { id: string; titre: string | null
   const [score, setScore] = useState<number | null>(null)
   const [isExpanded, setIsExpanded] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, loading])
+
+  useEffect(() => {
+    if (step === 'chat' && inputRef.current) {
+      inputRef.current.focus()
+    }
+  }, [step])
 
   const handleStart = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -41,7 +231,12 @@ export function InterviewChat({ cvs }: { cvs: { id: string; titre: string | null
 
     setLoading(true)
     try {
-      const result = await startSimulation(setupData)
+      const nombreQuestions = getNombreQuestions(setupData.nombreQuestions)
+      const result = await startSimulation({
+        cvId: setupData.cvId,
+        poste: setupData.poste,
+        nombreQuestions,
+      })
       if (result.success && result.id && result.firstQuestion) {
         setSimulationId(result.id)
         setMessages([{ role: 'assistant', content: result.firstQuestion }])
@@ -88,16 +283,23 @@ export function InterviewChat({ cvs }: { cvs: { id: string; titre: string | null
     }
   }
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      handleSend(e as unknown as React.FormEvent)
+    }
+  }
+
   if (step === 'setup') {
     return (
       <Card className="border-primary/20 shadow-lg">
         <CardHeader>
-          <CardTitle>Configurer votre simulation</CardTitle>
+          <CardTitle className="text-xl">Configurer votre simulation</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleStart} className="space-y-4">
+          <form onSubmit={handleStart} className="space-y-5">
             <div className="space-y-2">
-              <Label>Choisissez le CV avec lequel vous postulez</Label>
+              <Label className="text-sm font-medium">Choisissez le CV avec lequel vous postulez</Label>
               <Select
                 value={setupData.cvId}
                 onValueChange={(val) => setSetupData((prev) => ({ ...prev, cvId: val }))}
@@ -115,7 +317,7 @@ export function InterviewChat({ cvs }: { cvs: { id: string; titre: string | null
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Quel poste visez-vous ?</Label>
+              <Label className="text-sm font-medium">Quel poste visez-vous ?</Label>
               <Input
                 placeholder="Ex: Developpeur Front-end, Commercial..."
                 value={setupData.poste}
@@ -123,8 +325,28 @@ export function InterviewChat({ cvs }: { cvs: { id: string; titre: string | null
                 required
               />
             </div>
-            <Button type="submit" className="w-full bg-primary" disabled={loading}>
-              {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Nombre de questions</Label>
+              <Select
+                value={setupData.nombreQuestions}
+                onValueChange={(val) => setSetupData((prev) => ({ ...prev, nombreQuestions: val }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Choisir le nombre" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="8">8 questions (Recommandé)</SelectItem>
+                  <SelectItem value="10">10 questions</SelectItem>
+                  <SelectItem value="15">15 questions</SelectItem>
+                  <SelectItem value="aleatoire">Aléatoire (8-15)</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground mt-1">
+                Plus il y a de questions, plus l&apos;analyse sera précise.
+              </p>
+            </div>
+            <Button type="submit" className="w-full bg-primary h-12 text-base" disabled={loading}>
+              {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Sparkles className="mr-2 h-5 w-5" />}
               Commencer l&apos;entretien
             </Button>
           </form>
@@ -145,10 +367,12 @@ export function InterviewChat({ cvs }: { cvs: { id: string; titre: string | null
       >
         <CardHeader className="bg-primary/5 border-b py-3">
           <div className="flex items-center justify-between gap-3">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-              Simulation en cours -- {setupData.poste}
-            </CardTitle>
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse shrink-0" />
+              <CardTitle className="text-sm font-medium truncate">
+                Simulation en cours &mdash; {setupData.poste}
+              </CardTitle>
+            </div>
             <Button
               type="button"
               variant="ghost"
@@ -169,24 +393,27 @@ export function InterviewChat({ cvs }: { cvs: { id: string; titre: string | null
               {messages.map((msg, i) => (
                 <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   <div
-                    className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm ${
+                    className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                       msg.role === 'user'
                         ? 'bg-primary text-primary-foreground rounded-tr-none'
                         : 'bg-muted text-foreground rounded-tl-none border border-border/50'
                     }`}
                   >
-                    <div className="flex items-center gap-1.5 mb-1 opacity-70 text-[10px] uppercase font-bold tracking-wider">
+                    <div className="flex items-center gap-1.5 mb-1.5 opacity-70 text-[10px] uppercase font-bold tracking-wider">
                       {msg.role === 'assistant' ? <Bot className="h-3 w-3" /> : <User className="h-3 w-3" />}
                       {msg.role === 'assistant' ? 'Coach IA' : 'Vous'}
                     </div>
-                    {msg.content}
+                    <div className="whitespace-pre-wrap">{msg.content}</div>
                   </div>
                 </div>
               ))}
               {loading && (
                 <div className="flex justify-start">
                   <div className="bg-muted rounded-2xl rounded-tl-none px-4 py-3 border border-border/50">
-                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                      <span className="text-xs text-muted-foreground">Coach IA réfléchit...</span>
+                    </div>
                   </div>
                 </div>
               )}
@@ -194,17 +421,21 @@ export function InterviewChat({ cvs }: { cvs: { id: string; titre: string | null
             </div>
           </div>
 
-          <form onSubmit={handleSend} className="p-4 border-t bg-muted/20 flex gap-2">
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Tapez votre reponse ici..."
-              className="bg-background rounded-full px-4"
-              disabled={loading}
-            />
-            <Button type="submit" size="icon" className="rounded-full shrink-0" disabled={loading || !input.trim()}>
-              <Send className="h-4 w-4" />
-            </Button>
+          <form onSubmit={handleSend} className="p-4 border-t bg-muted/20">
+            <div className="flex gap-2 items-end">
+              <div className="flex-1">
+                <AutoResizeTextarea
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Tapez votre reponse ici... (Entrée pour envoyer, Maj+Entrée pour sauter une ligne)"
+                  disabled={loading}
+                  onKeyDown={handleKeyDown}
+                />
+              </div>
+              <Button type="submit" size="icon" className="h-[44px] w-[44px] rounded-xl shrink-0" disabled={loading || !input.trim()}>
+                <Send className="h-4 w-4" />
+              </Button>
+            </div>
           </form>
         </CardContent>
       </Card>
@@ -213,27 +444,53 @@ export function InterviewChat({ cvs }: { cvs: { id: string; titre: string | null
 
   return (
     <Card className="border-green-500/20 shadow-2xl overflow-hidden">
-      <div className="bg-green-500/10 p-8 text-center border-b border-green-500/20">
-        <div className="mx-auto w-16 h-16 bg-green-500 text-white rounded-full flex items-center justify-center mb-4">
+      <div className="bg-gradient-to-b from-green-500/10 to-green-500/5 p-8 text-center border-b border-green-500/20">
+        <div className="mx-auto w-16 h-16 bg-green-500 text-white rounded-full flex items-center justify-center mb-4 shadow-lg shadow-green-500/20">
           <CheckCircle2 className="h-10 w-10" />
         </div>
-        <h2 className="text-2xl font-bold text-green-700">Simulation terminee !</h2>
-        <div className="mt-4 flex items-center justify-center gap-2">
-          <span className="text-sm font-medium text-green-600">Votre score :</span>
-          <div className="text-4xl font-black text-green-700">{score}%</div>
+        <h2 className="text-2xl font-bold text-green-700 dark:text-green-400">Simulation terminée !</h2>
+
+        <div className="mt-6 flex justify-center">
+          {score !== null && <ScoreGauge score={score} />}
         </div>
+
+        {score !== null && (
+          <div className="mt-4 flex justify-center gap-6 text-sm text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <Bot className="h-3.5 w-3.5" />
+              {messages.filter(m => m.role === 'assistant').length} questions posées
+            </span>
+            <span className="flex items-center gap-1">
+              <User className="h-3.5 w-3.5" />
+              {messages.filter(m => m.role === 'user').length} réponses données
+            </span>
+          </div>
+        )}
       </div>
+
       <CardContent className="p-8">
-        <h3 className="font-bold text-lg mb-4 flex items-center gap-2 text-foreground">
+        <h3 className="font-bold text-lg mb-6 flex items-center gap-2 text-foreground">
           <Sparkles className="h-5 w-5 text-primary" />
-          Analyse de votre performance
+          Analyse détaillée de votre performance
         </h3>
-        <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground whitespace-pre-wrap leading-relaxed">
-          {feedback}
+
+        {feedback && <FeedbackSection feedback={feedback} />}
+
+        <div className="mt-8 flex flex-col sm:flex-row gap-3">
+          <Button className="flex-1" variant="default" onClick={() => setStep('setup')}>
+            <Sparkles className="mr-2 h-4 w-4" />
+            Nouvelle simulation
+          </Button>
+          <Button className="flex-1" variant="outline" onClick={() => {
+            setStep('setup')
+            setMessages([])
+            setFeedback(null)
+            setScore(null)
+            setSimulationId(null)
+          }}>
+            Retour à l&apos;accueil
+          </Button>
         </div>
-        <Button className="w-full mt-8" variant="outline" onClick={() => setStep('setup')}>
-          Recommencer une simulation
-        </Button>
       </CardContent>
     </Card>
   )

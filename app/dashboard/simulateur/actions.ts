@@ -6,7 +6,7 @@ import { PLANS } from '@/lib/types'
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
 
-export async function startSimulation(data: { cvId: string; poste: string }) {
+export async function startSimulation(data: { cvId: string; poste: string; nombreQuestions: number }) {
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -51,7 +51,8 @@ export async function startSimulation(data: { cvId: string; poste: string }) {
       .insert({
         user_id: user.id,
         cv_id: data.cvId,
-        messages: [{ role: 'assistant', content: firstQuestion }]
+        messages: [{ role: 'assistant', content: firstQuestion }],
+        nombre_questions: data.nombreQuestions
       })
       .select()
       .single()
@@ -71,7 +72,6 @@ export async function startSimulation(data: { cvId: string; poste: string }) {
 
     if (profileError) {
       console.error("Erreur update profile simulations_faites_ce_mois:", profileError)
-      // On continue quand même car la simulation a été insérée
     }
 
     return { success: true, id: sim.id, firstQuestion }
@@ -86,19 +86,31 @@ export async function sendMessage(id: string, message: string, history: any[]) {
     const supabase = await createClient()
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
 
-    const totalMessages = history.length
-    
-    // Si on a atteint 6 messages (3 questions/reponses), on finit et on donne le feedback
-    if (totalMessages >= 6) {
+    // Read the simulation to get nombre_questions
+    const { data: sim } = await supabase
+      .from('simulations_entretien')
+      .select('nombre_questions')
+      .eq('id', id)
+      .single()
+
+    const nombreQuestions = sim?.nombre_questions ?? 8
+    const maxMessages = nombreQuestions * 2
+
+    if (history.length >= maxMessages) {
       const prompt = `
         L'entretien est termine. Analyse la conversation suivante et donne un feedback constructif au candidat.
         CONVERSATION : ${JSON.stringify(history)}
         
         FORMAT DE REPONSE : 
         1. Donne un score sur 100 (uniquement le nombre).
-        2. Un texte de feedback structure (Points forts, Axes d'amelioration, Conseils).
+        2. Un feedback structure avec les sections suivantes (en Markdown) :
+           - **Points forts**
+           - **Axes d'amelioration**
+           - **Conseils pratiques**
         
-        Retourne sous format JSON: {"score": 85, "feedback": "Ton texte ici..."}
+        Retourne sous format JSON: {"score": 85, "feedback": "Ton texte ici avec le markdown..."}
+        
+        Important : Le feedback doit etre professionnel, bien structure et directement affichable.
       `
       const result = await model.generateContent(prompt)
       const response = await result.response
@@ -133,7 +145,8 @@ export async function sendMessage(id: string, message: string, history: any[]) {
 
     // Sinon on continue l'entretien
     const prompt = `
-      Continue l'entretien d'embauche. Pose la prochaine question basee sur la conversation precedente.
+      Continue l'entretien d'embauche. Question ${Math.floor(history.length / 2) + 1}/${nombreQuestions}.
+      Pose la prochaine question basee sur la conversation precedente.
       CONVERSATION : ${JSON.stringify(history)}
       
       Reste dans ton role de recruteur. Sois bref et professionnel.
