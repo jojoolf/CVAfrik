@@ -52,7 +52,8 @@ export async function startSimulation(data: { cvId: string; poste: string; nombr
         user_id: user.id,
         cv_id: data.cvId,
         messages: [{ role: 'assistant', content: firstQuestion }],
-        nombre_questions: data.nombreQuestions
+        nombre_questions: data.nombreQuestions,
+        poste: data.poste
       })
       .select()
       .single()
@@ -168,5 +169,50 @@ export async function sendMessage(id: string, message: string, history: any[]) {
   } catch (error) {
     console.error("Erreur sendMessage:", error)
     return { success: false, error: error instanceof Error ? error.message : 'Erreur lors de la génération.' }
+  }
+}
+
+export async function getUserSimulations() {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return { success: false, error: 'Non authentifie', data: [] }
+
+    const { data, error } = await supabase
+      .from('simulations_entretien')
+      .select('id, poste, score, nombre_questions, created_at')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+
+    return { success: true, data: data || [] }
+  } catch (error) {
+    console.error("Erreur getUserSimulations:", error)
+    return { success: false, error: 'Erreur lors du chargement.', data: [] }
+  }
+}
+
+export async function getSimulationById(id: string) {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return { success: false, error: 'Non authentifie' }
+
+    const { data, error } = await supabase
+      .from('simulations_entretien')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .single()
+
+    if (error) throw error
+
+    return { success: true, data }
+  } catch (error) {
+    console.error("Erreur getSimulationById:", error)
+    return { success: false, error: 'Simulation introuvable.' }
   }
 }

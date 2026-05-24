@@ -4,7 +4,9 @@ import { Navbar } from '@/components/layout/navbar'
 import { Footer } from '@/components/layout/footer'
 import { InterviewChat } from './interview-chat'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { MessageSquareCode, Sparkles, Trophy } from 'lucide-react'
+import { MessageSquareCode, Sparkles, Trophy, History } from 'lucide-react'
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 import { PLANS } from '@/lib/types'
 
 export default async function SimulateurPage() {
@@ -80,6 +82,25 @@ export default async function SimulateurPage() {
                   <p>2. Le coach IA vous pose des questions personnalisées.</p>
                   <p>3. Répondez naturellement, comme dans un vrai entretien.</p>
                   <p>4. Recevez un score et des conseils détaillés à la fin.</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <History className="h-4 w-4 text-primary" />
+                    Historique
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Consultez toutes vos simulations passées, les conversations complètes et les feedbacks détaillés.
+                  </p>
+                  <Button variant="outline" className="w-full rounded-full" asChild>
+                    <Link href="/dashboard/simulateur/historique">
+                      Voir l&apos;historique →
+                    </Link>
+                  </Button>
                 </CardContent>
               </Card>
 

@@ -6,10 +6,12 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Loader2, Send, Sparkles, User, Bot, CheckCircle2, Maximize2, Minimize2, Target, TrendingUp, Lightbulb, Star } from 'lucide-react'
+import { Loader2, Send, Sparkles, User, Bot, CheckCircle2, Maximize2, Minimize2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { startSimulation, sendMessage } from './actions'
+import { ScoreGauge } from '@/components/simulateur/score-gauge'
+import { FeedbackSection } from '@/components/simulateur/feedback-section'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -63,140 +65,7 @@ function AutoResizeTextarea({ value, onChange, placeholder, disabled, onKeyDown,
   )
 }
 
-function ScoreGauge({ score }: { score: number }) {
-  const radius = 56
-  const circumference = 2 * Math.PI * radius
-  const offset = circumference - (score / 100) * circumference
-  const color = score >= 80 ? '#22c55e' : score >= 60 ? '#eab308' : '#ef4444'
 
-  return (
-    <div className="flex flex-col items-center gap-2">
-      <div className="relative inline-flex items-center justify-center">
-        <svg width="140" height="140" className="-rotate-90">
-          <circle cx="70" cy="70" r={radius} fill="none" stroke="hsl(var(--muted))" strokeWidth="10" />
-          <circle
-            cx="70" cy="70" r={radius}
-            fill="none"
-            stroke={color}
-            strokeWidth="10"
-            strokeLinecap="round"
-            strokeDasharray={circumference}
-            strokeDashoffset={offset}
-            className="transition-all duration-1000 ease-out"
-          />
-        </svg>
-        <div className="absolute flex flex-col items-center">
-          <span className="text-4xl font-black" style={{ color }}>{score}</span>
-          <span className="text-xs font-medium text-muted-foreground">/100</span>
-        </div>
-      </div>
-      <span className="text-sm font-medium" style={{ color }}>
-        {score >= 80 ? 'Excellent !' : score >= 60 ? 'Bon travail' : 'À améliorer'}
-      </span>
-    </div>
-  )
-}
-
-function FeedbackSection({ feedback }: { feedback: string }) {
-  const sections = feedback.split(/\*\*/).filter(Boolean)
-
-  const pointsForts = [] as string[]
-  const axesAmelioration = [] as string[]
-  const conseils = [] as string[]
-  let currentSection = ''
-
-  const lines = feedback.split('\n')
-  for (const line of lines) {
-    const trimmed = line.trim()
-    if (!trimmed) continue
-
-    const lower = trimmed.toLowerCase()
-    if (lower.includes('point fort') || lower.includes('points forts')) {
-      currentSection = 'forts'
-      continue
-    }
-    if (lower.includes("axe d'am") || lower.includes("axes d'am") || lower.includes('amelioration')) {
-      currentSection = 'amelioration'
-      continue
-    }
-    if (lower.includes('conseil')) {
-      currentSection = 'conseils'
-      continue
-    }
-
-    const bullet = trimmed.replace(/^[\s•\-*]+/, '')
-    if (!bullet) continue
-
-    if (currentSection === 'forts') pointsForts.push(bullet)
-    else if (currentSection === 'amelioration') axesAmelioration.push(bullet)
-    else if (currentSection === 'conseils') conseils.push(bullet)
-  }
-
-  if (pointsForts.length === 0 && axesAmelioration.length === 0 && conseils.length === 0) {
-    return (
-      <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground whitespace-pre-wrap leading-relaxed">
-        {feedback}
-      </div>
-    )
-  }
-
-  return (
-    <div className="space-y-6">
-      {pointsForts.length > 0 && (
-        <div className="rounded-xl border border-green-200 bg-green-50/50 dark:border-green-900 dark:bg-green-950/20 p-5">
-          <h4 className="flex items-center gap-2 font-bold text-green-700 dark:text-green-400 mb-3">
-            <TrendingUp className="h-5 w-5" />
-            Points forts
-          </h4>
-          <ul className="space-y-2">
-            {pointsForts.map((item, i) => (
-              <li key={i} className="flex gap-2 text-sm text-green-800 dark:text-green-300">
-                <Star className="h-4 w-4 mt-0.5 shrink-0 fill-green-500 text-green-500" />
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {axesAmelioration.length > 0 && (
-        <div className="rounded-xl border border-amber-200 bg-amber-50/50 dark:border-amber-900 dark:bg-amber-950/20 p-5">
-          <h4 className="flex items-center gap-2 font-bold text-amber-700 dark:text-amber-400 mb-3">
-            <Target className="h-5 w-5" />
-            Axes d&apos;amélioration
-          </h4>
-          <ul className="space-y-2">
-            {axesAmelioration.map((item, i) => (
-              <li key={i} className="flex gap-2 text-sm text-amber-800 dark:text-amber-300">
-                <span className="h-4 w-4 mt-0.5 shrink-0 rounded-full border-2 border-amber-400 flex items-center justify-center">
-                  <span className="text-[10px] font-bold text-amber-500">!</span>
-                </span>
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {conseils.length > 0 && (
-        <div className="rounded-xl border border-blue-200 bg-blue-50/50 dark:border-blue-900 dark:bg-blue-950/20 p-5">
-          <h4 className="flex items-center gap-2 font-bold text-blue-700 dark:text-blue-400 mb-3">
-            <Lightbulb className="h-5 w-5" />
-            Conseils pratiques
-          </h4>
-          <ul className="space-y-2">
-            {conseils.map((item, i) => (
-              <li key={i} className="flex gap-2 text-sm text-blue-800 dark:text-blue-300">
-                <Lightbulb className="h-4 w-4 mt-0.5 shrink-0 text-blue-500" />
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </div>
-  )
-}
 
 export function InterviewChat({ cvs }: { cvs: { id: string; titre: string | null }[] }) {
   const [step, setStep] = useState<'setup' | 'chat' | 'result'>('setup')
