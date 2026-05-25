@@ -25,11 +25,11 @@ function Stat({ value, label }: { value: string; label: string }) {
 export function HeroSection() {
   return (
     <section className="relative min-h-screen overflow-hidden bg-gradient-hero noise pt-28">
-      <div className="absolute inset-0 bg-[#0d0a08] max-md:max-h-[50vh]">
+      <div className="absolute inset-0">
         <AfricaGlobe />
       </div>
 
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,var(--hero-fade)_75%)] max-md:bg-[radial-gradient(ellipse_at_center,transparent_20%,var(--hero-fade)_60%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,oklch(0.13_0.015_60)_75%)]" />
 
       <div className="relative z-10 mx-auto flex min-h-[80vh] max-w-7xl flex-col items-center px-4 pb-20 text-center">
         <motion.div
