@@ -134,9 +134,9 @@ export function AfricaGlobe() {
         gl={{ antialias: true, alpha: true }}
       >
         <Suspense fallback={null}>
-          <ambientLight intensity={0.4} />
-          <directionalLight position={[5, 3, 5]} intensity={1.2} color="#ffd97a" />
-          <directionalLight position={[-5, -2, -3]} intensity={0.3} color="#ff8a4c" />
+          <ambientLight intensity={0.25} />
+          <directionalLight position={[5, 3, 5]} intensity={0.8} color="#ffd97a" />
+          <directionalLight position={[-5, -2, -3]} intensity={0.2} color="#ff8a4c" />
           <Stars radius={50} depth={20} count={1500} factor={2} fade speed={0.5} />
           <Globe />
           <OrbitControls

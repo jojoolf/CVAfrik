@@ -25,7 +25,7 @@ function Stat({ value, label }: { value: string; label: string }) {
 export function HeroSection() {
   return (
     <section className="relative min-h-screen overflow-hidden bg-gradient-hero noise pt-28">
-      <div className="absolute inset-0 opacity-90">
+      <div className="absolute inset-0 opacity-60 md:opacity-70">
         <AfricaGlobe />
       </div>
 
