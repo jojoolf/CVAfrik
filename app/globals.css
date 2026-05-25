@@ -61,6 +61,18 @@
 
   --glass-bg: oklch(0.2 0.015 60 / 0.4);
   --glass-border: oklch(0.97 0.01 80 / 0.08);
+
+  /* Lovable dashboard gradients */
+  --gradient-primary: linear-gradient(135deg, oklch(0.7 0.18 55), oklch(0.75 0.2 45));
+  --gradient-emerald: linear-gradient(135deg, oklch(0.55 0.15 145), oklch(0.65 0.18 160));
+  --gradient-violet: linear-gradient(135deg, oklch(0.55 0.18 285), oklch(0.65 0.2 270));
+  --gradient-amber: linear-gradient(135deg, oklch(0.75 0.18 75), oklch(0.8 0.2 85));
+  --gradient-mesh: radial-gradient(circle at 30% 40%, oklch(0.7 0.18 55 / 0.12), transparent 60%),
+                   radial-gradient(circle at 70% 60%, oklch(0.55 0.18 285 / 0.08), transparent 50%);
+
+  --shadow-elegant: 0 4px 24px -6px oklch(0.05 0 0 / 0.12), 0 1px 4px -2px oklch(0.05 0 0 / 0.06);
+  --shadow-soft: 0 2px 16px -4px oklch(0.05 0 0 / 0.06);
+  --primary-glow: oklch(0.7 0.18 55 / 0.3);
 }
 
 .dark {
@@ -120,6 +132,18 @@
   --glass-bg: oklch(0.2 0.015 60 / 0.4);
   --glass-border: oklch(0.97 0.01 80 / 0.08);
   --hero-fade: oklch(0.13 0.015 60);
+
+  /* Lovable dashboard gradients - dark mode */
+  --gradient-primary: linear-gradient(135deg, oklch(0.7 0.18 55), oklch(0.75 0.2 45));
+  --gradient-emerald: linear-gradient(135deg, oklch(0.55 0.15 145), oklch(0.65 0.18 160));
+  --gradient-violet: linear-gradient(135deg, oklch(0.55 0.18 285), oklch(0.65 0.2 270));
+  --gradient-amber: linear-gradient(135deg, oklch(0.75 0.18 75), oklch(0.8 0.2 85));
+  --gradient-mesh: radial-gradient(circle at 30% 40%, oklch(0.7 0.18 55 / 0.12), transparent 60%),
+                   radial-gradient(circle at 70% 60%, oklch(0.55 0.18 285 / 0.08), transparent 50%);
+
+  --shadow-elegant: 0 4px 24px -6px oklch(0 0 0 / 0.25), 0 1px 4px -2px oklch(0 0 0 / 0.12);
+  --shadow-soft: 0 2px 16px -4px oklch(0 0 0 / 0.12);
+  --primary-glow: oklch(0.7 0.18 55 / 0.3);
 }
 
 @theme inline {
@@ -265,6 +289,14 @@
   .shadow-glow { box-shadow: var(--shadow-glow); }
   .shadow-card { box-shadow: var(--shadow-card); }
   .shadow-elevated { box-shadow: var(--shadow-elevated); }
+
+  .bg-gradient-primary { background: var(--gradient-primary); }
+  .bg-gradient-emerald { background: var(--gradient-emerald); }
+  .bg-gradient-violet { background: var(--gradient-violet); }
+  .bg-gradient-amber { background: var(--gradient-amber); }
+  .bg-mesh { background: var(--gradient-mesh); }
+  .shadow-elegant { box-shadow: var(--shadow-elegant); }
+  .shadow-soft { box-shadow: var(--shadow-soft); }
 
   .glass {
     background: var(--glass-bg);

@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/server'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { ArrowLeft, Calendar, BookOpen, Briefcase, GraduationCap } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
 
 export const revalidate = 3600
 
