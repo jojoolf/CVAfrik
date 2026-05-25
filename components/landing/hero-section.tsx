@@ -29,7 +29,7 @@ export function HeroSection() {
         <AfricaGlobe />
       </div>
 
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,oklch(0.13_0.015_60)_75%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,var(--hero-fade)_75%)]" />
 
       <div className="relative z-10 mx-auto flex min-h-[80vh] max-w-7xl flex-col items-center px-4 pb-20 text-center">
         <motion.div

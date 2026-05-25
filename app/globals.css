@@ -41,23 +41,27 @@
   --sidebar-border: oklch(0.9 0.02 85);
   --sidebar-ring: oklch(0.65 0.18 55);
 
-  /* Design system extras */
-  --gold: oklch(0.82 0.16 75);
-  --gold-glow: oklch(0.88 0.18 80);
-  --terracotta: oklch(0.65 0.18 35);
+  /* Design system extras - LIGHT mode */
+  --gold: oklch(0.65 0.18 55);
+  --gold-glow: oklch(0.7 0.18 55);
+  --terracotta: oklch(0.6 0.15 35);
   --emerald-deep: oklch(0.45 0.12 160);
 
-  --gradient-hero: radial-gradient(circle at 20% 30%, oklch(0.65 0.18 35 / 0.25), transparent 50%),
-                   radial-gradient(circle at 80% 70%, oklch(0.82 0.16 75 / 0.2), transparent 50%),
-                   linear-gradient(180deg, oklch(0.13 0.015 60), oklch(0.1 0.012 60));
-  --gradient-gold: linear-gradient(135deg, oklch(0.82 0.16 75), oklch(0.7 0.18 55));
-  --gradient-text: linear-gradient(135deg, oklch(0.88 0.18 80), oklch(0.7 0.18 45));
+  --gradient-hero: radial-gradient(circle at 20% 30%, oklch(0.65 0.18 55 / 0.12), transparent 50%),
+                   radial-gradient(circle at 80% 70%, oklch(0.82 0.16 75 / 0.1), transparent 50%),
+                   linear-gradient(180deg, oklch(0.99 0.005 85), oklch(0.96 0.01 85));
+  --gradient-gold: linear-gradient(135deg, oklch(0.65 0.18 55), oklch(0.6 0.15 35));
+  --gradient-text: linear-gradient(135deg, oklch(0.65 0.18 55), oklch(0.6 0.15 35));
 
-  --shadow-glow: 0 0 60px -10px oklch(0.82 0.16 75 / 0.5);
-  --shadow-card: 0 20px 60px -20px oklch(0.05 0 0 / 0.6);
-  --shadow-elevated: 0 30px 80px -20px oklch(0.05 0 0 / 0.8), 0 0 0 1px oklch(0.97 0.01 80 / 0.06);
+  --shadow-glow: 0 0 40px -8px oklch(0.65 0.18 55 / 0.4);
+  --shadow-card: 0 10px 40px -15px oklch(0.05 0 0 / 0.12);
+  --shadow-elevated: 0 20px 60px -20px oklch(0.05 0 0 / 0.15), 0 0 0 1px oklch(0.9 0.02 85 / 0.8);
 
-  --noise: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/></svg>");
+  --noise: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.3'/></svg>");
+
+  --glass-bg: oklch(0.95 0.02 85 / 0.6);
+  --glass-border: oklch(0.9 0.02 85 / 0.5);
+  --hero-fade: oklch(0.99 0.005 85);
 }
 
 .dark {
@@ -95,6 +99,28 @@
   --sidebar-accent-foreground: oklch(0.95 0.01 85);
   --sidebar-border: oklch(0.28 0.02 45);
   --sidebar-ring: oklch(0.7 0.18 55);
+
+  /* DARK mode landing page overrides */
+  --gold: oklch(0.82 0.16 75);
+  --gold-glow: oklch(0.88 0.18 80);
+  --terracotta: oklch(0.65 0.18 35);
+  --emerald-deep: oklch(0.45 0.12 160);
+
+  --gradient-hero: radial-gradient(circle at 20% 30%, oklch(0.65 0.18 35 / 0.25), transparent 50%),
+                   radial-gradient(circle at 80% 70%, oklch(0.82 0.16 75 / 0.2), transparent 50%),
+                   linear-gradient(180deg, oklch(0.13 0.015 60), oklch(0.1 0.012 60));
+  --gradient-gold: linear-gradient(135deg, oklch(0.82 0.16 75), oklch(0.7 0.18 55));
+  --gradient-text: linear-gradient(135deg, oklch(0.88 0.18 80), oklch(0.7 0.18 45));
+
+  --shadow-glow: 0 0 60px -10px oklch(0.82 0.16 75 / 0.5);
+  --shadow-card: 0 20px 60px -20px oklch(0.05 0 0 / 0.6);
+  --shadow-elevated: 0 30px 80px -20px oklch(0.05 0 0 / 0.8), 0 0 0 1px oklch(0.97 0.01 80 / 0.06);
+
+  --noise: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/></svg>");
+
+  --glass-bg: oklch(0.2 0.015 60 / 0.4);
+  --glass-border: oklch(0.97 0.01 80 / 0.08);
+  --hero-fade: oklch(0.13 0.015 60);
 }
 
 @theme inline {
@@ -242,9 +268,9 @@
   .shadow-elevated { box-shadow: var(--shadow-elevated); }
 
   .glass {
-    background: oklch(0.2 0.015 60 / 0.4);
+    background: var(--glass-bg);
     backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid oklch(0.97 0.01 80 / 0.08);
+    border: 1px solid var(--glass-border);
   }
 
   .noise::after {
