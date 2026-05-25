@@ -5,11 +5,10 @@ import { Footer } from '@/components/layout/footer'
 import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { BookOpen, Briefcase, GraduationCap, ArrowRight, Sparkles } from 'lucide-react'
+import { NewsletterSignup } from '@/components/blog/newsletter-signup'
 
 export const metadata: Metadata = {
   title: 'Blog & Offres d\'emploi | CVAfrik',
@@ -186,27 +185,8 @@ export default async function BlogPage() {
           {/* Newsletter CTA */}
           <div className="mt-16 relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-background border border-primary/10 p-8 lg:p-12">
             <div className="absolute inset-0 bg-mesh opacity-50" />
-            <div className="relative mx-auto max-w-xl text-center">
-              <Badge variant="outline" className="mb-4 border-primary/30 bg-primary/5">
-                <Sparkles className="mr-1.5 h-3.5 w-3.5 text-primary" />
-                Restez informé
-              </Badge>
-              <h2 className="text-2xl font-bold text-foreground lg:text-3xl">
-                Ne manquez aucun article
-              </h2>
-              <p className="mt-3 text-muted-foreground">
-                Recevez chaque semaine nos derniers conseils carrière et offres d&apos;emploi directement dans votre boîte mail.
-              </p>
-              <div className="mt-6 flex max-w-md mx-auto gap-3">
-                <Input
-                  type="email"
-                  placeholder="Votre adresse email"
-                  className="h-11 rounded-xl bg-background"
-                />
-                <Button className="h-11 rounded-xl shrink-0">
-                  S&apos;abonner
-                </Button>
-              </div>
+            <div className="relative">
+              <NewsletterSignup />
             </div>
           </div>
         </div>
