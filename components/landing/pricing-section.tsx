@@ -1,147 +1,145 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { Check, X, Sparkles } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { PLANS } from '@/lib/types'
+import { motion } from 'framer-motion'
+import { Check, Sparkles } from 'lucide-react'
+
+const plans = [
+  {
+    id: 'starter',
+    name: 'Starter',
+    price: { m: 0, a: 0 },
+    desc: 'Pour découvrir CVAfrik et créer ton premier CV.',
+    features: [
+      '3 CV par mois',
+      '3 lettres de motivation / mois',
+      '3 templates basiques',
+      'Export PDF (avec watermark)',
+      'Accès aux offres de stages',
+    ],
+    cta: 'Commencer gratuitement',
+  },
+  {
+    id: 'pro',
+    name: 'Career Pro',
+    price: { m: 2600, a: 26000 },
+    desc: 'Pour décrocher ton stage ou premier emploi rapidement.',
+    features: [
+      'CV & lettres illimités',
+      '45+ templates premium',
+      'Export PDF sans watermark',
+      'Score ATS détaillé + conseils IA',
+      'Simulateur entretien illimité',
+      'Matching CV ↔ offre d\'emploi',
+      'Traduction anglais/français',
+    ],
+    cta: 'Passer Pro',
+    popular: true,
+  },
+  {
+    id: 'business',
+    name: 'Business',
+    price: { m: 6500, a: 65000 },
+    desc: 'Pour les universités, écoles et coachs carrière.',
+    features: [
+      'Tout le plan Pro inclus',
+      'Gestion multi-profils étudiants',
+      'Dashboard de suivi',
+      'Templates avec logo école',
+      'Rapport mensuel des progrès',
+      'Support prioritaire WhatsApp',
+    ],
+    cta: 'Contacter l\'équipe',
+  },
+]
 
 export function PricingSection() {
-  const [isAnnual, setIsAnnual] = useState(false)
+  const [annual, setAnnual] = useState(false)
 
   return (
-    <section id="tarifs" className="py-20 md:py-28">
-      <div className="container mx-auto px-4">
-        {/* Header */}
+    <section id="pricing" className="relative py-32">
+      <div className="mx-auto max-w-7xl px-4">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-foreground md:text-4xl">
-            Des tarifs
-            <span className="text-primary"> adaptes a l&apos;Afrique</span>
+          <div className="glass mb-6 inline-flex rounded-full px-4 py-1.5 text-xs uppercase tracking-widest text-muted-foreground">
+            Tarifs
+          </div>
+          <h2 className="text-4xl font-bold tracking-tight md:text-5xl">
+            Des tarifs <span className="text-gradient-gold">adaptés à l&apos;Afrique.</span>
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Commencez gratuitement, puis passez a un plan superieur quand vous en avez besoin.
-            Paiement Mobile Money accepte.
+            Commence gratuitement, passe Pro quand tu es prêt.
+            Mobile Money accepté partout sur le continent.
           </p>
 
-          {/* Toggle */}
-          <div className="mt-10 flex items-center justify-center gap-4">
-            <span className={cn("text-sm font-medium", !isAnnual ? "text-foreground" : "text-muted-foreground")}>
-              Mensuel
-            </span>
+          <div className="mt-8 inline-flex items-center gap-3 rounded-full glass p-1.5">
             <button
-              onClick={() => setIsAnnual(!isAnnual)}
-              className="relative h-6 w-12 rounded-full bg-muted p-1 transition-colors hover:bg-muted/80"
+              onClick={() => setAnnual(false)}
+              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${!annual ? 'bg-gradient-gold text-primary-foreground' : 'text-muted-foreground'}`}
             >
-              <div
-                className={cn(
-                  "h-4 w-4 rounded-full bg-primary transition-transform",
-                  isAnnual ? "translate-x-6" : "translate-x-0"
-                )}
-              />
+              Mensuel
             </button>
-            <div className="flex items-center gap-2">
-              <span className={cn("text-sm font-medium", isAnnual ? "text-foreground" : "text-muted-foreground")}>
-                Annuel
-              </span>
-              <Badge variant="secondary" className="bg-primary/10 text-primary border-none text-[10px]">
-                -2 mois offerts
-              </Badge>
-            </div>
+            <button
+              onClick={() => setAnnual(true)}
+              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${annual ? 'bg-gradient-gold text-primary-foreground' : 'text-muted-foreground'}`}
+            >
+              Annuel <span className="ml-1 text-xs opacity-80">-2 mois</span>
+            </button>
           </div>
         </div>
 
-        {/* Pricing Cards */}
-        <div className="mx-auto mt-16 grid max-w-5xl gap-6 md:grid-cols-3">
-          {PLANS.map((plan, index) => {
-            const isPopular = plan.id === 'pro'
-            const prixFCFA = isAnnual && plan.prix_annuel_fcfa !== undefined ? plan.prix_annuel_fcfa : plan.prix_fcfa
-            const prixUSD = isAnnual && plan.prix_annuel_usd !== undefined ? plan.prix_annuel_usd : plan.prix_usd
-            
-            return (
-              <Card
-                key={plan.id}
-                className={cn(
-                  'relative flex flex-col transition-all duration-300 hover:scale-105 hover:shadow-xl',
-                  isPopular && 'border-primary shadow-lg ring-1 ring-primary shadow-primary/10'
-                )}
-              >
-                {isPopular && (
-                  <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 gap-1 px-3 animate-shine shadow-lg">
-                    <Sparkles className="h-3 w-3" />
-                    Plus populaire
-                  </Badge>
-                )}
+        <div className="mx-auto mt-14 grid max-w-6xl gap-6 md:grid-cols-3">
+          {plans.map((p, i) => (
+            <motion.div
+              key={p.id}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: i * 0.1 }}
+              className={`relative rounded-3xl p-8 ${
+                p.popular
+                  ? 'glass border-primary/40 shadow-glow ring-1 ring-primary/30'
+                  : 'glass'
+              }`}
+            >
+              {p.popular && (
+                <div className="absolute -top-3 left-1/2 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-gradient-gold px-3 py-1 text-xs font-bold text-primary-foreground">
+                  <Sparkles className="h-3 w-3" />
+                  Le plus populaire
+                </div>
+              )}
+              <h3 className="font-display text-xl font-bold">{p.name}</h3>
+              <p className="mt-1 text-sm text-muted-foreground">{p.desc}</p>
 
-                <CardHeader className="text-center">
-                  <CardTitle className="text-xl">{plan.nom}</CardTitle>
-                  <CardDescription>{plan.description}</CardDescription>
-                  <div className="mt-4">
-                    <div className="flex items-baseline justify-center gap-1">
-                      <span className="text-4xl font-bold text-foreground">
-                        {prixFCFA.toLocaleString('fr-FR')}
-                      </span>
-                      <span className="text-muted-foreground text-sm font-medium"> FCFA</span>
-                    </div>
-                    {plan.prix_fcfa > 0 && (
-                      <div className="mt-2 space-y-1">
-                        <p className="text-sm font-medium text-primary">
-                          ~{isAnnual ? (prixUSD / 12).toFixed(2) : prixUSD}€ / mois
-                        </p>
-                        {isAnnual && (
-                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">
-                            Facture {prixFCFA.toLocaleString('fr-FR')} FCFA / an
-                          </p>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </CardHeader>
-
-                <CardContent className="flex-1">
-                  <ul className="space-y-3">
-                    {plan.fonctionnalites.map((feature) => (
-                      <li key={feature} className="flex items-start gap-2">
-                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                        <span className="text-sm text-muted-foreground">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-
-                <CardFooter>
-                  <Button
-                    className="w-full"
-                    variant={isPopular ? 'default' : 'outline'}
-                    asChild
-                  >
-                    <Link href={plan.id === 'gratuit' ? '/auth/inscription' : `/tarifs?plan=${plan.id}`}>
-                      {plan.id === 'gratuit' ? 'Commencer gratuitement' : 'Choisir ce plan'}
-                    </Link>
-                  </Button>
-                </CardFooter>
-              </Card>
-            )
-          })}
-        </div>
-
-        {/* Payment Methods */}
-        <div className="mt-12 text-center">
-          <p className="mb-4 text-sm text-muted-foreground">
-            Paiement securise par CinetPay
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-4">
-            {['Orange Money', 'Wave', 'MTN Money', 'Moov Money', 'Flooz'].map((method) => (
-              <div
-                key={method}
-                className="rounded-full bg-card px-4 py-2 text-sm font-medium shadow-sm ring-1 ring-border"
-              >
-                {method}
+              <div className="mt-6 flex items-baseline gap-1">
+                <span className="text-5xl font-bold tracking-tight">
+                  {(annual ? p.price.a : p.price.m).toLocaleString('fr-FR')}
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  FCFA{p.price.m > 0 && (annual ? ' / an' : ' / mois')}
+                </span>
               </div>
-            ))}
-          </div>
+
+              <a
+                href={p.id === 'business' ? '/contact' : '/auth/inscription'}
+                className={`mt-6 block w-full rounded-full px-5 py-3 text-center text-sm font-semibold transition-transform hover:scale-[1.02] ${
+                  p.popular
+                    ? 'bg-gradient-gold text-primary-foreground shadow-glow'
+                    : 'glass hover:bg-white/10'
+                }`}
+              >
+                {p.cta}
+              </a>
+
+              <ul className="mt-8 space-y-3">
+                {p.features.map((f) => (
+                  <li key={f} className="flex gap-3 text-sm">
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                    <span className="text-muted-foreground">{f}</span>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          ))}
         </div>
       </div>
     </section>
