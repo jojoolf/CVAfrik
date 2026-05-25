@@ -2,8 +2,11 @@ import type { Metadata, Viewport } from 'next'
 import { Inter, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { Toaster } from '@/components/ui/sonner'
+import { createTranslator } from '@/lib/i18n/server'
+import { LocaleProvider } from '@/lib/i18n/locale-provider'
 import './globals.css'
 import Script from 'next/script'
+import { ThemeProvider } from '@/components/theme-provider'
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -33,11 +36,11 @@ const dmSans = DM_Sans({
 
 export const metadata: Metadata = {
   title: {
-    default: 'CVAfrik - Creez votre CV professionnel pour l\'Afrique de l\'Ouest',
+    default: 'CVAfrik - Creez votre CV professionnel pour l\'Afrique',
     template: '%s | CVAfrik',
   },
-  description: 'Creez des CV professionnels adaptes au marche de l\'emploi en Afrique de l\'Ouest. Paiement Mobile Money (Orange, Wave, MTN, Moov). Templates modernes et conseils IA.',
-  keywords: ['CV', 'curriculum vitae', 'Afrique', 'emploi', 'recrutement', 'Mobile Money', 'Orange Money', 'Wave', 'MTN', 'Moov', 'CinetPay'],
+  description: 'Creez des CV professionnels adaptes au marche de l\'emploi africain. Paiement Mobile Money (Orange, MTN, Moov). Templates modernes et conseils IA.',
+  keywords: ['CV', 'curriculum vitae', 'Afrique', 'emploi', 'recrutement', 'Mobile Money', 'Orange Money', 'MTN', 'Moov', 'CinetPay'],
   authors: [{ name: 'CVAfrik' }],
   creator: 'CVAfrik',
   openGraph: {
@@ -45,12 +48,12 @@ export const metadata: Metadata = {
     locale: 'fr_FR',
     url: 'https://cvafrik.com',
     siteName: 'CVAfrik',
-    title: 'CVAfrik - CV Professionnels pour l\'Afrique de l\'Ouest',
+    title: 'CVAfrik - CV Professionnels pour l\'Afrique',
     description: 'Creez des CV qui font la difference. Paiement Mobile Money accepte.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'CVAfrik - CV Professionnels pour l\'Afrique de l\'Ouest',
+    title: 'CVAfrik - CV Professionnels pour l\'Afrique',
     description: 'Creez des CV qui font la difference. Paiement Mobile Money accepte.',
   },
   robots: {
@@ -69,15 +72,15 @@ export const viewport: Viewport = {
   ],
 }
 
-import { ThemeProvider } from '@/components/theme-provider'
-
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const { locale } = await createTranslator()
+
   return (
-    <html lang="fr" className={`${inter.variable} ${geistMono.variable} ${syne.variable} ${dmSans.variable} bg-background`} suppressHydrationWarning>
+    <html lang={locale} className={`${inter.variable} ${geistMono.variable} ${syne.variable} ${dmSans.variable} bg-background`} suppressHydrationWarning>
       <body className="font-sans antialiased min-h-screen">
         <ThemeProvider
           attribute="class"
@@ -85,13 +88,15 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
-          <Toaster richColors position="top-center" />
-          <Script 
-            src="https://checkout.fedapay.com/js/checkout.js" 
-            strategy="beforeInteractive"
-          />
-          {process.env.NODE_ENV === 'production' && <Analytics />}
+          <LocaleProvider serverLocale={locale}>
+            {children}
+            <Toaster richColors position="top-center" />
+            <Script 
+              src="https://checkout.fedapay.com/js/checkout.js" 
+              strategy="beforeInteractive"
+            />
+            {process.env.NODE_ENV === 'production' && <Analytics />}
+          </LocaleProvider>
         </ThemeProvider>
       </body>
     </html>

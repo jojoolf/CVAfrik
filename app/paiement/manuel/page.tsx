@@ -158,8 +158,8 @@ function ManualPaymentContent() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label className="text-xs font-black uppercase text-slate-400 ml-1">Méthode utilisée</Label>
-              <div className="grid grid-cols-3 gap-2">
-                {["T-Money", "Moov", "Wave"].map((m) => (
+              <div className="grid grid-cols-2 gap-2">
+                {["T-Money", "Moov"].map((m) => (
                   <button
                     key={m}
                     type="button"

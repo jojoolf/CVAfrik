@@ -8,6 +8,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { Menu, FileText, LayoutDashboard, Sparkles, Star, FileSignature, MessageSquareCode, LifeBuoy } from 'lucide-react'
 import { UserNav } from '@/components/layout/user-nav'
 import { ModeToggle } from '@/components/layout/mode-toggle'
+import { LanguageSwitcher } from '@/components/language-switcher'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 
@@ -98,7 +99,8 @@ export function Navbar({ user }: NavbarProps) {
         </div>
 
         {/* Desktop Auth & Theme */}
-        <div className="hidden items-center gap-2 md:flex">
+        <div className="hidden items-center gap-1 md:flex">
+          <LanguageSwitcher />
           <ModeToggle />
           {user ? (
             <UserNav user={user} />
@@ -133,6 +135,7 @@ export function Navbar({ user }: NavbarProps) {
                     CV<span className="text-primary">Afrik</span>
                   </span>
                 </Link>
+                <LanguageSwitcher />
                 <ModeToggle />
               </div>
 

@@ -1,0 +1,191 @@
+{
+  "fr": {
+    "nav": {
+      "accueil": "Accueil",
+      "tarifs": "Tarifs",
+      "templates": "Templates",
+      "blog": "Blog",
+      "connexion": "Connexion",
+      "inscription": "Inscription",
+      "dashboard": "Mon espace",
+      "admin": "Admin",
+      "profil": "Mon profil",
+      "deconnexion": "Déconnexion",
+      "theme": "Thème",
+      "langue": "Langue"
+    },
+    "hero": {
+      "badge": "Sois parmi les premiers en Afrique",
+      "title": "Créez un CV qui vous",
+      "titleAccent": "ouvre des portes",
+      "subtitle": "La première plateforme de création de CV conçue pour le marché de l'emploi en Afrique. Templates professionnels, conseils IA et paiement Mobile Money.",
+      "feature1": "CV professionnels en 10 minutes",
+      "feature2": "Paiement Mobile Money",
+      "feature3": "Conseils IA personnalisés",
+      "cta": "Créer mon CV gratuitement",
+      "ctaTemplates": "Voir les templates"
+    },
+    "features": {
+      "title": "Tout ce qu'il vous faut",
+      "subtitle": "Des outils puissants pour booster votre carrière en Afrique"
+    },
+    "pricing": {
+      "title": "Des tarifs adaptés à tous",
+      "subtitle": "Choisissez le plan qui correspond à vos besoins",
+      "mensuel": "Mensuel",
+      "annuel": "Annuel",
+      "populaire": "Populaire",
+      "commencer": "Commencer"
+    },
+    "cta": {
+      "title": "Prêt à créer votre CV professionnel ?",
+      "subtitle": "Rejoignez de nombreux utilisateurs en Afrique qui ont déjà créé leur CV avec CVAfrik. Commencez gratuitement dès maintenant.",
+      "benefit1": "Inscription gratuite",
+      "benefit2": "Pas de carte bancaire requise",
+      "benefit3": "Premier CV offert",
+      "benefit4": "Paiement Mobile Money",
+      "button": "Créer mon CV gratuitement"
+    },
+    "dashboard": {
+      "title": "Mon espace",
+      "greeting": "Bonjour",
+      "cvs": "CV créés",
+      "lettres": "Lettres générées",
+      "simulations": "Simulations",
+      "mesFactures": "Mes factures",
+      "quickActions": "Actions rapides",
+      "createCV": "Créer un CV",
+      "createLetter": "Lettre de motivation",
+      "simulateInterview": "Simuler un entretien",
+      "support": "Aide & Support",
+      "passerPro": "Passer Pro",
+      "plan": "Plan"
+    }
+  },
+  "en": {
+    "nav": {
+      "accueil": "Home",
+      "tarifs": "Pricing",
+      "templates": "Templates",
+      "blog": "Blog",
+      "connexion": "Login",
+      "inscription": "Sign Up",
+      "dashboard": "Dashboard",
+      "admin": "Admin",
+      "profil": "My Profile",
+      "deconnexion": "Logout",
+      "theme": "Theme",
+      "langue": "Language"
+    },
+    "hero": {
+      "badge": "Be among the first in Africa",
+      "title": "Create a CV that",
+      "titleAccent": "opens doors",
+      "subtitle": "The first CV creation platform designed for the African job market. Professional templates, AI advice, and Mobile Money payment.",
+      "feature1": "Professional CVs in 10 minutes",
+      "feature2": "Mobile Money payment",
+      "feature3": "Personalized AI advice",
+      "cta": "Create my CV for free",
+      "ctaTemplates": "View templates"
+    },
+    "features": {
+      "title": "Everything you need",
+      "subtitle": "Powerful tools to boost your career in Africa"
+    },
+    "pricing": {
+      "title": "Pricing for everyone",
+      "subtitle": "Choose the plan that fits your needs",
+      "mensuel": "Monthly",
+      "annuel": "Yearly",
+      "populaire": "Popular",
+      "commencer": "Get started"
+    },
+    "cta": {
+      "title": "Ready to create your professional CV?",
+      "subtitle": "Join thousands of users in Africa who have already created their CV with CVAfrik. Start for free now.",
+      "benefit1": "Free registration",
+      "benefit2": "No credit card required",
+      "benefit3": "First CV free",
+      "benefit4": "Mobile Money payment",
+      "button": "Create my CV for free"
+    },
+    "dashboard": {
+      "title": "My Dashboard",
+      "greeting": "Hello",
+      "cvs": "CVs created",
+      "lettres": "Letters generated",
+      "simulations": "Simulations",
+      "mesFactures": "My invoices",
+      "quickActions": "Quick actions",
+      "createCV": "Create a CV",
+      "createLetter": "Cover letter",
+      "simulateInterview": "Interview simulator",
+      "support": "Help & Support",
+      "passerPro": "Go Pro",
+      "plan": "Plan"
+    }
+  },
+  "pt": {
+    "nav": {
+      "accueil": "Início",
+      "tarifs": "Preços",
+      "templates": "Modelos",
+      "blog": "Blog",
+      "connexion": "Entrar",
+      "inscription": "Cadastrar",
+      "dashboard": "Painel",
+      "admin": "Admin",
+      "profil": "Meu perfil",
+      "deconnexion": "Sair",
+      "theme": "Tema",
+      "langue": "Idioma"
+    },
+    "hero": {
+      "badge": "Seja um dos primeiros em África",
+      "title": "Crie um CV que",
+      "titleAccent": "abre portas",
+      "subtitle": "A primeira plataforma de criação de CV concebida para o mercado de trabalho em África. Modelos profissionais, conselhos de IA e pagamento Mobile Money.",
+      "feature1": "CVs profissionais em 10 minutos",
+      "feature2": "Pagamento Mobile Money",
+      "feature3": "Conselhos IA personalizados",
+      "cta": "Criar meu CV grátis",
+      "ctaTemplates": "Ver modelos"
+    },
+    "features": {
+      "title": "Tudo o que precisa",
+      "subtitle": "Ferramentas poderosas para impulsionar sua carreira em África"
+    },
+    "pricing": {
+      "title": "Preços para todos",
+      "subtitle": "Escolha o plano que se adequa às suas necessidades",
+      "mensuel": "Mensal",
+      "annuel": "Anual",
+      "populaire": "Popular",
+      "commencer": "Começar"
+    },
+    "cta": {
+      "title": "Pronto para criar seu CV profissional?",
+      "subtitle": "Junte-se a milhares de utilizadores em África que já criaram o seu CV com o CVAfrik. Comece grátis agora.",
+      "benefit1": "Cadastro gratuito",
+      "benefit2": "Sem cartão de crédito",
+      "benefit3": "Primeiro CV grátis",
+      "benefit4": "Pagamento Mobile Money",
+      "button": "Criar meu CV grátis"
+    },
+    "dashboard": {
+      "title": "Meu painel",
+      "greeting": "Olá",
+      "cvs": "CVs criados",
+      "lettres": "Cartas geradas",
+      "simulations": "Simulações",
+      "mesFactures": "Minhas faturas",
+      "quickActions": "Ações rápidas",
+      "createCV": "Criar um CV",
+      "createLetter": "Carta de apresentação",
+      "simulateInterview": "Simulador de entrevista",
+      "support": "Ajuda & Suporte",
+      "passerPro": "Tornar-se Pro",
+      "plan": "Plano"
+    }
+  }
+}

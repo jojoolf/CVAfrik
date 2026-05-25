@@ -110,6 +110,7 @@ export function PricingSection() {
               <h3 className="font-display text-xl font-bold">{p.name}</h3>
               <p className="mt-1 text-sm text-muted-foreground">{p.desc}</p>
 
+<<<<<<< HEAD
               <div className="mt-6 flex items-baseline gap-1">
                 <span className="text-5xl font-bold tracking-tight">
                   {(annual ? p.price.a : p.price.m).toLocaleString('fr-FR')}
@@ -117,6 +118,72 @@ export function PricingSection() {
                 <span className="text-sm text-muted-foreground">
                   FCFA{p.price.m > 0 && (annual ? ' / an' : ' / mois')}
                 </span>
+=======
+                <CardHeader className="text-center">
+                  <CardTitle className="text-xl">{plan.nom}</CardTitle>
+                  <CardDescription>{plan.description}</CardDescription>
+                  <div className="mt-4">
+                    <div className="flex items-baseline justify-center gap-1">
+                      <span className="text-4xl font-bold text-foreground">
+                        {prixFCFA.toLocaleString('fr-FR')}
+                      </span>
+                      <span className="text-muted-foreground text-sm font-medium"> FCFA</span>
+                    </div>
+                    {plan.prix_fcfa > 0 && (
+                      <div className="mt-2 space-y-1">
+                        <p className="text-sm font-medium text-primary">
+                          ~{isAnnual ? (prixUSD / 12).toFixed(2) : prixUSD}€ / mois
+                        </p>
+                        {isAnnual && (
+                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">
+                            Facture {prixFCFA.toLocaleString('fr-FR')} FCFA / an
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </CardHeader>
+
+                <CardContent className="flex-1">
+                  <ul className="space-y-3">
+                    {plan.fonctionnalites.map((feature) => (
+                      <li key={feature} className="flex items-start gap-2">
+                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                        <span className="text-sm text-muted-foreground">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+
+                <CardFooter>
+                  <Button
+                    className="w-full"
+                    variant={isPopular ? 'default' : 'outline'}
+                    asChild
+                  >
+                    <Link href={plan.id === 'gratuit' ? '/auth/inscription' : `/tarifs?plan=${plan.id}`}>
+                      {plan.id === 'gratuit' ? 'Commencer gratuitement' : 'Choisir ce plan'}
+                    </Link>
+                  </Button>
+                </CardFooter>
+              </Card>
+            )
+          })}
+        </div>
+
+        {/* Payment Methods */}
+        <div className="mt-12 text-center">
+          <p className="mb-4 text-sm text-muted-foreground">
+            Paiement securise par CinetPay
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            {['Orange Money', 'MTN Money', 'Moov Money', 'Flooz'].map((method) => (
+              <div
+                key={method}
+                className="rounded-full bg-card px-4 py-2 text-sm font-medium shadow-sm ring-1 ring-border"
+              >
+                {method}
+>>>>>>> ef2d9f0a052998b20d8c6cd7d437ecf368379218
               </div>
 
               <a

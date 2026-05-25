@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator'
 import { Check, Loader2, Shield, ArrowLeft } from 'lucide-react'
 import { toast } from 'sonner'
-import { type PlanConfig, PAYS_AFRIQUE_OUEST, OPERATEURS_MOBILE_MONEY } from '@/lib/types'
+import { type PlanConfig, PAYS_AFRIQUE, OPERATEURS_MOBILE_MONEY } from '@/lib/types'
 import Link from 'next/link'
 
 interface PaymentFormProps {
@@ -136,7 +136,7 @@ export function PaymentForm({ plan, userEmail, userId }: PaymentFormProps) {
                 </div>
                 <div className="mt-2 text-center">
                   <p className="font-semibold">Mobile Money</p>
-                  <p className="text-xs text-muted-foreground">Orange, Wave, MTN, Moov</p>
+                  <p className="text-xs text-muted-foreground">Orange, MTN, Moov</p>
                 </div>
               </Label>
             </div>
@@ -174,7 +174,7 @@ export function PaymentForm({ plan, userEmail, userId }: PaymentFormProps) {
                     <SelectValue placeholder="Selectionnez votre pays" />
                   </SelectTrigger>
                   <SelectContent>
-                    {PAYS_AFRIQUE_OUEST.map((pays) => (
+                    {PAYS_AFRIQUE.map((pays) => (
                       <SelectItem key={pays.code} value={pays.code}>
                         {pays.nom}
                       </SelectItem>

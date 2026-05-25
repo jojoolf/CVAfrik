@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { sendPaymentReceipt } from "@/lib/email";
+import { PLANS } from "@/lib/types";
 
 export async function POST(req: Request) {
   try {
@@ -8,12 +10,11 @@ export async function POST(req: Request) {
     const transaction = payload.entity;
 
     if (event === "transaction.approved") {
-      const { userId, planId } = transaction.metadata;
+      const { userId, planId, billing } = transaction.metadata;
 
-      // Initialize Supabase admin client
       const supabaseAdmin = createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_KEY!
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
       );
 
       // Update user profile
@@ -33,12 +34,39 @@ export async function POST(req: Request) {
       // Log transaction
       await supabaseAdmin.from("payments").insert({
         user_id: userId,
-        cinetpay_transaction_id: transaction.reference, // Using reference as transaction ID
+        cinetpay_transaction_id: transaction.reference,
         montant_fcfa: transaction.amount,
         plan_achete: planId,
         statut: "accepte",
         created_at: new Date().toISOString(),
       });
+
+      // Send email receipt
+      try {
+        const { data: user } = await supabaseAdmin.auth.admin.getUserById(userId);
+        const userEmail = user?.user?.email;
+        const userName = user?.user?.user_metadata?.full_name || userEmail?.split('@')[0] || 'Utilisateur';
+        const planInfo = PLANS.find(p => p.id === planId);
+        const planName = planInfo?.nom || planId;
+        const isAnnual = billing === 'annual';
+        const amount = isAnnual
+          ? `${(planInfo?.prix_annuel_fcfa || 0).toLocaleString()} FCFA`
+          : `${(planInfo?.prix_fcfa || 0).toLocaleString()} FCFA /mois`;
+
+        if (userEmail) {
+          await sendPaymentReceipt({
+            to: userEmail,
+            userName,
+            planName,
+            amount,
+            billing: isAnnual ? 'annual' : 'monthly',
+            transactionId: transaction.reference,
+            paymentMethod: 'Carte bancaire (FedaPay)',
+          });
+        }
+      } catch (emailError) {
+        console.error("Failed to send receipt email:", emailError);
+      }
 
       return NextResponse.json({ status: "success" });
     }

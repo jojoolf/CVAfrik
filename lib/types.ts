@@ -220,7 +220,7 @@ export const PLANS: PlanConfig[] = [
       filigrane: true,
       export_pdf: true,
       conseils_ia: false,
-      simulation_entretien: false,
+      simulation_entretien: true,
       suivi_candidatures: false,
       profil_linkedin: false,
       adaptation_offre: false,
@@ -237,7 +237,7 @@ export const PLANS: PlanConfig[] = [
     fonctionnalites: [
       'CV illimités',
       'Lettres de motivation illimitées',
-      '15+ templates premium',
+      '45+ templates premium',
       'Export PDF sans watermark',
       'Score ATS détaillé + conseils',
       'Simulateur entretien illimité',
@@ -293,8 +293,8 @@ export const PLANS: PlanConfig[] = [
   },
 ]
 
-// Pays d'Afrique supportes
-export const PAYS_AFRIQUE_OUEST = [
+// Tous les pays d'Afrique supportes
+export const PAYS_AFRIQUE = [
   { code: 'BJ', nom: 'Benin', indicatif: '+229' },
   { code: 'BF', nom: 'Burkina Faso', indicatif: '+226' },
   { code: 'CI', nom: 'Cote d\'Ivoire', indicatif: '+225' },
@@ -314,6 +314,6 @@ export const OPERATEURS_MOBILE_MONEY = [
   { id: 'orange', nom: 'Orange Money', pays: ['CI', 'SN', 'ML', 'BF', 'GN', 'CM'] },
   { id: 'mtn', nom: 'MTN Mobile Money', pays: ['CI', 'BJ', 'CM', 'CG', 'GN'] },
   { id: 'moov', nom: 'Moov Money', pays: ['CI', 'BJ', 'TG', 'NE', 'BF'] },
-  { id: 'wave', nom: 'Wave', pays: ['SN', 'CI', 'ML', 'BF'] },
   { id: 'flooz', nom: 'Flooz', pays: ['TG', 'BJ'] },
 ]
+

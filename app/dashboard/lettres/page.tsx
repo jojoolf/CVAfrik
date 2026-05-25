@@ -13,7 +13,7 @@ import { fr } from 'date-fns/locale'
 export default async function LettresPage({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | string[] | undefined }
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -22,7 +22,9 @@ export default async function LettresPage({
     redirect('/auth/connexion')
   }
 
-  const isCreating = searchParams.new === 'true'
+  const resolvedSearchParams = await searchParams
+  const newParam = resolvedSearchParams?.new
+  const isCreating = Array.isArray(newParam) ? newParam.includes('true') : newParam === 'true'
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -52,7 +54,7 @@ export default async function LettresPage({
   const generatedThisMonth = lettres?.filter(l => new Date(l.created_at) >= currentMonthStart).length || 0
   const resolvedPlanInfo = await planInfo
   const letterLimit = resolvedPlanInfo.limites.lettres_par_mois
-  const limitReached = generatedThisMonth >= letterLimit
+  const limitReached = letterLimit !== null && generatedThisMonth >= letterLimit
 
   if (isCreating && limitReached) {
     redirect('/tarifs?locked=lettres')
@@ -88,11 +90,11 @@ export default async function LettresPage({
                   Generer une nouvelle lettre
                 </CardTitle>
                 <CardDescription>
-                  Remplissez les informations ci-dessous pour que l&apos;IA redige votre lettre.
+                  Remplissez une seule fois le formulaire et comparez 3 lettres generees par l&apos;IA.
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <LettreGeneratorForm cvs={cvs || []} profile={profile} />
+                <LettreGeneratorForm cvs={cvs || []} />
               </CardContent>
             </Card>
           ) : (

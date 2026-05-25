@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { sendPaymentReceipt } from "@/lib/email";
+import { PLANS } from "@/lib/types";
 
 export async function POST(req: Request) {
   try {
@@ -7,7 +9,6 @@ export async function POST(req: Request) {
     const transactionId = formData.get("cpm_trans_id");
     const siteId = formData.get("cpm_site_id");
 
-    // Verification with CinetPay
     const checkResponse = await fetch("https://api-checkout.cinetpay.com/v2/payment/check", {
       method: "POST",
       headers: {
@@ -24,15 +25,13 @@ export async function POST(req: Request) {
 
     if (checkData.code === "00" && checkData.data.status === "ACCEPTED") {
       const metadata = JSON.parse(checkData.data.metadata);
-      const { userId, planId } = metadata;
+      const { userId, planId, billing } = metadata;
 
-      // Initialize Supabase admin client to bypass RLS
       const supabaseAdmin = createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_KEY!
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
       );
 
-      // Update user profile plan
       const { error: updateError } = await supabaseAdmin
         .from("profiles")
         .update({
@@ -46,7 +45,6 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "Database update failed" }, { status: 500 });
       }
 
-      // Log transaction
       await supabaseAdmin.from("payments").insert({
         user_id: userId,
         cinetpay_transaction_id: transactionId,
@@ -55,6 +53,33 @@ export async function POST(req: Request) {
         statut: "accepte",
         created_at: new Date().toISOString(),
       });
+
+      // Send email receipt
+      try {
+        const { data: user } = await supabaseAdmin.auth.admin.getUserById(userId);
+        const userEmail = user?.user?.email;
+        const userName = user?.user?.user_metadata?.full_name || userEmail?.split('@')[0] || 'Utilisateur';
+        const planInfo = PLANS.find(p => p.id === planId);
+        const planName = planInfo?.nom || planId;
+        const isAnnual = billing === 'annual';
+        const amount = isAnnual
+          ? `${(planInfo?.prix_annuel_fcfa || 0).toLocaleString()} FCFA`
+          : `${(planInfo?.prix_fcfa || 0).toLocaleString()} FCFA /mois`;
+
+        if (userEmail) {
+          await sendPaymentReceipt({
+            to: userEmail,
+            userName,
+            planName,
+            amount,
+            billing: isAnnual ? 'annual' : 'monthly',
+            transactionId: transactionId as string,
+            paymentMethod: 'Mobile Money (CinetPay)',
+          });
+        }
+      } catch (emailError) {
+        console.error("Failed to send receipt email:", emailError);
+      }
 
       return NextResponse.json({ status: "success" });
     }

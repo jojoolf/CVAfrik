@@ -4,9 +4,10 @@ import { HeroSection } from '@/components/landing/hero-section'
 import { FeaturesSection } from '@/components/landing/features-section'
 import { TemplatesSection } from '@/components/landing/templates-section'
 import { PricingSection } from '@/components/landing/pricing-section'
-import { TestimonialsSection } from '@/components/landing/testimonials-section'
 import { CTASection } from '@/components/landing/cta-section'
 import { createClient } from '@/lib/supabase/server'
+
+export const dynamic = 'force-dynamic'
 
 export default async function HomePage() {
   const supabase = await createClient()
@@ -20,7 +21,6 @@ export default async function HomePage() {
         <FeaturesSection />
         <TemplatesSection />
         <PricingSection />
-        <TestimonialsSection />
         <CTASection />
       </main>
       <Footer />

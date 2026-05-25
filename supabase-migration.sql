@@ -147,3 +147,12 @@ CREATE TABLE IF NOT EXISTS support_tickets (
   priorite TEXT DEFAULT 'normale',
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Admin activity logs
+CREATE TABLE IF NOT EXISTS admin_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  admin_email TEXT NOT NULL,
+  action TEXT NOT NULL,
+  details JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);

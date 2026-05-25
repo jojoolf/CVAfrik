@@ -10,7 +10,7 @@ import {
 const faqs = [
   {
     question: 'Comment fonctionne le paiement par Mobile Money ou Carte ?',
-    answer: 'C\'est très simple. Après avoir choisi votre plan, vous pourrez payer instantanément via Orange Money, Wave, MTN, Moov ou par Carte Bancaire (Visa/Mastercard). L\'activation de votre plan est immédiate dès la validation de la transaction.',
+    answer: 'C\'est très simple. Après avoir choisi votre plan, vous pourrez payer instantanément via Orange Money, MTN Mobile Money, Moov ou par Carte Bancaire (Visa/Mastercard). L\'activation de votre plan est immédiate dès la validation de la transaction.',
   },
   {
     question: 'Puis-je annuler mon abonnement à tout moment ?',

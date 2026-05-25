@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { FileText, FileSignature, MessageSquareCode, LifeBuoy, ArrowRight, Crown, TrendingUp, Sparkles, Clock } from 'lucide-react'
+import { FileText, FileSignature, MessageSquareCode, LifeBuoy, ArrowRight, Crown, TrendingUp, Sparkles, Clock, Receipt } from 'lucide-react'
 import { Navbar } from '@/components/layout/navbar'
 import { Footer } from '@/components/layout/footer'
 import { Button } from '@/components/ui/button'
@@ -11,6 +11,8 @@ import { createClient } from '@/lib/supabase/server'
 import { PLANS } from '@/lib/types'
 import { NewsletterPopup } from '@/components/newsletter-popup'
 import { CVActions } from '@/components/dashboard/cv-actions'
+import { CVAnalyzeButton } from '@/components/dashboard/cv-analyze-button'
+import { OnboardingTour } from '@/components/onboarding-tour'
 
 export const metadata: Metadata = {
   title: 'Mon espace',
@@ -114,6 +116,7 @@ export default async function DashboardPage() {
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar user={user} />
+      <OnboardingTour />
       <NewsletterPopup userEmail={user.email} userName={profile?.prenom || ''} />
       <main className="flex-1 bg-gradient-to-b from-secondary/40 to-background pb-20">
         <div className="container mx-auto max-w-6xl px-4 py-10 md:py-14">
@@ -213,6 +216,26 @@ export default async function DashboardPage() {
             </div>
           </div>
 
+          {/* Lien factures */}
+          <div className="mb-12">
+            <Link href="/dashboard/factures">
+              <Card className="group cursor-pointer border-dashed border-border/50 transition-all duration-300 hover:border-primary/40 hover:shadow-md hover:-translate-y-0.5">
+                <CardContent className="flex items-center justify-between p-5">
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/80 text-white shadow-sm">
+                      <Receipt className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">Mes factures</h3>
+                      <p className="text-xs text-muted-foreground">Historique de vos paiements et abonnements</p>
+                    </div>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
+
           {/* Mes CV recents */}
           <section>
             <div className="mb-4 flex items-center justify-between">
@@ -250,28 +273,35 @@ export default async function DashboardPage() {
                       <Card className="group transition-all duration-200 hover:border-primary/40 hover:shadow-md hover:-translate-y-0.5">
                         <CardHeader className="pb-2">
                           <div className="flex items-start justify-between">
-                            <CardTitle className="text-base font-medium group-hover:text-primary transition-colors">
-                              {cv.titre || 'Sans titre'}
-                            </CardTitle>
-                            <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                          </div>
-                          <CardDescription className="text-xs flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            Modifie le{' '}
-                            {cv.updated_at
-                              ? new Date(cv.updated_at).toLocaleDateString('fr-FR', {
-                                  day: 'numeric',
-                                  month: 'short',
-                                  year: 'numeric',
-                                })
-                              : '—'}
-                          </CardDescription>
-                        </CardHeader>
-                      </Card>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+              <CardTitle className="text-base font-medium group-hover:text-primary transition-colors">
+                {cv.titre || 'Sans titre'}
+              </CardTitle>
+              <div className="flex items-center gap-1">
+                <CVAnalyzeButton
+                  cvId={cv.id}
+                  userEmail={user.email}
+                  userName={displayName}
+                />
+                <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
+            </div>
+            <CardDescription className="text-xs flex items-center gap-1">
+              <Clock className="h-3 w-3" />
+              Modifie le{' '}
+              {cv.updated_at
+                ? new Date(cv.updated_at).toLocaleDateString('fr-FR', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric',
+                  })
+                : '—'}
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </Link>
+    </li>
+  ))}
+</ul>
             )}
           </section>
         </div>

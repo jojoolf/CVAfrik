@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
+import { ImageUpload } from '@/components/admin/image-upload'
 import { ArrowLeft, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -27,6 +28,7 @@ export default function ModifierPost({ params }: ModifierPostProps) {
   const [imageUrl, setImageUrl] = useState('')
   const [contenu, setContenu] = useState('')
   const [publie, setPublie] = useState(true)
+  const [slug, setSlug] = useState('')
 
   useEffect(() => {
     async function loadPost() {
@@ -48,6 +50,7 @@ export default function ModifierPost({ params }: ModifierPostProps) {
       setImageUrl(post.image_url || '')
       setContenu(post.contenu)
       setPublie(post.publie)
+      setSlug(post.slug)
       setLoading(false)
     }
 
@@ -78,6 +81,25 @@ export default function ModifierPost({ params }: ModifierPostProps) {
         .eq('id', resolvedParams.id)
 
       if (error) throw error
+
+      // Envoyer la newsletter si l'article est publié
+      if (publie) {
+        fetch('/api/newsletter/send-blog', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title: titre, slug, category: categorie }),
+        }).catch(() => {})
+      }
+
+      // Log admin action
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        fetch('/api/admin/logs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ adminEmail: user.email, action: 'update_post', details: { title: titre, category: categorie, published: publie } }),
+        }).catch(() => {})
+      }
 
       toast.success('Article mis à jour avec succès !')
       router.push('/admin')
@@ -130,8 +152,9 @@ export default function ModifierPost({ params }: ModifierPostProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="image">URL de l'image (Optionnel)</Label>
-          <Input id="image" value={imageUrl} onChange={e => setImageUrl(e.target.value)} placeholder="https://exemple.com/image.jpg" />
+          <Label>Image de l'article (Optionnel)</Label>
+          <ImageUpload value={imageUrl} onChange={setImageUrl} />
+          <p className="text-xs text-muted-foreground">Formats acceptes : PNG, JPG, WEBP. Max 5 Mo.</p>
         </div>
 
         <div className="space-y-2">

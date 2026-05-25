@@ -67,7 +67,7 @@ export function TestimonialsSection() {
           </p>
           <div className="mt-6">
             <Button variant="outline" asChild className="rounded-full font-bold">
-              <Link href="/avis">Donner mon avis</Link>
+
             </Button>
           </div>
         </div>

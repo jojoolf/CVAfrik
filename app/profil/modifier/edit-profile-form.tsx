@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertCircle, CheckCircle2, Loader2, Save, User, Calendar, Phone, MapPin, Globe } from 'lucide-react'
-import { Profile, PAYS_AFRIQUE_OUEST } from '@/lib/types'
+import { Profile, PAYS_AFRIQUE } from '@/lib/types'
 
 interface EditProfileFormProps {
   initialProfile: Partial<Profile>
@@ -134,7 +134,7 @@ export function EditProfileForm({ initialProfile, userId }: EditProfileFormProps
               value={formData.pays}
               onChange={(e) => setFormData({ ...formData, pays: e.target.value })}
             >
-              {PAYS_AFRIQUE_OUEST.map((p) => (
+              {PAYS_AFRIQUE.map((p) => (
                 <option key={p.code} value={p.code}>
                   {p.nom} ({p.indicatif})
                 </option>

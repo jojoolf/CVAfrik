@@ -7,7 +7,8 @@ import { createClient } from '@/lib/supabase/server'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { ArrowLeft, Calendar, BookOpen, Briefcase, GraduationCap } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
+
+export const revalidate = 3600
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -15,24 +16,32 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const resolvedParams = await params
-  const supabase = await createClient()
+  const supabase = createClient()
   const { data: post } = await supabase
     .from('blog_posts')
-    .select('titre, contenu')
+    .select('titre, contenu, categorie, image_url')
     .eq('slug', resolvedParams.slug)
     .single()
 
   if (!post) return { title: 'Article introuvable | CVAfrik' }
 
+  const description = post.contenu.substring(0, 160).replace(/<[^>]*>?/gm, '')
+
   return {
     title: `${post.titre} | Blog CVAfrik`,
-    description: post.contenu.substring(0, 160).replace(/<[^>]*>?/gm, ''),
+    description,
+    openGraph: {
+      title: post.titre,
+      description,
+      type: post.categorie === 'offres-emploi' ? 'article' : 'website',
+      ...(post.image_url && { images: [{ url: post.image_url }] }),
+    },
   }
 }
 
 export default async function BlogPostPage({ params }: PageProps) {
   const resolvedParams = await params
-  const supabase = await createClient()
+  const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   const { data: post } = await supabase
@@ -56,14 +65,42 @@ export default async function BlogPostPage({ params }: PageProps) {
 
   const getCategoryLabel = (category: string) => {
     switch (category) {
-      case 'offres-emploi': return 'Offre d\'emploi'
+      case 'offres-emploi': return "Offre d'emploi"
       case 'stages': return 'Stage'
       default: return 'Conseils & Carrière'
     }
   }
 
+  const isJobOffer = post.categorie === 'offres-emploi' || post.categorie === 'stages'
+
+  const jobSchema = isJobOffer ? {
+    '@context': 'https://schema.org',
+    '@type': 'JobPosting',
+    title: post.titre,
+    description: post.contenu.replace(/<[^>]*>?/gm, '').substring(0, 500),
+    datePosted: post.created_at,
+    url: `https://cv-afrik.vercel.app/blog/${post.slug}`,
+    ...(post.image_url && { image: post.image_url }),
+    hiringOrganization: {
+      '@type': 'Organization',
+      name: 'CVAfrik',
+    },
+    jobLocationType: 'TELECOMMUTE',
+    employmentType: post.categorie === 'stages' ? 'INTERN' : 'FULL_TIME',
+    applicantLocationRequirements: {
+      '@type': 'Country',
+      name: 'CI',
+    },
+  } : null
+
   return (
     <div className="flex min-h-screen flex-col">
+      {jobSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jobSchema) }}
+        />
+      )}
       <Navbar user={user} />
       
       <main className="flex-1 bg-background pb-20 pt-10">

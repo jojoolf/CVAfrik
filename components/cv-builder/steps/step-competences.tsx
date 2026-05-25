@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { Plus, Trash2, Star, Languages, X } from 'lucide-react'
+import { Plus, Trash2, Star, Languages, X, Sparkles, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 import type { CVDonnees, Competence, Langue } from '@/lib/types'
 
 interface StepCompetencesProps {
@@ -38,6 +39,7 @@ const niveauxLangue = [
 
 export function StepCompetences({ data, onUpdate }: StepCompetencesProps) {
   const [newCompetence, setNewCompetence] = useState({ nom: '', niveau: 'intermediaire' as Competence['niveau'], categorie: 'technique' as Competence['categorie'] })
+  const [suggesting, setSuggesting] = useState(false)
   const [newLangue, setNewLangue] = useState({ nom: '', niveau: 'intermediaire' as Langue['niveau'] })
   const [newInteret, setNewInteret] = useState('')
 
@@ -130,6 +132,50 @@ export function StepCompetences({ data, onUpdate }: StepCompetencesProps) {
             Competences
           </CardTitle>
           <CardDescription>Ajoutez vos competences techniques et soft skills</CardDescription>
+          {data.informations_personnelles?.titre_professionnel && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-2 gap-1.5 border-primary/30 text-primary hover:bg-primary/5"
+              onClick={async () => {
+                setSuggesting(true)
+                try {
+                  const res = await fetch('/api/cv/suggest-skills', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ jobTitle: data.informations_personnelles.titre_professionnel }),
+                  })
+                  const result = await res.json()
+                  if (result.success && result.competences?.length) {
+                    const newSkills = result.competences.filter((s: string) => !data.competences.some(c => c.nom.toLowerCase() === s.toLowerCase()))
+                    if (newSkills.length > 0) {
+                      onUpdate({
+                        competences: [
+                          ...data.competences,
+                          ...newSkills.map((nom: string) => ({
+                            id: crypto.randomUUID(),
+                            nom,
+                            niveau: 'intermediaire' as Competence['niveau'],
+                            categorie: 'technique' as Competence['categorie'],
+                          })),
+                        ],
+                      })
+                      toast.success(`${newSkills.length} competences suggerees ajoutees !`)
+                    } else {
+                      toast('Toutes les competences suggerees sont deja dans votre liste')
+                    }
+                  }
+                } catch {
+                  toast.error('Erreur lors de la suggestion')
+                }
+                setSuggesting(false)
+              }}
+              disabled={suggesting}
+            >
+              {suggesting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+              {suggesting ? 'Analyse...' : `Suggérer pour ${data.informations_personnelles.titre_professionnel}`}
+            </Button>
+          )}
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-3">
