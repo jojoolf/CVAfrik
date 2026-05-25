@@ -3,12 +3,12 @@
 import { motion } from 'framer-motion'
 
 const templates = [
-  { name: 'Dakar', tag: 'Moderne', gradient: 'from-amber-500/40 to-orange-700/40' },
-  { name: 'Lagos', tag: 'Tech', gradient: 'from-emerald-500/40 to-teal-700/40' },
-  { name: 'Abidjan', tag: 'Créatif', gradient: 'from-rose-500/40 to-fuchsia-700/40' },
-  { name: 'Nairobi', tag: 'Corporate', gradient: 'from-sky-500/40 to-indigo-700/40' },
-  { name: 'Casablanca', tag: 'Élégant', gradient: 'from-yellow-500/40 to-amber-700/40' },
-  { name: 'Kigali', tag: 'Minimal', gradient: 'from-stone-400/40 to-stone-700/40' },
+  { name: 'Classique', tag: 'Intemporel', gradient: 'from-amber-500/40 to-orange-700/40' },
+  { name: 'Moderne', tag: 'Contemporain', gradient: 'from-emerald-500/40 to-teal-700/40' },
+  { name: 'Créatif', tag: 'Artistique', gradient: 'from-rose-500/40 to-fuchsia-700/40' },
+  { name: 'Exécutif', tag: 'Élégant', gradient: 'from-yellow-500/40 to-amber-700/40' },
+  { name: 'Tech', tag: 'Développeur', gradient: 'from-sky-500/40 to-indigo-700/40' },
+  { name: 'Minimal', tag: 'Essentiel', gradient: 'from-stone-400/40 to-stone-700/40' },
 ]
 
 function MockCV({ gradient }: { gradient: string }) {
