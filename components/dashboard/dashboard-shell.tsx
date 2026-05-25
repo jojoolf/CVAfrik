@@ -18,6 +18,8 @@ import {
   Settings,
   Crown,
   Sparkles,
+  BookOpen,
+  CreditCard,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -57,9 +59,19 @@ const sidebarLinks = [
     icon: MessageSquareCode,
   },
   {
+    label: 'Blog',
+    href: '/blog',
+    icon: BookOpen,
+  },
+  {
     label: 'Aide & Support',
     href: '/dashboard/support',
     icon: LifeBuoy,
+  },
+  {
+    label: 'Tarifs',
+    href: '/tarifs',
+    icon: CreditCard,
   },
 ]
 
