@@ -1,6 +1,7 @@
 import { Navbar } from '@/components/layout/navbar'
 import { Footer } from '@/components/layout/footer'
 import { HeroSection } from '@/components/landing/hero-section'
+import { MobileMoneySection } from '@/components/landing/mobile-money-section'
 import { FeaturesSection } from '@/components/landing/features-section'
 import { TemplatesSection } from '@/components/landing/templates-section'
 import { PricingSection } from '@/components/landing/pricing-section'
@@ -18,6 +19,7 @@ export default async function HomePage() {
       <Navbar user={user} />
       <main className="flex-1">
         <HeroSection />
+        <MobileMoneySection />
         <FeaturesSection />
         <TemplatesSection />
         <PricingSection />

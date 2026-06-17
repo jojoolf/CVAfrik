@@ -10,6 +10,11 @@ import { CVPreviewStartup } from './cv-preview-startup'
 import { CVPreviewLuxe } from './cv-preview-luxe'
 import { CVPreviewElite } from './cv-preview-elite'
 import { CVPreviewDesign } from './cv-preview-design'
+import { CVPreviewPremiumFinance } from './cv-preview-premium-finance'
+import { CVPreviewPremiumTech } from './cv-preview-premium-tech'
+import { CVPreviewPremiumMarketing } from './cv-preview-premium-marketing'
+import { CVPreviewPremiumStudent } from './cv-preview-premium-student'
+import { CVPreviewPremiumExecutive } from './cv-preview-premium-executive'
 
 export type TemplatePlan = 'gratuit' | 'pro' | 'premium'
 
@@ -29,6 +34,11 @@ type BaseTemplateId =
   | 'luxe'
   | 'elite'
   | 'design'
+  | 'premium_finance'
+  | 'premium_tech'
+  | 'premium_marketing'
+  | 'premium_student'
+  | 'premium_executive'
 
 interface BaseTemplateDefinition {
   id: BaseTemplateId
@@ -69,6 +79,11 @@ const BASE_TEMPLATE_DEFINITIONS: BaseTemplateDefinition[] = [
   { id: 'luxe', name: 'Luxe', description: 'Raffine et premium', plans: ['premium'], color: 'bg-amber-600' },
   { id: 'elite', name: 'Elite', description: 'Premium avec photo', plans: ['premium'], color: 'bg-[#0B1E36]' },
   { id: 'design', name: 'Design', description: 'Esthetique chaleureux', plans: ['pro', 'premium'], color: 'bg-[#8B7355]' },
+  { id: 'premium_finance', name: 'Premium Finance', description: 'Cible banque & finance', plans: ['premium'], color: 'bg-[#1e3a8a]' },
+  { id: 'premium_tech', name: 'Premium Tech', description: 'Cible developpeurs & IT', plans: ['premium'], color: 'bg-cyan-500' },
+  { id: 'premium_marketing', name: 'Premium Marketing', description: 'Cible marketing & com', plans: ['premium'], color: 'bg-purple-600' },
+  { id: 'premium_student', name: 'Premium Student', description: 'Cible etudiants & juniors', plans: ['premium'], color: 'bg-indigo-600' },
+  { id: 'premium_executive', name: 'Premium Executive', description: 'Cible directeurs & cadres', plans: ['premium'], color: 'bg-[#111827]' },
 ]
 
 const STYLE_PRESETS: StylePresetDefinition[] = [
@@ -185,6 +200,11 @@ const baseRendererById: Record<BaseTemplateId, (props: CVTemplateProps) => React
   luxe: CVPreviewLuxe,
   elite: CVPreviewElite,
   design: CVPreviewDesign,
+  premium_finance: CVPreviewPremiumFinance,
+  premium_tech: CVPreviewPremiumTech,
+  premium_marketing: CVPreviewPremiumMarketing,
+  premium_student: CVPreviewPremiumStudent,
+  premium_executive: CVPreviewPremiumExecutive,
 }
 
 function renderFromConfig(config: TemplateCatalogItem, props: CVTemplateProps) {

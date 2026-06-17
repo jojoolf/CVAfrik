@@ -40,7 +40,7 @@ export function Navbar({ user }: NavbarProps) {
     fetchProfile()
   }, [user])
 
-  const getNavigation = () => {
+  const getNavigation = (): { name: string; href: string; icon?: any }[] => {
     if (!user) {
       return [
         { name: 'Fonctionnalités', href: '/#fonctionnalites' },
@@ -61,7 +61,7 @@ export function Navbar({ user }: NavbarProps) {
 
     return [
       ...baseMenu,
-      { name: 'Modèles', href: '/templates' },
+      { name: 'Modèles', href: '/templates', icon: undefined },
       { name: 'Support', href: '/dashboard/support', icon: LifeBuoy },
     ]
   }

@@ -3,13 +3,19 @@
 import React, { useState } from "react";
 import ClassicTemplate from "@/components/templates/ClassicTemplate";
 import ModernTemplate from "@/components/templates/ModernTemplate";
+import { CVPreviewPremiumFinance } from "@/components/cv-builder/templates/cv-preview-premium-finance";
+import { CVPreviewPremiumTech } from "@/components/cv-builder/templates/cv-preview-premium-tech";
+import { CVPreviewPremiumMarketing } from "@/components/cv-builder/templates/cv-preview-premium-marketing";
+import { CVPreviewPremiumStudent } from "@/components/cv-builder/templates/cv-preview-premium-student";
+import { CVPreviewPremiumExecutive } from "@/components/cv-builder/templates/cv-preview-premium-executive";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
-import { Layout, Grid, List, Sparkles, ChevronLeft, ChevronRight, Download, Eye } from "lucide-react";
+import { Layout, Grid, List, Sparkles, ChevronLeft, ChevronRight, Download, Eye, Lock } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import type { CVDonnees } from "@/lib/types";
 
-const mockData = {
+const mockDataLegacy = {
   profile: {
     first_name: "Amina",
     last_name: "Coulibaly",
@@ -48,16 +54,101 @@ const mockData = {
   skills: ["Droit OHADA", "Contrats Internationaux", "Négociation", "Arbitrage", "Conformité", "Anglais Juridique"],
 };
 
+const mockDataV2: CVDonnees = {
+  informations_personnelles: {
+    prenom: "Amina",
+    nom: "Coulibaly",
+    email: "amina.coulibaly@email.com",
+    telephone: "+228 90 00 00 00",
+    adresse: "Lomé, Togo",
+    linkedin: "linkedin.com/in/amina-coulibaly",
+  },
+  titre_professionnel: "Juriste d'Affaires Senior",
+  resume: "Juriste passionnée avec plus de 8 ans d'expérience dans le conseil juridique aux entreprises en Afrique. Spécialisée en droit OHADA, contrats commerciaux et conformité réglementaire. Excellente capacité d'analyse et de négociation.",
+  experiences: [
+    {
+      id: "1",
+      poste: "Responsable Juridique",
+      entreprise: "Cabinet Juridique & Co",
+      ville: "Lomé",
+      pays: "Togo",
+      date_debut: "2019-01",
+      date_fin: "",
+      en_cours: true,
+      description: "Supervision de la conformité légale pour plus de 50 clients corporatifs.",
+      realisations: [
+        "Rédaction et négociation de contrats complexes internationaux.",
+        "Gestion des litiges commerciaux et représentation devant les tribunaux."
+      ]
+    },
+    {
+      id: "2",
+      poste: "Conseiller Juridique Junior",
+      entreprise: "Africa Bank Group",
+      ville: "Dakar",
+      pays: "Sénégal",
+      date_debut: "2015-06",
+      date_fin: "2019-12",
+      en_cours: false,
+      description: "Revue des garanties bancaires et des contrats de prêt.",
+      realisations: [
+        "Veille juridique sur les évolutions réglementaires de la BCEAO.",
+        "Support au secrétariat du conseil d'administration."
+      ]
+    }
+  ],
+  formations: [
+    {
+      id: "1",
+      diplome: "Master 2 en Droit des Affaires",
+      etablissement: "Université de Lomé",
+      ville: "Lomé",
+      pays: "Togo",
+      date_debut: "2013-10",
+      date_fin: "2015-07",
+      en_cours: false
+    },
+    {
+      id: "2",
+      diplome: "Licence en Droit Privé",
+      etablissement: "Université de Dakar",
+      ville: "Dakar",
+      pays: "Sénégal",
+      date_debut: "2010-10",
+      date_fin: "2013-07",
+      en_cours: false
+    }
+  ],
+  competences: [
+    { id: "1", nom: "Droit OHADA", niveau: "expert", categorie: "technique" },
+    { id: "2", nom: "Contrats Internationaux", niveau: "expert", categorie: "technique" },
+    { id: "3", nom: "Négociation", niveau: "avance", categorie: "technique" },
+    { id: "4", nom: "Conformité", niveau: "avance", categorie: "technique" }
+  ],
+  langues: [
+    { id: "1", nom: "Français", niveau: "natif" },
+    { id: "2", nom: "Anglais", niveau: "courant" }
+  ],
+  certifications: [
+    { id: "1", nom: "Certification Conformité Africaine", organisme: "Institut de Conformité", date_obtention: "2020-11" }
+  ]
+};
+
 const templates = [
-  { id: "classic", name: "Classique Professional", component: ClassicTemplate, desc: "Sobre, élégant et intemporel." },
-  { id: "modern", name: "Modern Sidebar", component: ModernTemplate, desc: "Contemporain, dynamique et structuré." },
+  { id: "classic", name: "Classique Professional", component: ClassicTemplate, desc: "Sobre, élégant et intemporel.", isPremium: false, isNewV2: false },
+  { id: "modern", name: "Modern Sidebar", component: ModernTemplate, desc: "Contemporain, dynamique et structuré.", isPremium: false, isNewV2: false },
+  { id: "premium_finance", name: "Premium Finance", component: CVPreviewPremiumFinance, desc: "Design marine et or, parfait pour la banque et finance.", isPremium: true, isNewV2: true },
+  { id: "premium_tech", name: "Premium Tech", component: CVPreviewPremiumTech, desc: "Design moderne avec dégradés pour profils tech.", isPremium: true, isNewV2: true },
+  { id: "premium_marketing", name: "Premium Marketing", component: CVPreviewPremiumMarketing, desc: "Créatif avec dégradé et frise chronologique.", isPremium: true, isNewV2: true },
+  { id: "premium_student", name: "Premium Student", component: CVPreviewPremiumStudent, desc: "Valorise la formation, idéal étudiants et jeunes diplômés.", isPremium: true, isNewV2: true },
+  { id: "premium_executive", name: "Premium Executive", component: CVPreviewPremiumExecutive, desc: "Thème sombre luxueux avec accents dorés pour directeurs.", isPremium: true, isNewV2: true }
 ];
 
 export default function TemplatesPage() {
   const [selectedTemplate, setSelectedTemplate] = useState(templates[0]);
   const [viewMode, setViewMode] = useState<"desktop" | "mobile">("desktop");
 
-  const ActiveTemplate = selectedTemplate.component;
+  const ActiveTemplate = selectedTemplate.component as any;
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -75,18 +166,23 @@ export default function TemplatesPage() {
               </p>
             </div>
 
-            <div className="flex bg-muted p-1.5 rounded-2xl border border-border">
+            <div className="flex flex-wrap bg-muted p-1.5 rounded-2xl border border-border gap-1 max-w-full">
               {templates.map((t) => (
                 <button
                   key={t.id}
                   onClick={() => setSelectedTemplate(t)}
-                  className={`px-6 py-3 rounded-xl text-sm font-black transition-all ${
+                  className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center gap-1.5 ${
                     selectedTemplate.id === t.id 
                       ? "bg-background text-foreground shadow-sm" 
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   {t.name}
+                  {t.isPremium && (
+                    <span className="bg-amber-500 text-black text-[9px] font-extrabold px-1.5 py-0.5 rounded-md flex items-center gap-0.5">
+                      <Lock size={8} /> PREM
+                    </span>
+                  )}
                 </button>
               ))}
             </div>
@@ -121,7 +217,7 @@ export default function TemplatesPage() {
               <div className="bg-primary text-primary-foreground rounded-3xl p-8 shadow-2xl shadow-primary/20">
                 <h4 className="font-black mb-2">Plan Premium</h4>
                 <p className="text-primary-foreground/80 text-xs mb-6 leading-relaxed">
-                  Débloquez 5 autres templates exclusifs et le scoring IA en passant au plan Premium.
+                  Débloquez tous nos templates exclusifs et le scoring IA en passant au plan Premium.
                 </p>
                 <Button variant="secondary" className="w-full font-black text-xs h-11" asChild>
                   <Link href="/tarifs">Mettre à niveau</Link>
@@ -132,7 +228,10 @@ export default function TemplatesPage() {
             {/* Preview Panel */}
             <div className="lg:col-span-9">
               <div className="bg-muted/20 border border-border rounded-[2.5rem] p-4 md:p-12 overflow-hidden shadow-sm">
-                <div className="flex justify-center mb-8">
+                <div className="flex justify-between items-center mb-8">
+                  <p className="text-xs text-muted-foreground font-semibold italic max-w-xs sm:max-w-md">
+                    {selectedTemplate.desc}
+                  </p>
                   <div className="bg-muted p-1 rounded-xl flex border border-border">
                     <button 
                       onClick={() => setViewMode("desktop")}
@@ -151,7 +250,11 @@ export default function TemplatesPage() {
 
                 <div className={`transition-all duration-500 mx-auto ${viewMode === "mobile" ? "max-w-[400px]" : "max-w-[800px]"}`}>
                   <div className="transform scale-[0.6] md:scale-100 origin-top">
-                    <ActiveTemplate data={mockData} />
+                    {selectedTemplate.isNewV2 ? (
+                      <ActiveTemplate data={mockDataV2} showWatermark={true} />
+                    ) : (
+                      <ActiveTemplate data={mockDataLegacy} />
+                    )}
                   </div>
                 </div>
               </div>

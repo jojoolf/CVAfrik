@@ -30,7 +30,7 @@ export async function POST(req: Request) {
       admin_email: user.email,
       action: "reject_payment",
       details: { paymentId }
-    }).catch(() => {});
+    });
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

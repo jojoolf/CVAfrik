@@ -88,7 +88,7 @@ export async function POST(req: Request) {
       admin_email: user.email,
       action: "approve_payment",
       details: { paymentId, userId, planId, amount: billing }
-    }).catch(() => {});
+    });
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

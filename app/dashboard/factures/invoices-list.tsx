@@ -128,8 +128,11 @@ export function InvoicesList({ payments, plans, userName, userEmail }: { payment
     pdf.text(format(endDate, 'dd/MM/yyyy', { locale: fr }), infoX + 40, y + 6)
 
     // Status badge
-    const statusColor = payment.statut === 'accepte' ? [22, 163, 74] as const : [245, 158, 11] as const
-    pdf.setFillColor(...statusColor)
+    if (payment.statut === 'accepte') {
+      pdf.setFillColor(22, 163, 74)
+    } else {
+      pdf.setFillColor(245, 158, 11)
+    }
     pdf.roundedRect(infoX + 40, y + 14, 24, 6, 1, 1, 'F')
     pdf.setTextColor(255, 255, 255)
     pdf.setFont('helvetica', 'bold')

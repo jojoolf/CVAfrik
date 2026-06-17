@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { InterviewChat } from './interview-chat'
+import { EnhancedInterviewChat } from '@/components/simulateur/enhanced-interview-chat'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -34,19 +34,27 @@ export default async function SimulateurPage() {
     .select('id, titre')
     .eq('user_id', user.id)
 
-  const prenom = profile?.prenom || ''
+  const { data: simulations } = await supabase
+    .from('simulations_entretien_v2')
+    .select('score')
+    .eq('user_id', user.id)
+
+  const totalSims = simulations?.length || 0
+  const scores = (simulations || []).map(s => s.score).filter((s): s is number => typeof s === 'number')
+  const avgScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : '—'
+  const timeTotal = totalSims * 8 // Estimate 8 minutes per simulation session
 
   const stats = [
-    { label: 'Simulations', value: '0', icon: MessageSquareCode, gradient: 'from-blue-500 to-cyan-500' },
-    { label: 'Score moyen', value: '—', icon: Trophy, gradient: 'from-amber-500 to-orange-500' },
-    { label: 'Temps total', value: '0 min', icon: Clock, gradient: 'from-violet-500 to-purple-500' },
+    { label: 'Simulations', value: totalSims.toString(), icon: MessageSquareCode, gradient: 'from-blue-500 to-cyan-500' },
+    { label: 'Score moyen', value: avgScore !== '—' ? `${avgScore}%` : '—', icon: Trophy, gradient: 'from-amber-500 to-orange-500' },
+    { label: 'Temps d\'entraînement', value: `${timeTotal} min`, icon: Clock, gradient: 'from-violet-500 to-purple-500' },
   ]
 
   const steps = [
     { icon: Target, title: 'Choisissez un CV', desc: 'Sélectionnez le CV sur lequel baser votre simulation.' },
-    { icon: Brain, title: 'Répondez aux questions', desc: 'Le coach IA vous pose des questions personnalisées.' },
-    { icon: Mic, title: 'Entraînez-vous', desc: 'Répondez naturellement, comme dans un vrai entretien.' },
-    { icon: Trophy, title: 'Recevez votre score', desc: 'Obtenez un feedback détaillé et des conseils.' },
+    { icon: Brain, title: 'Choisissez vos critères', desc: 'Définissez le poste, le type d\'entretien et le secteur.' },
+    { icon: Mic, title: 'Entraînez-vous', desc: 'Répondez naturellement aux questions ciblées du coach.' },
+    { icon: Trophy, title: 'Feedback sectoriel', desc: 'Obtenez des scores détaillés et des axes d\'amélioration concrets.' },
   ]
 
   return (
@@ -59,13 +67,13 @@ export default async function SimulateurPage() {
             <div>
               <Badge variant="outline" className="mb-3 border-violet-500/30 bg-violet-500/10 text-violet-700 dark:text-violet-300">
                 <Sparkles className="mr-1.5 h-3.5 w-3.5" />
-                Pro Feature
+                Feature Premium / Pro
               </Badge>
               <h1 className="text-2xl font-bold tracking-tight text-foreground lg:text-3xl">
-                Simulateur d&apos;Entretien IA
+                Simulateur d&apos;Entretien IA v2
               </h1>
               <p className="mt-1 text-muted-foreground">
-                Entraînez-vous avec notre coach IA pour décrocher votre prochain emploi.
+                Mises en situation réelles par secteur et types d&apos;entretien avec analyses détaillées de performance.
               </p>
             </div>
             <Button variant="outline" size="sm" asChild className="rounded-full">
@@ -100,7 +108,7 @@ export default async function SimulateurPage() {
         {/* Chat area */}
         <div className="lg:col-span-2">
           {cvs && cvs.length > 0 ? (
-            <InterviewChat cvs={cvs} />
+            <EnhancedInterviewChat cvs={cvs} />
           ) : (
             <Card className="border-dashed border-2 shadow-elegant">
               <CardContent className="flex flex-col items-center justify-center py-16 text-center">
@@ -109,7 +117,7 @@ export default async function SimulateurPage() {
                 </div>
                 <h3 className="text-lg font-semibold text-foreground">Aucun CV disponible</h3>
                 <p className="mt-2 text-muted-foreground max-w-xs">
-                  Vous devez d&apos;abord créer un CV avant de lancer une simulation d&apos;entretien.
+                  Vous devez d&apos;abord créer un CV afin de pouvoir lancer une simulation personnalisée.
                 </p>
                 <Button asChild className="mt-6">
                   <Link href="/cv-builder">
@@ -175,7 +183,7 @@ export default async function SimulateurPage() {
                 <div>
                   <p className="text-sm font-medium text-foreground">Conseil du Coach</p>
                   <p className="mt-1 text-xs text-muted-foreground italic">
-                    &quot;Soyez honnête et précis. L&apos;IA analyse non seulement le contenu mais aussi la structure de vos réponses.&quot;
+                    &quot;Répondez de manière structurée et constructive. Le simulateur évalue à la fois votre communication, vos connaissances techniques, vos soft-skills et votre pertinence.&quot;
                   </p>
                 </div>
               </div>

@@ -185,7 +185,7 @@ export function PremiumPricing({ user }: PremiumPricingProps) {
               </div>
 
               <ul className="space-y-4 mb-10 flex-1">
-                {plan.features.map((feature, idx) => (
+                {plan.features.map((feature: any, idx) => (
                   <li key={idx} className={cn("flex items-start gap-3 text-sm transition-opacity", feature.active ? "text-[#E8F0E9]" : "text-[#1E2B20] opacity-40")}>
                     {feature.active ? (
                       <Check size={16} className="text-[#00C853] mt-0.5 shrink-0" />

@@ -32,7 +32,7 @@ function ManualPaymentContent() {
 
   const planInfo = PLANS.find((p) => p.id === planId) || PLANS.find((p) => p.id === 'pro')!;
   const isAnnual = billing === "annual";
-  const amount = isAnnual ? planInfo.prix_annuel_fcfa : planInfo.prix_fcfa;
+  const amount = (isAnnual ? planInfo.prix_annuel_fcfa : planInfo.prix_fcfa) ?? 0;
   const formattedAmount = amount.toLocaleString('fr-FR');
 
   const paymentMethods = [

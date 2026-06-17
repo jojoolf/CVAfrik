@@ -132,7 +132,7 @@ export function StepCompetences({ data, onUpdate }: StepCompetencesProps) {
             Competences
           </CardTitle>
           <CardDescription>Ajoutez vos competences techniques et soft skills</CardDescription>
-          {data.informations_personnelles?.titre_professionnel && (
+          {data.titre_professionnel && (
             <Button
               variant="outline"
               size="sm"
@@ -143,7 +143,7 @@ export function StepCompetences({ data, onUpdate }: StepCompetencesProps) {
                   const res = await fetch('/api/cv/suggest-skills', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ jobTitle: data.informations_personnelles.titre_professionnel }),
+                    body: JSON.stringify({ jobTitle: data.titre_professionnel }),
                   })
                   const result = await res.json()
                   if (result.success && result.competences?.length) {
@@ -173,7 +173,7 @@ export function StepCompetences({ data, onUpdate }: StepCompetencesProps) {
               disabled={suggesting}
             >
               {suggesting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-              {suggesting ? 'Analyse...' : `Suggérer pour ${data.informations_personnelles.titre_professionnel}`}
+              {suggesting ? 'Analyse...' : `Suggérer pour ${data.titre_professionnel}`}
             </Button>
           )}
         </CardHeader>

@@ -309,6 +309,63 @@ export const PAYS_AFRIQUE = [
   { code: 'CD', nom: 'RD Congo', indicatif: '+243' },
 ]
 
+// ========== Simulateur d'entretien v2 ==========
+
+export interface EnhancedSimulationSession {
+  id: string
+  user_id: string
+  cv_id: string | null
+  position: string
+  sector: 'finance' | 'tech' | 'marketing' | 'hr' | 'sales' | 'other'
+  interview_type: 'behavioral' | 'technical' | 'mixed' | 'case_study'
+  nombre_questions: number
+  messages: ChatMessage[]
+  feedback?: InterviewFeedback
+  score?: number
+  created_at: string
+  completed_at?: string
+}
+
+export interface InterviewFeedback {
+  score: number
+  scoreDetails: {
+    communication: number
+    technicalKnowledge: number
+    softSkills: number
+    relevance: number
+  }
+  strengths: string[]
+  improvements: string[]
+  practicalAdvice: string[]
+  sectorSpecificFeedback: string
+  nextSteps: string[]
+}
+
+export const INTERVIEW_TYPES = [
+  { id: 'behavioral', nom: 'Comportemental', description: 'Questions sur vos expériences passées (méthode STAR)', icon: '🎯' },
+  { id: 'technical', nom: 'Technique', description: 'Questions techniques et cas pratiques de votre domaine', icon: '⚙️' },
+  { id: 'mixed', nom: 'Mixte', description: 'Combinaison de questions comportementales et techniques', icon: '🔀' },
+  { id: 'case_study', nom: 'Cas pratique', description: 'Résolution de cas réels de votre secteur', icon: '📋' },
+]
+
+export const SECTORS = [
+  { id: 'finance', nom: 'Finance', icon: '💼' },
+  { id: 'tech', nom: 'Tech/IT', icon: '💻' },
+  { id: 'marketing', nom: 'Marketing', icon: '📊' },
+  { id: 'hr', nom: 'RH', icon: '👥' },
+  { id: 'sales', nom: 'Vente', icon: '📈' },
+  { id: 'other', nom: 'Autre', icon: '⭐' },
+]
+
+export interface SimulationAnalytics {
+  totalSimulations: number
+  averageScore: number
+  bestScore: number
+  improvedAreas: { [key: string]: number }
+  frequentWeaknesses: string[]
+  recommendedPracticeAreas: string[]
+}
+
 // Operateurs Mobile Money
 export const OPERATEURS_MOBILE_MONEY = [
   { id: 'orange', nom: 'Orange Money', pays: ['CI', 'SN', 'ML', 'BF', 'GN', 'CM'] },

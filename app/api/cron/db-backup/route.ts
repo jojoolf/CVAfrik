@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     );
 
     const date = new Date().toISOString().split("T")[0];
-    const backup: Record<string, unknown> = { date, tables: {} };
+    const backup: { date: string; tables: Record<string, any> } = { date, tables: {} };
 
     const tables = ["profiles", "cvs", "payments", "manual_payments", "blog_posts", "newsletter_subscribers", "support_tickets", "simulations_entretien", "lettres_motivation", "suivi_candidatures", "admin_logs"];
 
