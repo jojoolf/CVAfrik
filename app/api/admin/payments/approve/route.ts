@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getSubscriptionExpiryDate } from "@/lib/subscription";
-
-const ADMIN_EMAILS = ["nokejoel@gmail.com", "jojoolf@gmail.com"]; // Ajoutez vos emails admin ici
+import { isAdminEmail } from "@/lib/admin";
 
 export async function POST(req: Request) {
   try {
@@ -10,7 +9,7 @@ export async function POST(req: Request) {
     const { data: { user } } = await supabase.auth.getUser();
 
     // Check if user is admin
-    if (!user || !ADMIN_EMAILS.includes(user.email || "")) {
+    if (!isAdminEmail(user.email)) {
       return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
     }
 

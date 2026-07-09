@@ -4,7 +4,14 @@ import { createClient } from '@/lib/supabase/server'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { PLANS } from '@/lib/types'
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
+let genAI: GoogleGenerativeAI | null = null
+
+function getGenAI() {
+  if (!genAI) {
+    genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
+  }
+  return genAI
+}
 
 export async function startSimulation(data: { cvId: string; poste: string }) {
   try {
@@ -30,9 +37,10 @@ export async function startSimulation(data: { cvId: string; poste: string }) {
       .from('cvs')
       .select('donnees')
       .eq('id', data.cvId)
+      .eq('user_id', user.id)
       .single()
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+    const model = getGenAI().getGenerativeModel({ model: 'gemini-1.5-flash' })
     const prompt = `
       Tu es un recruteur expert. Tu vas mener un entretien d'embauche pour le poste de "${data.poste}".
       Voici les infos du candidat (CV) : ${JSON.stringify(cv?.donnees)}.
@@ -68,7 +76,24 @@ export async function startSimulation(data: { cvId: string; poste: string }) {
 export async function sendMessage(id: string, message: string, history: any[]) {
   try {
     const supabase = await createClient()
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return { success: false, error: 'Non authentifie' }
+    }
+
+    const { data: simulation } = await supabase
+      .from('simulations_entretien')
+      .select('id, user_id')
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .single()
+
+    if (!simulation) {
+      return { success: false, error: 'Simulation introuvable' }
+    }
+
+    const model = getGenAI().getGenerativeModel({ model: 'gemini-1.5-flash' })
 
     const totalMessages = history.length
     
@@ -96,6 +121,7 @@ export async function sendMessage(id: string, message: string, history: any[]) {
           score: data.score 
         })
         .eq('id', id)
+        .eq('user_id', user.id)
 
       return { success: true, isFinished: true, feedback: data.feedback, score: data.score }
     }
@@ -114,6 +140,7 @@ export async function sendMessage(id: string, message: string, history: any[]) {
       .from('simulations_entretien')
       .update({ messages: [...history, { role: 'assistant', content: nextQuestion }] })
       .eq('id', id)
+      .eq('user_id', user.id)
 
     return { success: true, isFinished: false, nextQuestion }
   } catch (error) {

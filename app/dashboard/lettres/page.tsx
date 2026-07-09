@@ -9,6 +9,8 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
+import { getEffectivePlan } from '@/lib/plan-status'
+import { PLANS } from '@/lib/types'
 
 export default async function LettresPage({
   searchParams,
@@ -41,8 +43,8 @@ export default async function LettresPage({
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
 
-  const planId = profile?.plan ?? 'gratuit'
-  const planInfo = import('@/lib/types').then(m => m.PLANS.find(p => p.id === planId) || m.PLANS[0])
+  const planId = getEffectivePlan(profile?.plan, profile?.plan_expiry)
+  const planInfo = PLANS.find(p => p.id === planId) || PLANS[0]
 
   // Get start of current month
   const currentMonthStart = new Date()
@@ -50,8 +52,7 @@ export default async function LettresPage({
   currentMonthStart.setHours(0, 0, 0, 0)
 
   const generatedThisMonth = lettres?.filter(l => new Date(l.created_at) >= currentMonthStart).length || 0
-  const resolvedPlanInfo = await planInfo
-  const letterLimit = resolvedPlanInfo.limites.lettres_par_mois
+  const letterLimit = planInfo.limites.lettres_par_mois
   const limitReached = letterLimit !== null && generatedThisMonth >= letterLimit
 
   if (isCreating && limitReached) {
