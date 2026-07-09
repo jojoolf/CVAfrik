@@ -3,7 +3,7 @@
 import React, { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { Loader2, CreditCard, ShieldCheck, AlertCircle, CheckCircle2, Zap } from "lucide-react";
+import { Loader2, ShieldCheck, Zap, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { FedaPayButton } from "@/components/payments/fedapay-button";
@@ -16,30 +16,25 @@ function PaymentContent() {
   const billing = searchParams.get("billing");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [userData, setUserData] = useState<any>(null);
-  const supabase = createClient();
 
   useEffect(() => {
+    const supabase = createClient();
+
     async function checkUser() {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         
         if (!session) {
-          router.push(`/auth/connexion?redirect=/paiement?plan=${planId}`);
+          const redirectTarget = `/paiement?plan=${encodeURIComponent(planId)}${billing === 'annual' ? '&billing=annual' : ''}`;
+          router.push(`/auth/connexion?redirect=${encodeURIComponent(redirectTarget)}`);
           return;
         }
 
-        const { data: profile } = await supabase
+        await supabase
           .from('profiles')
           .select('*')
           .eq('id', session.user.id)
           .single();
-
-        setUserData({
-          email: session.user.email,
-          firstname: profile?.prenom || '',
-          lastname: profile?.nom || '',
-        });
       } catch (err) {
         setError("Session expirée. Veuillez vous reconnecter.");
       } finally {
@@ -48,7 +43,7 @@ function PaymentContent() {
     }
 
     checkUser();
-  }, [planId, router, supabase]);
+  }, [billing, planId, router]);
 
   if (loading) {
     return (
@@ -56,6 +51,25 @@ function PaymentContent() {
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-12 h-12 animate-spin text-primary" />
           <p className="text-slate-400 font-medium animate-pulse">Sécurisation de la connexion...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+        <div className="max-w-md w-full rounded-[2rem] bg-white p-8 text-center shadow-2xl shadow-slate-200/50 border border-slate-100">
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-rose-50 text-rose-500">
+            <ShieldCheck className="h-8 w-8" />
+          </div>
+          <h1 className="text-2xl font-black text-slate-900">Connexion requise</h1>
+          <p className="mt-3 text-sm text-slate-500">{error}</p>
+          <Button asChild className="mt-8 w-full rounded-2xl font-black">
+            <Link href={`/auth/connexion?redirect=${encodeURIComponent(`/paiement?plan=${encodeURIComponent(planId)}${billing === 'annual' ? '&billing=annual' : ''}`)}`}>
+              Revenir a la connexion
+            </Link>
+          </Button>
         </div>
       </div>
     );

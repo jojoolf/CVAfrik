@@ -52,7 +52,7 @@ export default async function LettresPage({
   const generatedThisMonth = lettres?.filter(l => new Date(l.created_at) >= currentMonthStart).length || 0
   const resolvedPlanInfo = await planInfo
   const letterLimit = resolvedPlanInfo.limites.lettres_par_mois
-  const limitReached = generatedThisMonth >= letterLimit
+  const limitReached = letterLimit !== null && generatedThisMonth >= letterLimit
 
   if (isCreating && limitReached) {
     redirect('/tarifs?locked=lettres')

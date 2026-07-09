@@ -6,13 +6,14 @@ import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Lock, Download, Loader2, Sparkles, FileText, Eye, Maximize2 } from 'lucide-react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Lock, Download, Loader2, Sparkles, FileText, Maximize2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { CVDonnees, PlanConfig } from '@/lib/types'
+import { TEMPLATE_CATALOG, getPlanLabel, hasTemplateAccess } from '@/lib/template-access'
 import { toPng } from 'html-to-image'
 import { jsPDF } from 'jspdf'
 import { toast } from 'sonner'
-import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 
 import { CVPreviewClassique } from '../templates/cv-preview-classique'
 import { CVPreviewModerne } from '../templates/cv-preview-moderne'
@@ -32,20 +33,15 @@ interface StepPreviewProps {
   plan: PlanConfig
 }
 
-const templates = [
-  { id: 'classique', name: 'Classique', description: 'Design intemporel', plans: ['gratuit', 'pro', 'premium'], color: 'bg-gray-800' },
-  { id: 'moderne', name: 'Moderne', description: 'Design contemporain', plans: ['gratuit', 'pro', 'premium'], color: 'bg-blue-600' },
-  { id: 'creatif', name: 'Creatif', description: 'Design original', plans: ['pro', 'premium'], color: 'bg-rose-500' },
-  { id: 'executif', name: 'Executif', description: 'Design sobre', plans: ['pro', 'premium'], color: 'bg-slate-700' },
-  { id: 'tech', name: 'Tech', description: 'Pour developpeurs', plans: ['pro', 'premium'], color: 'bg-cyan-600' },
-  { id: 'minimaliste', name: 'Minimaliste', description: 'L\'essentiel', plans: ['pro', 'premium'], color: 'bg-stone-500' },
-  { id: 'startup', name: 'Startup', description: 'Dynamique', plans: ['premium'], color: 'bg-orange-500' },
-  { id: 'luxe', name: 'Luxe', description: 'Elegant', plans: ['premium'], color: 'bg-amber-600' },
-  { id: 'elite', name: 'Elite', description: 'Premium avec photo', plans: ['pro', 'premium'], color: 'bg-[#0B1E36]' },
-  { id: 'design', name: 'Design', description: 'Esthetique chaleureux', plans: ['pro', 'premium'], color: 'bg-[#8B7355]' },
-]
-
-function CVTemplateRenderer({ template, data, showWatermark }: { template: string; data: CVDonnees; showWatermark: boolean }) {
+function CVTemplateRenderer({
+  template,
+  data,
+  showWatermark,
+}: {
+  template: string
+  data: CVDonnees
+  showWatermark: boolean
+}) {
   switch (template) {
     case 'classique':
       return <CVPreviewClassique data={data} showWatermark={showWatermark} />
@@ -76,41 +72,37 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
   const cvRef = useRef<HTMLDivElement>(null)
   const [isExporting, setIsExporting] = useState(false)
 
-  const isTemplateAvailable = (templateId: string) => {
-    const t = templates.find(t => t.id === templateId)
-    return t?.plans.includes(plan.id) || false
-  }
+  const isTemplateAvailable = (templateId: string) => hasTemplateAccess(plan.id, templateId)
 
   const handleDownloadPDF = async () => {
     if (!cvRef.current) return
     setIsExporting(true)
-    
+
     try {
-      // Small delay to ensure everything is rendered
-      await new Promise(resolve => setTimeout(resolve, 500))
-      
+      await new Promise((resolve) => setTimeout(resolve, 500))
+
       const dataUrl = await toPng(cvRef.current, {
         quality: 1,
         pixelRatio: 2,
-        backgroundColor: '#ffffff'
+        backgroundColor: '#ffffff',
       })
-      
-      // Handle different module resolution in Next.js/Turbopack
-      const JSPDFClass = typeof jsPDF === 'function' ? jsPDF : (jsPDF as any).jsPDF || (jsPDF as any).default;
-      
+
+      const JSPDFClass =
+        typeof jsPDF === 'function' ? jsPDF : (jsPDF as any).jsPDF || (jsPDF as any).default
+
       if (!JSPDFClass) {
-        throw new Error("Impossible de charger le module PDF.")
+        throw new Error('Impossible de charger le module PDF.')
       }
 
       const pdf = new JSPDFClass({
         orientation: 'portrait',
         unit: 'mm',
-        format: 'a4'
+        format: 'a4',
       })
-      
-      const imgWidth = 210 // A4 width in mm
+
+      const imgWidth = 210
       const imgHeight = (cvRef.current.offsetHeight * imgWidth) / cvRef.current.offsetWidth
-      
+
       pdf.addImage(dataUrl, 'PNG', 0, 0, imgWidth, imgHeight)
       pdf.save(`CV_${data.informations_personnelles.nom || 'CVAfrik'}.pdf`)
       toast.success('CV telecharge avec succes !')
@@ -127,33 +119,32 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
       <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
         <div className="text-center md:text-left">
           <h2 className="text-2xl font-bold text-foreground">Apercu et template</h2>
-          <p className="text-muted-foreground">
-            Choisissez votre template et telechargez votre CV
-          </p>
+          <p className="text-muted-foreground">Choisissez votre template et telechargez votre CV</p>
         </div>
-        
-        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-          {/* Aperçu Plein Ecran Mobile */}
+
+        <div className="flex w-full flex-col gap-3 sm:flex-row md:w-auto">
           <Dialog>
             <DialogTrigger asChild>
-              <Button variant="outline" className="gap-2 rounded-full lg:hidden flex-1 border-primary/20 hover:bg-primary/5">
+              <Button variant="outline" className="flex-1 gap-2 rounded-full border-primary/20 hover:bg-primary/5 lg:hidden">
                 <Maximize2 className="h-4 w-4 text-primary" />
                 Plein ecran
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-[100vw] w-full p-2 md:p-6 h-[95vh] flex flex-col items-center overflow-auto bg-slate-100/80 backdrop-blur-sm border-none">
-              <DialogHeader className="w-full flex justify-between items-center mb-2">
-                <DialogTitle className="text-slate-500 font-bold uppercase tracking-widest text-xs">Aperçu du CV</DialogTitle>
+            <DialogContent className="flex h-[95vh] w-full max-w-[100vw] flex-col items-center overflow-auto border-none bg-slate-100/80 p-2 backdrop-blur-sm md:p-6">
+              <DialogHeader className="mb-2 flex w-full justify-between">
+                <DialogTitle className="text-xs font-bold uppercase tracking-widest text-slate-500">
+                  Apercu du CV
+                </DialogTitle>
               </DialogHeader>
-              
-              <div className="w-full flex justify-center custom-scrollbar overflow-auto">
-                <div 
-                  className="bg-white shadow-2xl shrink-0 mb-10"
-                  style={{ 
+
+              <div className="custom-scrollbar flex w-full justify-center overflow-auto">
+                <div
+                  className="mb-10 shrink-0 bg-white shadow-2xl"
+                  style={{
                     width: '210mm',
                     minHeight: '297mm',
                     transform: 'scale(0.85)',
-                    transformOrigin: 'top center'
+                    transformOrigin: 'top center',
                   }}
                 >
                   <CVTemplateRenderer
@@ -166,11 +157,11 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
             </DialogContent>
           </Dialog>
 
-          <div className="flex flex-col gap-2 flex-1">
-            <Button 
-              onClick={handleDownloadPDF} 
+          <div className="flex flex-1 flex-col gap-2">
+            <Button
+              onClick={handleDownloadPDF}
               disabled={isExporting}
-              className="gap-2 bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 rounded-full px-6 w-full"
+              className="w-full gap-2 rounded-full bg-primary px-6 shadow-lg shadow-primary/20 hover:bg-primary/90"
             >
               {isExporting ? (
                 <>
@@ -180,29 +171,30 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
               ) : (
                 <>
                   <Download className="h-4 w-4" />
-                  Télécharger PDF
+                  Telecharger PDF
                 </>
               )}
             </Button>
 
-            <Button 
+            <Button
               variant="outline"
-              onClick={() => toast.info('L\'export Word (DOCX) sera disponible dans la prochaine mise à jour !')} 
-              className="gap-2 rounded-full px-6 w-full border-dashed"
+              onClick={() => toast.info('L\'export Word (DOCX) sera disponible dans la prochaine mise a jour !')}
+              className="w-full gap-2 rounded-full border-dashed px-6"
             >
               <FileText className="h-4 w-4 text-muted-foreground" />
-              <span className="text-muted-foreground">Télécharger Word</span>
-              <Badge variant="secondary" className="ml-auto text-[9px] py-0">Bientôt</Badge>
+              <span className="text-muted-foreground">Telecharger Word</span>
+              <Badge variant="secondary" className="ml-auto py-0 text-[9px]">
+                Bientot
+              </Badge>
             </Button>
           </div>
         </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Template Selection */}
-        <Card className="lg:col-span-1 h-fit">
+        <Card className="h-fit lg:col-span-1">
           <CardHeader className="pb-3">
-            <CardTitle className="text-lg flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-lg">
               <Sparkles className="h-4 w-4 text-primary" />
               Templates
             </CardTitle>
@@ -210,55 +202,57 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
           </CardHeader>
           <CardContent>
             <RadioGroup value={template} onValueChange={onTemplateChange} className="grid grid-cols-2 gap-2">
-              {templates.map((t) => {
-                const available = isTemplateAvailable(t.id)
-                const isSelected = template === t.id
+              {TEMPLATE_CATALOG.map((item) => {
+                const available = isTemplateAvailable(item.id)
+                const isSelected = template === item.id
+
                 return (
-                  <div key={t.id}>
+                  <div key={item.id}>
                     <RadioGroupItem
-                      value={t.id}
-                      id={t.id}
+                      value={item.id}
+                      id={item.id}
                       disabled={!available}
                       className="peer sr-only"
                     />
                     <Label
-                      htmlFor={t.id}
+                      htmlFor={item.id}
                       className={cn(
-                        'flex flex-col cursor-pointer rounded-xl border-2 border-muted bg-popover overflow-hidden transition-all hover:border-primary/50 hover:shadow-md',
-                        isSelected && 'border-primary ring-2 ring-primary/20 shadow-md',
-                        !available && 'cursor-not-allowed opacity-60'
+                        'flex cursor-pointer flex-col overflow-hidden rounded-xl border-2 border-muted bg-popover transition-all hover:border-primary/50 hover:shadow-md',
+                        isSelected && 'border-primary shadow-md ring-2 ring-primary/20',
+                        !available && 'cursor-not-allowed opacity-60',
                       )}
                     >
-                      {/* Color preview bar */}
-                      <div className={`h-12 w-full ${t.color} relative flex items-center justify-center`}>
-                        {/* Mini layout preview */}
+                      <div className={`relative flex h-12 w-full items-center justify-center ${item.color}`}>
                         <div className="flex gap-1 opacity-60">
-                          <div className="w-3 h-6 bg-white/30 rounded-sm" />
+                          <div className="h-6 w-3 rounded-sm bg-white/30" />
                           <div className="space-y-0.5">
-                            <div className="w-5 h-1 bg-white/40 rounded-full" />
-                            <div className="w-4 h-1 bg-white/30 rounded-full" />
-                            <div className="w-6 h-1 bg-white/20 rounded-full" />
+                            <div className="h-1 w-5 rounded-full bg-white/40" />
+                            <div className="h-1 w-4 rounded-full bg-white/30" />
+                            <div className="h-1 w-6 rounded-full bg-white/20" />
                           </div>
                         </div>
+
                         {!available && (
-                          <div className="absolute top-1 right-1">
-                            <span className="flex items-center gap-0.5 bg-black/50 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full">
+                          <div className="absolute right-1 top-1">
+                            <span className="flex items-center gap-0.5 rounded-full bg-black/50 px-1.5 py-0.5 text-[8px] font-bold text-white">
                               <Lock className="h-2 w-2" />
-                              {t.plans.includes('pro') ? 'PRO' : '★'}
+                              {getPlanLabel(item.requiredPlan)}
                             </span>
                           </div>
                         )}
+
                         {isSelected && (
-                          <div className="absolute top-1 left-1">
-                            <div className="h-4 w-4 bg-white rounded-full flex items-center justify-center">
-                              <div className="h-2.5 w-2.5 bg-primary rounded-full" />
+                          <div className="absolute left-1 top-1">
+                            <div className="flex h-4 w-4 items-center justify-center rounded-full bg-white">
+                              <div className="h-2.5 w-2.5 rounded-full bg-primary" />
                             </div>
                           </div>
                         )}
                       </div>
+
                       <div className="px-2 py-1.5">
-                        <p className="font-semibold text-foreground text-[11px] truncate">{t.name}</p>
-                        <p className="text-[9px] text-muted-foreground truncate">{t.description}</p>
+                        <p className="truncate text-[11px] font-semibold text-foreground">{item.name}</p>
+                        <p className="truncate text-[9px] text-muted-foreground">{item.description}</p>
                       </div>
                     </Label>
                   </div>
@@ -268,17 +262,15 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
           </CardContent>
         </Card>
 
-        {/* CV Preview */}
-        <Card className="lg:col-span-2 overflow-hidden border-none shadow-none bg-transparent">
-          <div className="relative group">
-            <div className="overflow-auto rounded-xl border border-border bg-gray-100 shadow-inner p-4 md:p-8 flex justify-center custom-scrollbar">
-              <div 
+        <Card className="overflow-hidden border-none bg-transparent shadow-none lg:col-span-2">
+          <div className="group relative">
+            <div className="custom-scrollbar flex justify-center overflow-auto rounded-xl border border-border bg-gray-100 p-4 shadow-inner md:p-8">
+              <div
                 ref={cvRef}
-                className="bg-white shadow-2xl shrink-0"
-                style={{ 
+                className="shrink-0 bg-white shadow-2xl"
+                style={{
                   width: '210mm',
                   minHeight: '297mm',
-                  // Ensure it renders exactly as A4 for PDF export
                 }}
               >
                 <CVTemplateRenderer
@@ -288,10 +280,9 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
                 />
               </div>
             </div>
-            
-            {/* Hover indication */}
-            <div className="absolute top-4 right-4 flex items-center justify-center bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none rounded-xl">
-              <p className="bg-white/90 px-4 py-2 rounded-full text-xs font-bold shadow-lg flex items-center gap-2">
+
+            <div className="pointer-events-none absolute right-4 top-4 flex items-center justify-center rounded-xl bg-black/5 opacity-0 transition-opacity group-hover:opacity-100">
+              <p className="flex items-center gap-2 rounded-full bg-white/90 px-4 py-2 text-xs font-bold shadow-lg">
                 <FileText className="h-3 w-3" />
                 Format A4
               </p>

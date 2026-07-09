@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { CheckCircle2, ArrowRight, FileText, Sparkles } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
+import { getSubscriptionExpiryDate } from '@/lib/subscription'
 
 export const metadata: Metadata = {
   title: 'Paiement reussi',
@@ -46,8 +47,10 @@ export default async function PaymentSuccessPage({ searchParams }: PageProps) {
         .eq('cinetpay_transaction_id', transaction_id)
 
       // Update user profile
-      const planExpiry = new Date()
-      planExpiry.setMonth(planExpiry.getMonth() + 1)
+      const planExpiry = getSubscriptionExpiryDate(
+        payment.plan_achete,
+        Number(payment.montant_fcfa || 0),
+      )
 
       await supabase
         .from('profiles')

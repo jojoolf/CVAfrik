@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { getSubscriptionExpiryDate } from "@/lib/subscription";
 
 const ADMIN_EMAILS = ["nokejoel@gmail.com", "jojoolf@gmail.com"]; // Ajoutez vos emails admin ici
 
@@ -15,6 +16,16 @@ export async function POST(req: Request) {
 
     const { paymentId, userId, planId } = await req.json();
 
+    const { data: payment, error: paymentLookupError } = await supabase
+      .from("manual_payments")
+      .select("montant, plan_id")
+      .eq("id", paymentId)
+      .single();
+
+    if (paymentLookupError || !payment) {
+      return NextResponse.json({ error: "Paiement introuvable" }, { status: 404 });
+    }
+
     // 1. Update the manual payment status
     const { error: payError } = await supabase
       .from("manual_payments")
@@ -23,9 +34,11 @@ export async function POST(req: Request) {
 
     if (payError) throw payError;
 
-    // 2. Update the user profile plan and expiry date (30 days from now)
-    const expiryDate = new Date();
-    expiryDate.setDate(expiryDate.getDate() + 30);
+    // 2. Update the user profile plan and expiry date based on the amount paid
+    const expiryDate = getSubscriptionExpiryDate(
+      planId,
+      Number(payment.montant || 0),
+    );
 
     const { error: profileError } = await supabase
       .from("profiles")

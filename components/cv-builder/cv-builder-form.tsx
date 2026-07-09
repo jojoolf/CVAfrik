@@ -21,6 +21,12 @@ import {
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import type { Profile, PlanConfig, CV, CVDonnees } from '@/lib/types'
+import {
+  getFirstAvailableTemplate,
+  getTemplateConfig,
+  getTemplateUpgradeHref,
+  hasTemplateAccess,
+} from '@/lib/template-access'
 
 import { StepPersonalInfo } from './steps/step-personal-info'
 import { StepFormation } from './steps/step-formation'
@@ -100,6 +106,21 @@ export function CVBuilderForm({
     setIsSaving(true)
 
     try {
+      const selectedTemplateConfig = getTemplateConfig(template)
+
+      if (!selectedTemplateConfig) {
+        const fallbackTemplate = getFirstAvailableTemplate(plan.id)
+        setTemplate(fallbackTemplate)
+        toast.error('Le template selectionne est introuvable. Un template valide a ete recharge.')
+        return
+      }
+
+      if (!hasTemplateAccess(plan.id, selectedTemplateConfig.id)) {
+        toast.error(`Le template ${selectedTemplateConfig.name} n'est pas inclus dans votre abonnement.`)
+        router.push(getTemplateUpgradeHref(selectedTemplateConfig.id))
+        return
+      }
+
       const supabase = createClient()
       
       if (existingCV) {

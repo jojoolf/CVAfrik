@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { getSubscriptionExpiryDate } from "@/lib/subscription";
 
 export async function POST(req: Request) {
   try {
@@ -25,6 +26,10 @@ export async function POST(req: Request) {
     if (checkData.code === "00" && checkData.data.status === "ACCEPTED") {
       const metadata = JSON.parse(checkData.data.metadata);
       const { userId, planId } = metadata;
+      const expiryDate = getSubscriptionExpiryDate(
+        planId,
+        Number(checkData.data.amount || 0),
+      );
 
       // Initialize Supabase admin client to bypass RLS
       const supabaseAdmin = createClient(
@@ -37,6 +42,7 @@ export async function POST(req: Request) {
         .from("profiles")
         .update({
           plan: planId,
+          plan_expiry: expiryDate.toISOString(),
           updated_at: new Date().toISOString(),
         })
         .eq("id", userId);

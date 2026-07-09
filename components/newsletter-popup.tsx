@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Mail, Sparkles, Loader2, X } from 'lucide-react'
+import { Mail, Sparkles, Loader2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 
@@ -44,22 +44,15 @@ export function NewsletterPopup({ userEmail, userName }: NewsletterPopupProps) {
     const supabase = createClient()
 
     try {
-      // Vérifier si déjà inscrit pour éviter les erreurs d'unicité
-      const { data: existing } = await supabase
+      const { error } = await supabase
         .from('newsletter_subscribers')
-        .select('id')
-        .eq('email', email)
-        .single()
+        .insert({
+          email,
+          prenom: userName || null
+        })
 
-      if (!existing) {
-        const { error } = await supabase
-          .from('newsletter_subscribers')
-          .insert({
-            email,
-            prenom: userName || null
-          })
-
-        if (error) throw error
+      if (error && error.code !== '23505') {
+        throw error
       }
 
       toast.success('Merci pour votre inscription ! 🎉')

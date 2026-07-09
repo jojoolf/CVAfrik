@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { getSubscriptionExpiryDate } from "@/lib/subscription";
 
 export async function POST(req: Request) {
   try {
@@ -9,6 +10,10 @@ export async function POST(req: Request) {
 
     if (event === "transaction.approved") {
       const { userId, planId } = transaction.metadata;
+      const expiryDate = getSubscriptionExpiryDate(
+        planId,
+        Number(transaction.amount || 0),
+      );
 
       // Initialize Supabase admin client
       const supabaseAdmin = createClient(
@@ -21,6 +26,7 @@ export async function POST(req: Request) {
         .from("profiles")
         .update({
           plan: planId,
+          plan_expiry: expiryDate.toISOString(),
           updated_at: new Date().toISOString(),
         })
         .eq("id", userId);

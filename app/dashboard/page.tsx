@@ -71,9 +71,9 @@ export default async function DashboardPage() {
       bg: 'bg-emerald-500/10',
     },
     {
-      label: 'Simulations',
+      label: 'Simulations (bientot)',
       value: profile?.simulations_faites_ce_mois || 0,
-      limit: isFreePlan ? 3 : null,
+      limit: null,
       icon: MessageSquareCode,
       color: 'text-violet-500',
       bg: 'bg-violet-500/10',
@@ -97,10 +97,11 @@ export default async function DashboardPage() {
     },
     {
       title: 'Simuler un entretien',
-      description: 'Entrainement avec un coach IA',
+      description: 'Bientot disponible sur tous les plans',
       href: '/dashboard/simulateur',
       icon: MessageSquareCode,
       gradient: 'from-violet-500 to-purple-500',
+      badge: 'Bientot',
     },
     {
       title: 'Aide & Support',
@@ -203,7 +204,14 @@ export default async function DashboardPage() {
                       <div className={`mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${action.gradient} text-white shadow-sm`}>
                         <action.icon className="h-5 w-5" />
                       </div>
-                      <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">{action.title}</h3>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">{action.title}</h3>
+                        {action.badge && (
+                          <Badge variant="outline" className="text-[10px]">
+                            {action.badge}
+                          </Badge>
+                        )}
+                      </div>
                       <p className="mt-1 text-xs text-muted-foreground">{action.description}</p>
                       <ArrowRight className="mt-3 h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
                     </CardContent>

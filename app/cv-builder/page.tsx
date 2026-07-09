@@ -3,6 +3,12 @@ import { redirect } from 'next/navigation'
 import { CVBuilderForm } from '@/components/cv-builder/cv-builder-form'
 import { createClient } from '@/lib/supabase/server'
 import { PLANS } from '@/lib/types'
+import {
+  getFirstAvailableTemplate,
+  getTemplateConfig,
+  getTemplateUpgradeHref,
+  hasTemplateAccess,
+} from '@/lib/template-access'
 
 export const metadata: Metadata = {
   title: 'Creer mon CV',
@@ -17,9 +23,12 @@ export default async function CVBuilderPage({ searchParams }: PageProps) {
   const params = await searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  const requestedPath = params.template
+    ? `/cv-builder?template=${encodeURIComponent(params.template)}`
+    : '/cv-builder'
 
   if (!user) {
-    redirect('/auth/connexion?redirect=/cv-builder')
+    redirect(`/auth/connexion?redirect=${encodeURIComponent(requestedPath)}`)
   }
 
   // Get user profile
@@ -48,6 +57,15 @@ export default async function CVBuilderPage({ searchParams }: PageProps) {
     existingCV = data
   }
 
+  const requestedTemplateId = existingCV?.template || params.template
+  const requestedTemplate = requestedTemplateId ? getTemplateConfig(requestedTemplateId) : null
+
+  if (requestedTemplate && !hasTemplateAccess(profile.plan, requestedTemplate.id)) {
+    redirect(getTemplateUpgradeHref(requestedTemplate.id))
+  }
+
+  const selectedTemplate = requestedTemplate?.id || getFirstAvailableTemplate(profile.plan)
+
   // Check monthly limits for free plan
   const canCreate = plan.limites.cvs_par_mois === null || 
     profile.cvs_generes_ce_mois < (plan.limites.cvs_par_mois || 0) ||
@@ -63,7 +81,7 @@ export default async function CVBuilderPage({ searchParams }: PageProps) {
       plan={plan}
       existingCV={existingCV}
       canCreate={canCreate}
-      selectedTemplate={params.template || 'moderne'}
+      selectedTemplate={selectedTemplate}
     />
   )
 }

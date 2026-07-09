@@ -121,6 +121,8 @@ ALTER TABLE simulations_entretien ENABLE ROW LEVEL SECURITY;
 -- RLS Policies
 CREATE POLICY "Users can view own profile" ON profiles FOR SELECT USING (auth.uid() = id);
 CREATE POLICY "Users can update own profile" ON profiles FOR UPDATE USING (auth.uid() = id);
+CREATE POLICY "Admins can view all profiles" ON profiles FOR SELECT USING ((auth.jwt() ->> 'email') IN ('nokejoel@gmail.com', 'jojoolf@gmail.com'));
+CREATE POLICY "Admins can update all profiles" ON profiles FOR UPDATE USING ((auth.jwt() ->> 'email') IN ('nokejoel@gmail.com', 'jojoolf@gmail.com'));
 
 CREATE POLICY "Users can view own CVs" ON cvs FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert own CVs" ON cvs FOR INSERT WITH CHECK (auth.uid() = user_id);
@@ -131,6 +133,72 @@ CREATE POLICY "Users can view own lettres" ON lettres_motivation FOR SELECT USIN
 CREATE POLICY "Users can insert own lettres" ON lettres_motivation FOR INSERT WITH CHECK (auth.uid() = user_id);
 
 CREATE POLICY "Users can view own payments" ON payments FOR SELECT USING (auth.uid() = user_id);
+
+-- Paiements manuels
+CREATE TABLE IF NOT EXISTS manual_payments (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  plan_id TEXT NOT NULL,
+  montant NUMERIC NOT NULL,
+  methode TEXT NOT NULL,
+  transaction_id TEXT NOT NULL,
+  statut TEXT DEFAULT 'en_attente',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE manual_payments ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own manual payments" ON manual_payments FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert own manual payments" ON manual_payments FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Admins can manage manual payments" ON manual_payments FOR ALL USING ((auth.jwt() ->> 'email') IN ('nokejoel@gmail.com', 'jojoolf@gmail.com'));
+
+-- Articles de blog
+CREATE TABLE IF NOT EXISTS blog_posts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  titre TEXT NOT NULL,
+  slug TEXT NOT NULL UNIQUE,
+  contenu TEXT NOT NULL,
+  image_url TEXT,
+  categorie TEXT NOT NULL DEFAULT 'conseils',
+  publie BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE blog_posts ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Public can view published blog posts" ON blog_posts FOR SELECT USING (publie = TRUE);
+CREATE POLICY "Admins can manage blog posts" ON blog_posts FOR ALL USING ((auth.jwt() ->> 'email') IN ('nokejoel@gmail.com', 'jojoolf@gmail.com'));
+
+-- Avis clients
+CREATE TABLE IF NOT EXISTS avis (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  nom TEXT,
+  note INTEGER NOT NULL CHECK (note BETWEEN 1 AND 5),
+  commentaire TEXT,
+  statut TEXT DEFAULT 'en_attente',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE avis ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Anyone can create an avis" ON avis FOR INSERT WITH CHECK (true);
+CREATE POLICY "Public can read approved avis" ON avis FOR SELECT USING (statut = 'approuve');
+CREATE POLICY "Admins can manage avis" ON avis FOR ALL USING ((auth.jwt() ->> 'email') IN ('nokejoel@gmail.com', 'jojoolf@gmail.com'));
+
+-- Newsletter
+CREATE TABLE IF NOT EXISTS newsletter_subscribers (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email TEXT NOT NULL UNIQUE,
+  prenom TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE newsletter_subscribers ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Anyone can subscribe" ON newsletter_subscribers FOR INSERT WITH CHECK (true);
+CREATE POLICY "Admins can view subscribers" ON newsletter_subscribers FOR SELECT USING ((auth.jwt() ->> 'email') IN ('nokejoel@gmail.com', 'jojoolf@gmail.com'));
 
 CREATE POLICY "Users can view own candidatures" ON suivi_candidatures FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can manage own candidatures" ON suivi_candidatures FOR ALL USING (auth.uid() = user_id);
