@@ -11,6 +11,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
+import { getAuthErrorMessage } from '@/lib/auth/auth-error'
 import { setOAuthReturnCookieClient } from '@/lib/auth/set-oauth-return-cookie'
 
 export function SignupForm() {
@@ -67,7 +68,7 @@ export function SignupForm() {
         if (error.message.includes('already registered')) {
           toast.error('Un compte existe deja avec cet email')
         } else {
-          toast.error(error.message)
+          toast.error(getAuthErrorMessage(error))
         }
         return
       }
@@ -75,7 +76,7 @@ export function SignupForm() {
       toast.success('Compte cree ! Si vous ne recevez pas l\'email, essayez la connexion Google.')
       router.push('/auth/connexion?info=check-email')
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Une erreur est survenue')
+      toast.error(getAuthErrorMessage(err))
     } finally {
       setIsLoading(false)
     }
@@ -95,10 +96,10 @@ export function SignupForm() {
       })
 
       if (error) {
-        toast.error(error.message)
+        toast.error(getAuthErrorMessage(error))
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Une erreur est survenue')
+      toast.error(getAuthErrorMessage(err))
     } finally {
       setIsLinkedinLoading(false)
     }
@@ -118,10 +119,10 @@ export function SignupForm() {
       })
 
       if (error) {
-        toast.error(error.message)
+        toast.error(getAuthErrorMessage(error))
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Une erreur est survenue')
+      toast.error(getAuthErrorMessage(err))
     } finally {
       setIsGoogleLoading(false)
     }

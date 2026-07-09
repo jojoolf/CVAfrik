@@ -7,6 +7,15 @@ import { createClient } from '@/lib/supabase/client'
 import { readOAuthNextFromCookieString, safeInternalPath } from '@/lib/auth/oauth-return'
 import { clearOAuthReturnCookieClient } from '@/lib/auth/set-oauth-return-cookie'
 
+function buildErrorPath(reason: string, detail?: string) {
+  const url = new URL('/auth/erreur', window.location.origin)
+  url.searchParams.set('reason', reason)
+  if (detail) {
+    url.searchParams.set('detail', detail.slice(0, 240))
+  }
+  return url.pathname + url.search
+}
+
 export default function AuthCallbackPage() {
   const router = useRouter()
 
@@ -17,10 +26,7 @@ export default function AuthCallbackPage() {
       const oauthDesc = params.get('error_description')
 
       if (oauthError) {
-        const u = new URL('/auth/erreur', window.location.origin)
-        u.searchParams.set('reason', oauthError)
-        if (oauthDesc) u.searchParams.set('detail', oauthDesc.slice(0, 200))
-        router.replace(u.pathname + u.search)
+        router.replace(buildErrorPath(oauthError, oauthDesc ?? undefined))
         return
       }
 
@@ -41,7 +47,7 @@ export default function AuthCallbackPage() {
         clearOAuthReturnCookieClient()
         if (error) {
           console.error('[auth/callback] verifyOtp', error.message)
-          router.replace('/auth/erreur')
+          router.replace(buildErrorPath('verify_otp_failed', error.message))
           return
         }
         router.replace(nextPath)
@@ -52,7 +58,7 @@ export default function AuthCallbackPage() {
       const code = params.get('code')
       if (!code) {
         clearOAuthReturnCookieClient()
-        router.replace('/auth/erreur')
+        router.replace(buildErrorPath('missing_code'))
         return
       }
 
@@ -67,7 +73,7 @@ export default function AuthCallbackPage() {
           return
         }
         console.error('[auth/callback] exchangeCodeForSession', error.message)
-        router.replace('/auth/erreur')
+        router.replace(buildErrorPath('exchange_code_failed', error.message))
         return
       }
 

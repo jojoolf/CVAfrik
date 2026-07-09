@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator'
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
+import { getAuthErrorMessage } from '@/lib/auth/auth-error'
 import { setOAuthReturnCookieClient } from '@/lib/auth/set-oauth-return-cookie'
 
 interface LoginFormProps {
@@ -50,7 +51,7 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
       router.push(redirectTo || '/dashboard')
       router.refresh()
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Une erreur est survenue')
+      toast.error(getAuthErrorMessage(err))
     } finally {
       setIsLoading(false)
     }
@@ -70,10 +71,10 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
       })
 
       if (error) {
-        toast.error(error.message)
+        toast.error(getAuthErrorMessage(error))
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Une erreur est survenue')
+      toast.error(getAuthErrorMessage(err))
     } finally {
       setIsLinkedinLoading(false)
     }
@@ -93,10 +94,10 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
       })
 
       if (error) {
-        toast.error(error.message)
+        toast.error(getAuthErrorMessage(error))
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Une erreur est survenue')
+      toast.error(getAuthErrorMessage(err))
     } finally {
       setIsGoogleLoading(false)
     }
