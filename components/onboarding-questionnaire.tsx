@@ -280,7 +280,7 @@ export function OnboardingQuestionnaire({
                 <Input
                   id="prenom"
                   type="text"
-                  placeholder="Ex: Joël"
+                  placeholder="Votre prénom"
                   value={prenom}
                   onChange={(e) => setPrenom(e.target.value)}
                   autoFocus
@@ -295,7 +295,7 @@ export function OnboardingQuestionnaire({
                 <Input
                   id="nom"
                   type="text"
-                  placeholder="Ex: EKON"
+                  placeholder="Votre nom de famille"
                   value={nom}
                   onChange={(e) => setNom(e.target.value)}
                   className="bg-slate-800 border-slate-700 text-white placeholder-slate-500 rounded-xl h-11"
