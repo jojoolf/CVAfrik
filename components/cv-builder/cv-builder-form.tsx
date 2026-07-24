@@ -411,6 +411,7 @@ export function CVBuilderForm({
           {showLivePreview && currentStep !== 4 && (
             <div className="hidden lg:block lg:col-span-5 xl:col-span-5 relative">
               <div className="sticky top-28 space-y-3">
+                {/* Preview header bar */}
                 <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-card/60 border border-border/80 backdrop-blur-md shadow-sm">
                   <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
                     <Sparkles className="h-3.5 w-3.5 text-primary animate-pulse" />
@@ -419,7 +420,7 @@ export function CVBuilderForm({
 
                   <div className="flex items-center gap-1">
                     <button
-                      onClick={() => setPreviewZoom(z => Math.max(0.45, z - 0.05))}
+                      onClick={() => setPreviewZoom(z => Math.max(0.35, parseFloat((z - 0.05).toFixed(2))))}
                       className="p-1 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
                       title="Dézoomer"
                     >
@@ -429,7 +430,7 @@ export function CVBuilderForm({
                       {Math.round(previewZoom * 100)}%
                     </span>
                     <button
-                      onClick={() => setPreviewZoom(z => Math.min(0.9, z + 0.05))}
+                      onClick={() => setPreviewZoom(z => Math.min(0.9, parseFloat((z + 0.05).toFixed(2))))}
                       className="p-1 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
                       title="Zoomer"
                     >
@@ -445,18 +446,28 @@ export function CVBuilderForm({
                   </div>
                 </div>
 
-                <div className="relative rounded-2xl border border-border/80 bg-slate-900/5 dark:bg-slate-900/40 p-4 shadow-xl flex justify-center items-start overflow-hidden min-h-[580px] max-h-[calc(100vh-160px)] custom-scrollbar">
-                  <div 
-                    className="shrink-0 bg-white shadow-2xl transition-transform duration-200 origin-top rounded-sm overflow-hidden"
+                {/* A4 preview container — uses wrapper sizing to prevent cutoff */}
+                <div className="rounded-2xl border border-border/80 bg-slate-900/5 dark:bg-slate-900/40 p-3 shadow-xl overflow-auto custom-scrollbar max-h-[calc(100vh-200px)] flex justify-center items-start">
+                  {/* Outer wrapper shrinks to scaled dimensions → no overflow */}
+                  <div
                     style={{
-                      width: '210mm',
-                      minHeight: '297mm',
-                      transform: `scale(${previewZoom})`,
-                      transformOrigin: 'top center',
-                      marginBottom: `-${(1 - previewZoom) * 297 * 3.779}px`,
+                      width: `${Math.round(794 * previewZoom)}px`,
+                      height: `${Math.round(1123 * previewZoom)}px`,
+                      flexShrink: 0,
+                      position: 'relative',
                     }}
                   >
-                    {renderCvTemplate(template, { data: cvData, showWatermark: plan.limites.filigrane })}
+                    <div
+                      className="absolute top-0 left-0 bg-white shadow-2xl overflow-hidden"
+                      style={{
+                        width: '794px',
+                        minHeight: '1123px',
+                        transform: `scale(${previewZoom})`,
+                        transformOrigin: 'top left',
+                      }}
+                    >
+                      {renderCvTemplate(template, { data: cvData, showWatermark: plan.limites.filigrane })}
+                    </div>
                   </div>
                 </div>
               </div>
