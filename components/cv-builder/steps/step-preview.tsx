@@ -1,10 +1,14 @@
 'use client'
 
 import { useMemo, useRef, useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Lock, Download, Loader2, Sparkles, FileText, Maximize2, CheckCircle, ZoomIn, ZoomOut, MousePointerClick } from 'lucide-react'
+import {
+  Lock, Download, Loader2, Sparkles, FileText,
+  Maximize2, CheckCircle, ZoomIn, ZoomOut, MousePointerClick,
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { CVDonnees, PlanConfig } from '@/lib/types'
 import { toPng } from 'html-to-image'
@@ -27,19 +31,22 @@ function getLockLabel(templatePlans: string[]) {
   return 'VERROUILLÉ'
 }
 
-// A4 dimensions in pixels at 96dpi
-const A4_WIDTH_PX = 794
-const A4_HEIGHT_PX = 1123
+// True A4 at 96 dpi — never change these, PDF depends on them
+const A4_W = 794
+const A4_H = 1123
 
 export function StepPreview({ data, template, onTemplateChange, plan }: StepPreviewProps) {
+  // Visible (scaled) preview ref
   const cvRef = useRef<HTMLDivElement>(null)
+  // Hidden full-size export ref (off-screen, no transform)
+  const exportRef = useRef<HTMLDivElement>(null)
   const previewContainerRef = useRef<HTMLDivElement>(null)
+
   const [isExporting, setIsExporting] = useState(false)
   const [activeCategory, setActiveCategory] = useState<string>('all')
   const [zoomLevel, setZoomLevel] = useState<number>(0.75)
-  const [containerWidth, setContainerWidth] = useState<number>(500)
+  const [mounted, setMounted] = useState(false)
 
-  // Canva Customization State
   const [canvaConfig, setCanvaConfig] = useState<CanvaCustomization>({
     primaryColor: CANVA_COLORS[0].value,
     fontFamily: CANVA_FONTS[0].value,
@@ -47,14 +54,15 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
     isCanvaDirectEditMode: true,
   })
 
-  // Measure container width to auto-fit zoom
+  // Need document to be available for portal
+  useEffect(() => { setMounted(true) }, [])
+
+  // Auto-fit zoom to container width
   useEffect(() => {
     const measure = () => {
       if (previewContainerRef.current) {
-        const w = previewContainerRef.current.clientWidth - 48 // subtract padding
-        setContainerWidth(w)
-        // Auto-fit: set zoom so A4 fills container width
-        const autoZoom = Math.min(0.9, Math.max(0.4, w / A4_WIDTH_PX))
+        const w = previewContainerRef.current.clientWidth - 48
+        const autoZoom = Math.min(0.9, Math.max(0.35, w / A4_W))
         setZoomLevel(parseFloat(autoZoom.toFixed(2)))
       }
     }
@@ -64,9 +72,8 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
     return () => ro.disconnect()
   }, [])
 
-  const updateCanvaConfig = (updates: Partial<CanvaCustomization>) => {
+  const updateCanvaConfig = (updates: Partial<CanvaCustomization>) =>
     setCanvaConfig(prev => ({ ...prev, ...updates }))
-  }
 
   const templates = useMemo(() => templateCatalog, [])
 
@@ -78,57 +85,91 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
     return templates
   }, [templates, activeCategory])
 
-  const isTemplateAvailable = (templateConfig: TemplateCatalogItem) =>
-    templateConfig.plans.includes(plan.id)
+  const isTemplateAvailable = (t: TemplateCatalogItem) => t.plans.includes(plan.id)
 
+  // ── PDF EXPORT ──────────────────────────────────────────────────────────────
   const handleDownloadPDF = async () => {
-    if (!cvRef.current) return
+    if (!exportRef.current) return
     setIsExporting(true)
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500))
+      // Give browser time to fully render the hidden export div
+      await new Promise(resolve => setTimeout(resolve, 600))
 
-      const dataUrl = await toPng(cvRef.current, {
+      // Capture from the HIDDEN full-size div (no transform, real pixel size)
+      const dataUrl = await toPng(exportRef.current, {
         quality: 1,
-        pixelRatio: 2,
+        pixelRatio: 2,          // Retina-quality output
         backgroundColor: '#ffffff',
-        width: A4_WIDTH_PX,
-        height: cvRef.current.scrollHeight,
+        width: A4_W,
+        height: exportRef.current.scrollHeight,
+        // Force all styles to be inlined (avoids Tailwind class issues in capture)
+        skipFonts: false,
+        useCORS: true,
       })
 
-      const JSPDFClass = typeof jsPDF === 'function' ? jsPDF : (jsPDF as any).jsPDF || (jsPDF as any).default
+      const JSPDFClass =
+        typeof jsPDF === 'function' ? jsPDF : (jsPDF as any).jsPDF ?? (jsPDF as any).default
 
-      if (!JSPDFClass) {
-        throw new Error('Impossible de charger le moteur d\'exportation PDF.')
-      }
+      if (!JSPDFClass) throw new Error('Moteur PDF introuvable')
 
-      const pdf = new JSPDFClass({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4',
-      })
+      const pdf = new JSPDFClass({ orientation: 'portrait', unit: 'mm', format: 'a4' })
 
-      const imgWidth = 210
-      const imgHeight = (cvRef.current.scrollHeight * imgWidth) / A4_WIDTH_PX
+      const realHeight = exportRef.current.scrollHeight
+      const pdfWidth = 210                                     // mm
+      const pdfHeight = (realHeight * pdfWidth) / A4_W        // proportional
 
-      pdf.addImage(dataUrl, 'PNG', 0, 0, imgWidth, imgHeight)
-      pdf.save(`CV_${data.informations_personnelles.prenom || 'CVAfrik'}_${data.informations_personnelles.nom || 'CV'}.pdf`)
-      toast.success('Votre CV a été téléchargé au format PDF avec succès !')
-    } catch (error: any) {
-      console.error('PDF Error:', error)
-      toast.error(`Erreur lors de la génération du PDF : ${error.message || 'Échec d\'export'}`)
+      pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight)
+      pdf.save(
+        `CV_${data.informations_personnelles.prenom || 'CVAfrik'}_${
+          data.informations_personnelles.nom || 'CV'
+        }.pdf`
+      )
+      toast.success('CV téléchargé avec succès ! ✅')
+    } catch (err: any) {
+      console.error('PDF export error:', err)
+      toast.error(`Erreur export PDF : ${err.message ?? 'Échec'}`)
     } finally {
       setIsExporting(false)
     }
   }
 
-  // Scaled dimensions for wrapper div (prevents layout overflow)
-  const scaledWidth = Math.round(A4_WIDTH_PX * zoomLevel)
-  const scaledHeight = Math.round(A4_HEIGHT_PX * zoomLevel)
+  // Wrapper dimensions = A4 × zoom (keeps layout clean, no overflow)
+  const scaledW = Math.round(A4_W * zoomLevel)
+  const scaledH = Math.round(A4_H * zoomLevel)
 
   return (
     <div className="space-y-4 max-w-7xl mx-auto">
-      {/* Top Banner & Export Actions */}
+
+      {/*
+        ── HIDDEN EXPORT DIV (portal → body) ─────────────────────────────
+        Rendered at TRUE A4 size, NO transform, off-screen.
+        html-to-image captures this, not the scaled preview.
+      */}
+      {mounted && createPortal(
+        <div
+          aria-hidden="true"
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: '-9999px',
+            width: `${A4_W}px`,
+            minHeight: `${A4_H}px`,
+            background: '#ffffff',
+            overflow: 'hidden',
+            zIndex: -1,
+            fontFamily: canvaConfig.fontFamily,
+            fontSize: `${canvaConfig.fontSizePt}pt`,
+            pointerEvents: 'none',
+          }}
+          ref={exportRef}
+        >
+          {renderCvTemplate(template, { data, showWatermark: plan.limites.filigrane })}
+        </div>,
+        document.body
+      )}
+
+      {/* ── TOP BANNER ───────────────────────────────────────────────────── */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-card/80 backdrop-blur-md p-5 rounded-2xl border border-border/80 shadow-sm">
         <div className="text-center md:text-left space-y-1">
           <div className="flex items-center justify-center md:justify-start gap-2">
@@ -141,7 +182,7 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
         </div>
 
         <div className="flex w-full md:w-auto flex-col sm:flex-row gap-3">
-          {/* Fullscreen Dialog */}
+          {/* Fullscreen preview */}
           <Dialog>
             <DialogTrigger asChild>
               <Button variant="outline" className="gap-2 rounded-xl border-border/80 font-medium">
@@ -156,13 +197,12 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
                   Aperçu Haute Définition (A4)
                 </DialogTitle>
               </DialogHeader>
-
               <div className="custom-scrollbar flex w-full flex-1 justify-center overflow-auto py-4">
                 <div
                   className="shrink-0 bg-white shadow-2xl rounded-sm overflow-hidden"
                   style={{
-                    width: `${A4_WIDTH_PX}px`,
-                    minHeight: `${A4_HEIGHT_PX}px`,
+                    width: `${A4_W}px`,
+                    minHeight: `${A4_H}px`,
                     fontFamily: canvaConfig.fontFamily,
                     fontSize: `${canvaConfig.fontSizePt}pt`,
                   }}
@@ -173,6 +213,7 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
             </DialogContent>
           </Dialog>
 
+          {/* Download PDF */}
           <Button
             onClick={handleDownloadPDF}
             disabled={isExporting}
@@ -193,13 +234,13 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
         </div>
       </div>
 
-      {/* Canva Toolbar */}
+      {/* ── CANVA TOOLBAR ────────────────────────────────────────────────── */}
       <CanvaToolbar customization={canvaConfig} onChange={updateCanvaConfig} />
 
-      {/* Main Grid: Template Selector + A4 Preview */}
+      {/* ── MAIN GRID ────────────────────────────────────────────────────── */}
       <div className="grid gap-5 lg:grid-cols-12">
 
-        {/* ── Template Catalog Panel ─────────────────────────────────── */}
+        {/* Template Catalog */}
         <Card className="lg:col-span-5 border-border/80 bg-card/80 backdrop-blur-sm shadow-sm">
           <CardHeader className="pb-3 border-b border-border/40">
             <div className="flex items-center justify-between">
@@ -213,14 +254,14 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
             </div>
             <CardDescription className="text-xs">Choisissez un style visuel adapté à votre secteur</CardDescription>
 
-            {/* Category Filter Pills */}
+            {/* Category pills */}
             <div className="flex items-center gap-1.5 pt-2 overflow-x-auto custom-scrollbar pb-1">
               {[
                 { id: 'all', label: 'Tous' },
                 { id: 'free', label: 'Gratuits' },
                 { id: 'pro', label: 'Pro' },
                 { id: 'premium', label: 'Premium' },
-              ].map((cat) => (
+              ].map(cat => (
                 <button
                   key={cat.id}
                   onClick={() => setActiveCategory(cat.id)}
@@ -237,30 +278,31 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
           </CardHeader>
 
           <CardContent className="p-4">
-            {/* Plain div grid — no hidden radio inputs to avoid browser scroll-to-focus */}
-            <div className="grid grid-cols-2 gap-3 max-h-[520px] overflow-y-auto custom-scrollbar pr-1">
-              {filteredTemplates.map((templateConfig) => {
-                const available = isTemplateAvailable(templateConfig)
-                const isSelected = template === templateConfig.id
+            <div
+              className="grid grid-cols-2 gap-3 max-h-[520px] overflow-y-auto custom-scrollbar pr-1"
+              role="radiogroup"
+            >
+              {filteredTemplates.map(tpl => {
+                const available = isTemplateAvailable(tpl)
+                const isSelected = template === tpl.id
                 return (
                   <div
-                    key={templateConfig.id}
+                    key={tpl.id}
                     role="radio"
                     aria-checked={isSelected}
                     aria-disabled={!available}
-                    onClick={(e) => {
-                      // Prevent page scroll on click
+                    onClick={e => {
                       e.preventDefault()
-                      if (available) onTemplateChange(templateConfig.id)
+                      if (available) onTemplateChange(tpl.id)
                     }}
                     className={cn(
-                      'flex cursor-pointer flex-col overflow-hidden rounded-2xl border-2 border-border/60 bg-card transition-all hover:border-primary/50 hover:shadow-md relative group select-none',
+                      'flex cursor-pointer flex-col overflow-hidden rounded-2xl border-2 border-border/60 bg-card transition-all hover:border-primary/50 hover:shadow-md relative select-none',
                       isSelected && 'border-primary ring-2 ring-primary/20 shadow-lg shadow-primary/10',
                       !available && 'cursor-not-allowed opacity-50 bg-muted/20 pointer-events-none',
                     )}
                   >
-                    {/* Color Preview Block */}
-                    <div className={`relative flex h-16 w-full items-center justify-center ${templateConfig.color}`}>
+                    {/* Color swatch */}
+                    <div className={`relative flex h-16 w-full items-center justify-center ${tpl.color}`}>
                       <div className="flex gap-1.5 opacity-60">
                         <div className="h-8 w-4 rounded-sm bg-white/30" />
                         <div className="space-y-1">
@@ -274,7 +316,7 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
                         <div className="absolute right-1.5 top-1.5">
                           <span className="flex items-center gap-1 rounded-md bg-slate-900/80 px-2 py-0.5 text-[9px] font-bold text-white backdrop-blur-sm border border-white/10">
                             <Lock className="h-2.5 w-2.5" />
-                            {getLockLabel(templateConfig.plans)}
+                            {getLockLabel(tpl.plans)}
                           </span>
                         </div>
                       )}
@@ -288,10 +330,9 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
                       )}
                     </div>
 
-                    {/* Info Block */}
                     <div className="p-2.5 space-y-0.5">
-                      <p className="truncate text-xs font-bold text-foreground">{templateConfig.name}</p>
-                      <p className="truncate text-[10px] text-muted-foreground">{templateConfig.description}</p>
+                      <p className="truncate text-xs font-bold text-foreground">{tpl.name}</p>
+                      <p className="truncate text-[10px] text-muted-foreground">{tpl.description}</p>
                     </div>
                   </div>
                 )
@@ -300,20 +341,21 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
           </CardContent>
         </Card>
 
-        {/* ── Live A4 Preview Panel ──────────────────────────────────── */}
+        {/* ── Live A4 Preview ─────────────────────────────────────────────── */}
         <Card
           ref={previewContainerRef}
           className="lg:col-span-7 border-border/80 bg-slate-900/5 dark:bg-slate-950/40 rounded-2xl shadow-inner flex flex-col overflow-hidden"
         >
-          {/* Preview toolbar */}
+          {/* Toolbar */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-border/40 shrink-0">
             <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
               <MousePointerClick className="h-3.5 w-3.5 text-primary animate-pulse" />
               <span>
-                Canvas A4 — Mode {canvaConfig.isCanvaDirectEditMode ? (
+                Canvas A4 —{' '}
+                {canvaConfig.isCanvaDirectEditMode ? (
                   <span className="text-emerald-500 font-bold">Édition Active</span>
                 ) : (
-                  <span className="text-muted-foreground">Lecture seule</span>
+                  <span>Lecture seule</span>
                 )}
               </span>
             </span>
@@ -339,16 +381,13 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
             </div>
           </div>
 
-          {/* Scrollable A4 canvas area */}
+          {/* Scrollable A4 canvas */}
           <div className="flex-1 overflow-auto custom-scrollbar p-4 flex justify-center items-start bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-slate-800/10 via-transparent to-transparent dark:from-slate-700/20">
-            {/*
-              Wrapper div with SCALED dimensions → prevents overflow/cutoff.
-              The inner div is the actual A4 sheet at 1:1 scale, scaled via CSS transform.
-            */}
+            {/* Wrapper = scaled dimensions → no overflow */}
             <div
               style={{
-                width: `${scaledWidth}px`,
-                height: `${scaledHeight}px`,
+                width: `${scaledW}px`,
+                height: `${scaledH}px`,
                 flexShrink: 0,
                 position: 'relative',
               }}
@@ -364,13 +403,12 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
                     : 'cursor-default'
                 )}
                 style={{
-                  width: `${A4_WIDTH_PX}px`,
-                  minHeight: `${A4_HEIGHT_PX}px`,
+                  width: `${A4_W}px`,
+                  minHeight: `${A4_H}px`,
                   transform: `scale(${zoomLevel})`,
                   transformOrigin: 'top left',
                   fontFamily: canvaConfig.fontFamily,
                   fontSize: `${canvaConfig.fontSizePt}pt`,
-                  borderColor: canvaConfig.primaryColor,
                 }}
               >
                 {renderCvTemplate(template, { data, showWatermark: plan.limites.filigrane })}
@@ -382,7 +420,7 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
           <div className="shrink-0 px-4 py-2 border-t border-border/30 bg-card/30 backdrop-blur-sm">
             <p className="text-[10px] text-muted-foreground text-center">
               {canvaConfig.isCanvaDirectEditMode
-                ? '✏️ Cliquez sur le texte du CV pour le modifier directement — les changements seront enregistrés'
+                ? '✏️ Cliquez sur le texte du CV pour modifier directement'
                 : '👁️ Mode lecture — activez "Édition sur Canvas" pour modifier'}
             </p>
           </div>
