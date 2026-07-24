@@ -23,7 +23,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Plus, Trash2, GraduationCap, GripVertical } from 'lucide-react'
+import { Plus, Trash2, GraduationCap, GripVertical, Calendar, Building, MapPin, Award } from 'lucide-react'
 import type { CVDonnees, Formation } from '@/lib/types'
 
 interface StepFormationProps {
@@ -42,7 +42,17 @@ const emptyFormation: Omit<Formation, 'id'> = {
   description: '',
 }
 
-function SortableFormationCard({ formation, updateFormation, removeFormation }: { formation: Formation; updateFormation: (id: string, updates: Partial<Formation>) => void; removeFormation: (id: string) => void }) {
+function SortableFormationCard({ 
+  formation, 
+  index,
+  updateFormation, 
+  removeFormation 
+}: { 
+  formation: Formation; 
+  index: number;
+  updateFormation: (id: string, updates: Partial<Formation>) => void; 
+  removeFormation: (id: string) => void 
+}) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: formation.id })
 
   const style = {
@@ -52,101 +62,153 @@ function SortableFormationCard({ formation, updateFormation, removeFormation }: 
   }
 
   return (
-    <Card ref={setNodeRef} style={style} className={isDragging ? 'shadow-lg' : ''}>
-      <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
-        <div className="flex items-center gap-2">
-          <button {...attributes} {...listeners} className="cursor-grab touch-none p-1 hover:text-primary transition-colors">
-            <GripVertical className="h-4 w-4 text-muted-foreground" />
+    <Card 
+      ref={setNodeRef} 
+      style={style} 
+      className={`overflow-hidden border-border/80 bg-card/90 backdrop-blur-sm shadow-sm transition-all hover:shadow-md ${
+        isDragging ? 'shadow-2xl border-primary ring-2 ring-primary/20' : ''
+      }`}
+    >
+      <CardHeader className="flex flex-row items-center justify-between border-b border-border/40 bg-muted/20 px-5 py-3.5 space-y-0">
+        <div className="flex items-center gap-3">
+          <button 
+            {...attributes} 
+            {...listeners} 
+            className="cursor-grab active:cursor-grabbing p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+            title="Glisser pour réordonner"
+          >
+            <GripVertical className="h-4 w-4" />
           </button>
-          <div>
-            <CardTitle className="text-base">
-              {formation.diplome || 'Nouvelle formation'}
-            </CardTitle>
-            <CardDescription>
-              {formation.etablissement || 'Etablissement non specifie'}
-            </CardDescription>
+          
+          <div className="flex items-center gap-2">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+              {index + 1}
+            </span>
+            <div>
+              <CardTitle className="text-sm font-semibold leading-none">
+                {formation.diplome || 'Nouvelle Formation / Diplôme'}
+              </CardTitle>
+              <CardDescription className="text-[11px] mt-0.5">
+                {formation.etablissement || 'Établissement non spécifié'}
+              </CardDescription>
+            </div>
           </div>
         </div>
+
         <Button
           variant="ghost"
           size="icon"
-          className="text-destructive"
+          className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
           onClick={() => removeFormation(formation.id)}
+          title="Supprimer la formation"
         >
           <Trash2 className="h-4 w-4" />
         </Button>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <Label>Diplome / Formation *</Label>
-          <Input
-            value={formation.diplome}
-            onChange={(e) => updateFormation(formation.id, { diplome: e.target.value })}
-            placeholder="Ex: Licence en Informatique"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label>Etablissement *</Label>
-          <Input
-            value={formation.etablissement}
-            onChange={(e) => updateFormation(formation.id, { etablissement: e.target.value })}
-            placeholder="Ex: Universite Felix Houphouet-Boigny"
-          />
-        </div>
+
+      <CardContent className="p-5 space-y-4">
         <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <Label>Ville</Label>
-            <Input
-              value={formation.ville}
-              onChange={(e) => updateFormation(formation.id, { ville: e.target.value })}
-              placeholder="Ex: Abidjan"
-            />
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold">Diplôme / Titre de la Formation <span className="text-destructive">*</span></Label>
+            <div className="relative">
+              <Award className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                value={formation.diplome}
+                onChange={(e) => updateFormation(formation.id, { diplome: e.target.value })}
+                placeholder="Ex: Licence en Génie Informatique"
+                className="pl-9 rounded-xl text-sm"
+              />
+            </div>
           </div>
-          <div className="space-y-2">
-            <Label>Pays</Label>
+
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold">Établissement / École / Université <span className="text-destructive">*</span></Label>
+            <div className="relative">
+              <Building className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                value={formation.etablissement}
+                onChange={(e) => updateFormation(formation.id, { etablissement: e.target.value })}
+                placeholder="Ex: Université Félix Houphouët-Boigny"
+                className="pl-9 rounded-xl text-sm"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold">Ville</Label>
+            <div className="relative">
+              <MapPin className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                value={formation.ville}
+                onChange={(e) => updateFormation(formation.id, { ville: e.target.value })}
+                placeholder="Ex: Abidjan"
+                className="pl-9 rounded-xl text-sm"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold">Pays</Label>
             <Input
               value={formation.pays}
               onChange={(e) => updateFormation(formation.id, { pays: e.target.value })}
-              placeholder="Ex: Cote d'Ivoire"
+              placeholder="Ex: Côte d'Ivoire"
+              className="rounded-xl text-sm"
             />
           </div>
         </div>
+
         <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <Label>Date de debut</Label>
-            <Input
-              type="month"
-              value={formation.date_debut}
-              onChange={(e) => updateFormation(formation.id, { date_debut: e.target.value })}
-            />
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold">Date de Début</Label>
+            <div className="relative">
+              <Calendar className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="month"
+                value={formation.date_debut}
+                onChange={(e) => updateFormation(formation.id, { date_debut: e.target.value })}
+                className="pl-9 rounded-xl text-sm"
+              />
+            </div>
           </div>
-          <div className="space-y-2">
-            <Label>Date de fin</Label>
-            <Input
-              type="month"
-              value={formation.date_fin}
-              onChange={(e) => updateFormation(formation.id, { date_fin: e.target.value })}
-              disabled={formation.en_cours}
-            />
+
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold">Date de Fin</Label>
+            <div className="relative">
+              <Calendar className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="month"
+                value={formation.date_fin}
+                onChange={(e) => updateFormation(formation.id, { date_fin: e.target.value })}
+                disabled={formation.en_cours}
+                className="pl-9 rounded-xl text-sm"
+              />
+            </div>
           </div>
         </div>
-        <div className="flex items-center space-x-2">
+
+        <div className="flex items-center space-x-2 pt-1">
           <Checkbox
             id={`en_cours_${formation.id}`}
             checked={formation.en_cours}
             onCheckedChange={(checked) => updateFormation(formation.id, { en_cours: checked as boolean })}
+            className="rounded-md"
           />
-          <Label htmlFor={`en_cours_${formation.id}`} className="text-sm">
-            Formation en cours
+          <Label htmlFor={`en_cours_${formation.id}`} className="text-xs font-medium cursor-pointer">
+            Formation actuellement en cours
           </Label>
         </div>
-        <div className="space-y-2">
-          <Label>Description (optionnel)</Label>
+
+        <div className="space-y-1.5 pt-1">
+          <Label className="text-xs font-semibold">Description ou Mentions (Optionnel)</Label>
           <Textarea
             value={formation.description || ''}
             onChange={(e) => updateFormation(formation.id, { description: e.target.value })}
-            placeholder="Mention, specialisation, projets notables..."
+            placeholder="Mention obtenue, spécialisation, projets de fin d'études notables..."
             rows={2}
+            className="rounded-xl text-sm"
           />
         </div>
       </CardContent>
@@ -155,8 +217,6 @@ function SortableFormationCard({ formation, updateFormation, removeFormation }: 
 }
 
 export function StepFormation({ data, onUpdate }: StepFormationProps) {
-  const [editingId, setEditingId] = useState<string | null>(null)
-
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
@@ -181,7 +241,6 @@ export function StepFormation({ data, onUpdate }: StepFormationProps) {
       id: crypto.randomUUID(),
     }
     onUpdate({ formations: [...data.formations, newFormation] })
-    setEditingId(newFormation.id)
   }
 
   const updateFormation = (id: string, updates: Partial<Formation>) => {
@@ -193,22 +252,27 @@ export function StepFormation({ data, onUpdate }: StepFormationProps) {
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold text-foreground">Formation</h2>
-        <p className="mt-2 text-muted-foreground">
-          Ajoutez vos diplomes et formations. Glissez-deposez pour reordonner.
+    <div className="mx-auto max-w-3xl space-y-6">
+      <div className="text-center space-y-1.5 pb-2">
+        <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Formations & Diplômes</h2>
+        <p className="text-sm text-muted-foreground max-w-lg mx-auto">
+          Valorisez votre parcours académique. Utilisez la poignée à gauche pour réordonner vos diplômes.
         </p>
       </div>
 
       {data.formations.length === 0 ? (
-        <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <GraduationCap className="h-12 w-12 text-muted-foreground/50" />
-            <p className="mt-4 text-center text-muted-foreground">Aucune formation ajoutee</p>
-            <Button className="mt-4" onClick={addFormation}>
+        <Card className="border-2 border-dashed border-border/80 bg-card/40 rounded-2xl p-8 text-center shadow-none">
+          <CardContent className="flex flex-col items-center justify-center p-0">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-4">
+              <GraduationCap className="h-8 w-8" />
+            </div>
+            <h3 className="text-base font-semibold text-foreground">Aucune formation ajoutée</h3>
+            <p className="mt-1 text-xs text-muted-foreground max-w-xs">
+              Ajoutez vos diplômes, études universitaires ou certifications.
+            </p>
+            <Button className="mt-6 rounded-xl font-medium shadow-md shadow-primary/20" onClick={addFormation}>
               <Plus className="mr-2 h-4 w-4" />
-              Ajouter une formation
+              Ajouter une Première Formation
             </Button>
           </CardContent>
         </Card>
@@ -216,10 +280,11 @@ export function StepFormation({ data, onUpdate }: StepFormationProps) {
         <div className="space-y-4">
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
             <SortableContext items={data.formations.map(f => f.id)} strategy={verticalListSortingStrategy}>
-              {data.formations.map((formation) => (
+              {data.formations.map((formation, index) => (
                 <SortableFormationCard
                   key={formation.id}
                   formation={formation}
+                  index={index}
                   updateFormation={updateFormation}
                   removeFormation={removeFormation}
                 />
@@ -227,9 +292,13 @@ export function StepFormation({ data, onUpdate }: StepFormationProps) {
             </SortableContext>
           </DndContext>
 
-          <Button variant="outline" className="w-full" onClick={addFormation}>
-            <Plus className="mr-2 h-4 w-4" />
-            Ajouter une autre formation
+          <Button 
+            variant="outline" 
+            className="w-full py-6 rounded-2xl border-dashed border-2 hover:border-primary hover:bg-primary/5 text-sm font-semibold transition-all"
+            onClick={addFormation}
+          >
+            <Plus className="mr-2 h-4 w-4 text-primary" />
+            Ajouter une Autre Formation
           </Button>
         </div>
       )}

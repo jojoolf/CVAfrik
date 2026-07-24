@@ -15,12 +15,21 @@ import {
   Briefcase,
   Star,
   Loader2,
-  AlertCircle,
-  Lock
+  Lock,
+  Eye,
+  EyeOff,
+  CheckCircle2,
+  Edit3,
+  ZoomIn,
+  ZoomOut,
+  Maximize2,
+  Sparkles
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import type { Profile, PlanConfig, CV, CVDonnees } from '@/lib/types'
+import { motion, AnimatePresence } from 'framer-motion'
+import { renderCvTemplate } from './templates/cv-preview-collection'
 
 import { StepPersonalInfo } from './steps/step-personal-info'
 import { StepFormation } from './steps/step-formation'
@@ -29,11 +38,11 @@ import { StepCompetences } from './steps/step-competences'
 import { StepPreview } from './steps/step-preview'
 
 const steps = [
-  { id: 'personal', title: 'Informations', icon: User },
-  { id: 'formation', title: 'Formation', icon: GraduationCap },
-  { id: 'experience', title: 'Experience', icon: Briefcase },
-  { id: 'competences', title: 'Competences', icon: Star },
-  { id: 'preview', title: 'Aperçu', icon: FileText },
+  { id: 'personal', title: 'Informations', icon: User, description: 'Coordonnées & profil' },
+  { id: 'formation', title: 'Formation', icon: GraduationCap, description: 'Parcours académique' },
+  { id: 'experience', title: 'Expérience', icon: Briefcase, description: 'Parcours pro' },
+  { id: 'competences', title: 'Compétences', icon: Star, description: 'Savoir-faire & langues' },
+  { id: 'preview', title: 'Aperçu', icon: FileText, description: 'Style & Export' },
 ]
 
 interface CVBuilderFormProps {
@@ -73,8 +82,13 @@ export function CVBuilderForm({
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState(existingCV ? steps.length - 1 : 0)
   const [isSaving, setIsSaving] = useState(false)
-  const [cvTitle, setCvTitle] = useState(existingCV?.titre || 'Mon CV')
+  const [lastSavedTime, setLastSavedTime] = useState<string | null>(null)
+  const [cvTitle, setCvTitle] = useState(existingCV?.titre || 'Mon CV Professionnel')
   const [template, setTemplate] = useState(existingCV?.template || selectedTemplate)
+  const [showLivePreview, setShowLivePreview] = useState(true)
+  const [previewZoom, setPreviewZoom] = useState<number>(0.65)
+  const [isEditingTitle, setIsEditingTitle] = useState(false)
+
   const [cvData, setCvData] = useState<CVDonnees>(
     existingCV?.donnees || {
       ...defaultCVData,
@@ -94,7 +108,7 @@ export function CVBuilderForm({
     setCvData(prev => ({ ...prev, ...updates }))
   }, [])
 
-  const progress = ((currentStep + 1) / steps.length) * 100
+  const progress = Math.round(((currentStep + 1) / steps.length) * 100)
 
   const handleSave = async (redirect = false) => {
     setIsSaving(true)
@@ -103,7 +117,6 @@ export function CVBuilderForm({
       const supabase = createClient()
       
       if (existingCV) {
-        // Update existing CV
         const { error } = await supabase
           .from('cvs')
           .update({
@@ -115,9 +128,8 @@ export function CVBuilderForm({
           .eq('id', existingCV.id)
 
         if (error) throw error
-        toast.success('CV mis a jour avec succes!')
+        toast.success('CV mis à jour avec succès !')
       } else {
-        // Create new CV
         const { error } = await supabase
           .from('cvs')
           .insert({
@@ -129,7 +141,6 @@ export function CVBuilderForm({
 
         if (error) throw error
 
-        // Update monthly counter
         await supabase
           .from('profiles')
           .update({
@@ -138,8 +149,10 @@ export function CVBuilderForm({
           })
           .eq('id', profile.id)
 
-        toast.success('CV cree avec succes!')
+        toast.success('CV créé avec succès !')
       }
+
+      setLastSavedTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))
 
       if (redirect) {
         router.push('/dashboard')
@@ -167,21 +180,20 @@ export function CVBuilderForm({
 
   if (!canCreate) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
-        <div className="max-w-md text-center">
-          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
-            <Lock className="h-8 w-8 text-destructive" />
+      <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-background via-slate-900/5 to-primary/5 p-4">
+        <div className="max-w-md text-center bg-card/80 backdrop-blur-xl p-8 rounded-3xl border border-border shadow-2xl">
+          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-destructive/10 text-destructive shadow-inner">
+            <Lock className="h-10 w-10 text-destructive" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">Limite atteinte</h1>
-          <p className="mt-2 text-muted-foreground">
-            Vous avez atteint la limite de CV pour ce mois avec le plan gratuit. 
-            Passez au plan Pro pour creer des CV illimites.
+          <h1 className="text-2xl font-bold text-foreground">Limite mensuelle atteinte</h1>
+          <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
+            Vous avez atteint la limite de création de CV pour ce mois avec votre plan actuel. Passez au plan Pro pour débloquer la création illimitée et tous les modèles premium.
           </p>
-          <div className="mt-6 flex flex-col gap-3">
-            <Button asChild>
-              <Link href="/tarifs">Voir les plans</Link>
+          <div className="mt-8 flex flex-col gap-3">
+            <Button asChild className="rounded-xl shadow-lg shadow-primary/25 h-11">
+              <Link href="/tarifs">Découvrir les Plans Pro</Link>
             </Button>
-            <Button variant="outline" asChild>
+            <Button variant="ghost" asChild className="rounded-xl h-11">
               <Link href="/dashboard">Retour au tableau de bord</Link>
             </Button>
           </div>
@@ -191,150 +203,305 @@ export function CVBuilderForm({
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-secondary/20">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" asChild>
+    <div className="flex min-h-screen flex-col bg-slate-950/5 dark:bg-slate-950 text-foreground selection:bg-primary/20">
+      {/* Header Glassmorphic Top Bar */}
+      <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-xl transition-all">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="sm" asChild className="rounded-xl hover:bg-muted/80">
               <Link href="/dashboard">
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Retour
+                <span className="hidden sm:inline">Tableau de bord</span>
               </Link>
             </Button>
-            <div className="hidden h-6 w-px bg-border sm:block" />
-            <div className="hidden sm:block">
-              <input
-                type="text"
-                value={cvTitle}
-                onChange={(e) => setCvTitle(e.target.value)}
-                className="bg-transparent text-lg font-semibold text-foreground focus:outline-none"
-                placeholder="Titre du CV"
-              />
+
+            <div className="h-5 w-px bg-border/60" />
+
+            <div className="flex items-center gap-2">
+              {isEditingTitle ? (
+                <input
+                  type="text"
+                  value={cvTitle}
+                  autoFocus
+                  onBlur={() => setIsEditingTitle(false)}
+                  onKeyDown={(e) => e.key === 'Enter' && setIsEditingTitle(false)}
+                  onChange={(e) => setCvTitle(e.target.value)}
+                  className="rounded-lg bg-muted px-2.5 py-1 text-sm font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              ) : (
+                <button
+                  onClick={() => setIsEditingTitle(true)}
+                  className="group flex items-center gap-1.5 rounded-lg px-2 py-1 hover:bg-muted/60 transition-colors text-left"
+                >
+                  <span className="max-w-[160px] truncate sm:max-w-[260px] text-sm sm:text-base font-bold text-foreground">
+                    {cvTitle}
+                  </span>
+                  <Edit3 className="h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                </button>
+              )}
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            {/* Status Indicator */}
+            {lastSavedTime && (
+              <span className="hidden md:flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
+                <CheckCircle2 className="h-3 w-3" />
+                Enregistré à {lastSavedTime}
+              </span>
+            )}
+
+            {/* Toggle Split Screen Preview */}
             <Button
               variant="outline"
               size="sm"
+              onClick={() => setShowLivePreview(prev => !prev)}
+              className="hidden lg:flex items-center gap-2 rounded-xl border-border/80 bg-background/50 hover:bg-accent"
+              title={showLivePreview ? "Masquer l'aperçu en direct" : "Afficher l'aperçu côte à côte"}
+            >
+              {showLivePreview ? (
+                <>
+                  <EyeOff className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-xs">Masquer Aperçu</span>
+                </>
+              ) : (
+                <>
+                  <Eye className="h-4 w-4 text-primary" />
+                  <span className="text-xs">Aperçu en Direct</span>
+                </>
+              )}
+            </Button>
+
+            {/* Save Button */}
+            <Button
+              variant="default"
+              size="sm"
               onClick={() => handleSave(false)}
               disabled={isSaving}
+              className="rounded-xl shadow-md shadow-primary/20 bg-primary hover:bg-primary/90 font-medium text-xs sm:text-sm px-4"
             >
               {isSaving ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
                 <Save className="mr-2 h-4 w-4" />
               )}
-              Sauvegarder
+              Enregistrer
             </Button>
+          </div>
+        </div>
+
+        {/* Stepper Navigation Bar */}
+        <div className="border-t border-border/40 bg-card/40 backdrop-blur-md">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 py-2.5">
+            <div className="flex items-center justify-between gap-2 overflow-x-auto custom-scrollbar pb-1 pt-0.5">
+              {steps.map((step, index) => {
+                const Icon = step.icon
+                const isActive = index === currentStep
+                const isCompleted = index < currentStep
+
+                return (
+                  <button
+                    key={step.id}
+                    onClick={() => setCurrentStep(index)}
+                    className={`group relative flex items-center gap-2.5 rounded-xl px-3 py-1.5 text-xs font-semibold transition-all shrink-0 ${
+                      isActive
+                        ? 'bg-primary text-primary-foreground shadow-md shadow-primary/25 scale-[1.02]'
+                        : isCompleted
+                        ? 'bg-primary/10 text-primary hover:bg-primary/15'
+                        : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'
+                    }`}
+                  >
+                    <div
+                      className={`flex h-6 w-6 items-center justify-center rounded-lg transition-transform ${
+                        isActive
+                          ? 'bg-white/20 text-white'
+                          : isCompleted
+                          ? 'bg-primary/20 text-primary'
+                          : 'bg-muted text-muted-foreground group-hover:scale-110'
+                      }`}
+                    >
+                      {isCompleted ? (
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                      ) : (
+                        <Icon className="h-3.5 w-3.5" />
+                      )}
+                    </div>
+
+                    <div className="flex flex-col text-left">
+                      <span className="leading-tight">{step.title}</span>
+                    </div>
+
+                    {index < steps.length - 1 && (
+                      <span className="ml-1 hidden xl:inline text-muted-foreground/40 font-normal">
+                        ›
+                      </span>
+                    )}
+                  </button>
+                )
+              })}
+
+              <div className="ml-auto hidden sm:flex items-center gap-2 text-xs font-medium text-muted-foreground pl-2 border-l border-border/50">
+                <Progress value={progress} className="w-20 h-2 bg-muted overflow-hidden rounded-full" />
+                <span className="text-[11px] font-bold text-primary">{progress}%</span>
+              </div>
+            </div>
           </div>
         </div>
       </header>
 
-      {/* Progress */}
-      <div className="border-b border-border bg-background">
-        <div className="container mx-auto px-4 py-4">
-          <Progress value={progress} className="h-2" />
-          <div className="mt-4 flex justify-between">
-            {steps.map((step, index) => (
-              <button
-                key={step.id}
-                onClick={() => setCurrentStep(index)}
-                className={`flex flex-col items-center gap-1 transition-colors ${
-                  index <= currentStep
-                    ? 'text-primary'
-                    : 'text-muted-foreground'
-                }`}
+      {/* Main Content Area - Split Screen Layout */}
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+        <div className={`grid gap-8 transition-all duration-300 ${
+          showLivePreview && currentStep !== 4
+            ? 'lg:grid-cols-12' 
+            : 'max-w-4xl mx-auto'
+        }`}>
+          {/* Form Step Section */}
+          <div className={`${
+            showLivePreview && currentStep !== 4 
+              ? 'lg:col-span-7 xl:col-span-7' 
+              : 'w-full'
+          }`}>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentStep}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.22, ease: 'easeOut' }}
               >
-                <div
-                  className={`flex h-10 w-10 items-center justify-center rounded-full border-2 transition-colors ${
-                    index === currentStep
-                      ? 'border-primary bg-primary text-primary-foreground'
-                      : index < currentStep
-                      ? 'border-primary bg-primary/10'
-                      : 'border-muted'
-                  }`}
-                >
-                  <step.icon className="h-5 w-5" />
-                </div>
-                <span className="hidden text-xs font-medium sm:block">
-                  {step.title}
-                </span>
-              </button>
-            ))}
+                {currentStep === 0 && (
+                  <StepPersonalInfo
+                    data={cvData}
+                    onUpdate={updateCVData}
+                    plan={plan}
+                  />
+                )}
+                {currentStep === 1 && (
+                  <StepFormation
+                    data={cvData}
+                    onUpdate={updateCVData}
+                  />
+                )}
+                {currentStep === 2 && (
+                  <StepExperience
+                    data={cvData}
+                    onUpdate={updateCVData}
+                  />
+                )}
+                {currentStep === 3 && (
+                  <StepCompetences
+                    data={cvData}
+                    onUpdate={updateCVData}
+                  />
+                )}
+                {currentStep === 4 && (
+                  <StepPreview
+                    data={cvData}
+                    template={template}
+                    onTemplateChange={setTemplate}
+                    plan={plan}
+                  />
+                )}
+              </motion.div>
+            </AnimatePresence>
           </div>
-        </div>
-      </div>
 
-      {/* Content */}
-      <main className="flex-1 py-8">
-        <div className="container mx-auto px-4">
-          {currentStep === 0 && (
-            <StepPersonalInfo
-              data={cvData}
-              onUpdate={updateCVData}
-              plan={plan}
-            />
-          )}
-          {currentStep === 1 && (
-            <StepFormation
-              data={cvData}
-              onUpdate={updateCVData}
-            />
-          )}
-          {currentStep === 2 && (
-            <StepExperience
-              data={cvData}
-              onUpdate={updateCVData}
-            />
-          )}
-          {currentStep === 3 && (
-            <StepCompetences
-              data={cvData}
-              onUpdate={updateCVData}
-            />
-          )}
-          {currentStep === 4 && (
-            <StepPreview
-              data={cvData}
-              template={template}
-              onTemplateChange={setTemplate}
-              plan={plan}
-            />
+          {/* Side-by-Side Live A4 Preview Section (Desktop) */}
+          {showLivePreview && currentStep !== 4 && (
+            <div className="hidden lg:block lg:col-span-5 xl:col-span-5 relative">
+              <div className="sticky top-28 space-y-3">
+                <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-card/60 border border-border/80 backdrop-blur-md shadow-sm">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
+                    <Sparkles className="h-3.5 w-3.5 text-primary animate-pulse" />
+                    <span>Aperçu en temps réel</span>
+                  </div>
+
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => setPreviewZoom(z => Math.max(0.45, z - 0.05))}
+                      className="p-1 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                      title="Dézoomer"
+                    >
+                      <ZoomOut className="h-3.5 w-3.5" />
+                    </button>
+                    <span className="text-[10px] font-mono font-medium px-1 text-muted-foreground">
+                      {Math.round(previewZoom * 100)}%
+                    </span>
+                    <button
+                      onClick={() => setPreviewZoom(z => Math.min(0.9, z + 0.05))}
+                      className="p-1 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                      title="Zoomer"
+                    >
+                      <ZoomIn className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      onClick={() => setCurrentStep(4)}
+                      className="ml-2 flex items-center gap-1 px-2 py-0.5 text-[11px] font-medium text-primary hover:bg-primary/10 rounded-md transition-colors"
+                    >
+                      <Maximize2 className="h-3 w-3" />
+                      Grand écran
+                    </button>
+                  </div>
+                </div>
+
+                <div className="relative rounded-2xl border border-border/80 bg-slate-900/5 dark:bg-slate-900/40 p-4 shadow-xl flex justify-center items-start overflow-hidden min-h-[580px] max-h-[calc(100vh-160px)] custom-scrollbar">
+                  <div 
+                    className="shrink-0 bg-white shadow-2xl transition-transform duration-200 origin-top rounded-sm overflow-hidden"
+                    style={{
+                      width: '210mm',
+                      minHeight: '297mm',
+                      transform: `scale(${previewZoom})`,
+                      transformOrigin: 'top center',
+                      marginBottom: `-${(1 - previewZoom) * 297 * 3.779}px`,
+                    }}
+                  >
+                    {renderCvTemplate(template, { data: cvData, showWatermark: plan.limites.filigrane })}
+                  </div>
+                </div>
+              </div>
+            </div>
           )}
         </div>
       </main>
 
-      {/* Footer Navigation */}
-      <footer className="sticky bottom-0 border-t border-border bg-background">
-        <div className="container mx-auto flex items-center justify-between px-4 py-4">
+      {/* Sticky Bottom Floating Navigation Toolbar */}
+      <footer className="sticky bottom-0 z-40 border-t border-border/60 bg-background/80 backdrop-blur-xl">
+        <div className="mx-auto max-w-7xl flex items-center justify-between px-4 sm:px-6 py-3">
           <Button
             variant="outline"
             onClick={prevStep}
             disabled={currentStep === 0}
+            className="rounded-xl border-border/80 px-4 h-10 font-medium"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Precedent
+            Précédent
           </Button>
 
-          <span className="text-sm text-muted-foreground">
-            Etape {currentStep + 1} sur {steps.length}
-          </span>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span className="font-semibold text-foreground">Étape {currentStep + 1}</span> sur {steps.length}
+          </div>
 
           {currentStep < steps.length - 1 ? (
-            <Button onClick={nextStep}>
+            <Button 
+              onClick={nextStep} 
+              className="rounded-xl px-6 h-10 font-medium shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90"
+            >
               Suivant
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           ) : (
-            <Button onClick={() => handleSave(true)} disabled={isSaving}>
+            <Button 
+              onClick={() => handleSave(true)} 
+              disabled={isSaving}
+              className="rounded-xl px-6 h-10 font-medium shadow-lg shadow-primary/25 bg-emerald-600 hover:bg-emerald-500 text-white"
+            >
               {isSaving ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
                 <Save className="mr-2 h-4 w-4" />
               )}
-              Terminer
+              Terminer & Enregistrer
             </Button>
           )}
         </div>
