@@ -358,6 +358,8 @@ export default async function DashboardPage() {
       <OnboardingQuestionnaire
         userId={user!.id}
         initialCompleted={profile?.onboarding_completed ?? false}
+        initialNom={profile?.nom}
+        initialPrenom={profile?.prenom}
       />
     </div>
   )

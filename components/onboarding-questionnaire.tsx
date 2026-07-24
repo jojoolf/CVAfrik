@@ -9,10 +9,12 @@ import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { 
   Sparkles, 
+  User, 
   Briefcase, 
   GraduationCap, 
   Target, 
   Globe, 
+  Share2,
   ChevronRight, 
   ChevronLeft, 
   CheckCircle2, 
@@ -24,6 +26,8 @@ import { cn } from '@/lib/utils'
 interface OnboardingQuestionnaireProps {
   userId?: string
   initialCompleted?: boolean
+  initialNom?: string | null
+  initialPrenom?: string | null
 }
 
 const STATUTS = [
@@ -52,6 +56,15 @@ const OBJECTIFS = [
   'Autre',
 ]
 
+const SOURCES = [
+  'LinkedIn',
+  'IA (ChatGPT, Claude, Gemini...)',
+  'Recherche Google',
+  'Ami / Recommandation d\'un proche',
+  'Réseaux sociaux (TikTok, Facebook, Insta)',
+  'Autre',
+]
+
 const PAYS_LIST = [
   'Côte d\'Ivoire',
   'Sénégal',
@@ -64,12 +77,20 @@ const PAYS_LIST = [
   'Autre',
 ]
 
-export function OnboardingQuestionnaire({ userId, initialCompleted }: OnboardingQuestionnaireProps) {
+export function OnboardingQuestionnaire({ 
+  userId, 
+  initialCompleted,
+  initialNom,
+  initialPrenom,
+}: OnboardingQuestionnaireProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Form selections
+  // Form states
+  const [prenom, setPrenom] = useState(initialPrenom || '')
+  const [nom, setNom] = useState(initialNom || '')
+
   const [statut, setStatut] = useState('')
   const [customStatut, setCustomStatut] = useState('')
 
@@ -79,11 +100,13 @@ export function OnboardingQuestionnaire({ userId, initialCompleted }: Onboarding
   const [objectif, setObjectif] = useState('')
   const [customObjectif, setCustomObjectif] = useState('')
 
+  const [source, setSource] = useState('')
+  const [customSource, setCustomSource] = useState('')
+
   const [pays, setPays] = useState('')
   const [customPays, setCustomPays] = useState('')
 
   useEffect(() => {
-    // Check if questionnaire was already completed
     if (initialCompleted) return
     const localDone = localStorage.getItem('onboarding_questionnaire_completed')
     if (!localDone) {
@@ -103,6 +126,7 @@ export function OnboardingQuestionnaire({ userId, initialCompleted }: Onboarding
       const finalStatut = statut === 'Autre' ? customStatut || 'Autre' : statut
       const finalSecteur = secteur === 'Autre' ? customSecteur || 'Autre' : secteur
       const finalObjectif = objectif === 'Autre' ? customObjectif || 'Autre' : objectif
+      const finalSource = source === 'Autre' ? customSource || 'Autre' : source
       const finalPays = pays === 'Autre' ? customPays || 'Autre' : pays
 
       const supabase = createClient()
@@ -114,9 +138,12 @@ export function OnboardingQuestionnaire({ userId, initialCompleted }: Onboarding
         await supabase
           .from('profiles')
           .update({
+            prenom: prenom.trim() || null,
+            nom: nom.trim() || null,
             statut: finalStatut,
             secteur: finalSecteur,
             objectif: finalObjectif,
+            source: finalSource,
             pays: finalPays,
             onboarding_completed: true,
             updated_at: new Date().toISOString(),
@@ -125,7 +152,7 @@ export function OnboardingQuestionnaire({ userId, initialCompleted }: Onboarding
       }
 
       localStorage.setItem('onboarding_questionnaire_completed', 'true')
-      toast.success('Profil personnalisé mis à jour avec succès ! 🚀')
+      toast.success('Profil mis à jour avec succès ! Bienvenue sur CVAfrik 🚀')
       setIsOpen(false)
     } catch (err) {
       console.error('Questionnaire submit error:', err)
@@ -139,23 +166,33 @@ export function OnboardingQuestionnaire({ userId, initialCompleted }: Onboarding
 
   const stepsInfo = [
     {
+      title: 'Comment vous appelez-vous ?',
+      subtitle: 'Pour personnaliser vos CV et lettres de motivation',
+      icon: User,
+    },
+    {
       title: 'Quel est votre statut actuel ?',
-      subtitle: 'Cela nous aide à personnaliser vos modèles et conseils IA',
+      subtitle: 'Cela nous aide à vous conseiller les meilleurs formats',
       icon: GraduationCap,
     },
     {
       title: 'Dans quel secteur d\'activité évoluez-vous ?',
-      subtitle: 'Pour vous suggérer les meilleures compétences clés',
+      subtitle: 'Pour vous suggérer les compétences les plus demandées',
       icon: Briefcase,
     },
     {
       title: 'Quel est votre objectif principal ?',
-      subtitle: 'Nous adapterons votre tableau de bord selon vos priorités',
+      subtitle: 'Pour adapter les fonctionnalités de votre espace',
       icon: Target,
     },
     {
+      title: 'Comment avez-vous connu CVAfrik ?',
+      subtitle: 'Aidez-nous à savoir ce qui vous a amené ici',
+      icon: Share2,
+    },
+    {
       title: 'Dans quel pays recherchez-vous du travail ?',
-      subtitle: 'Pour adapter la mise en page aux exigences locales',
+      subtitle: 'Pour adapter les templates aux standards locaux',
       icon: Globe,
     },
   ]
@@ -163,10 +200,12 @@ export function OnboardingQuestionnaire({ userId, initialCompleted }: Onboarding
   const currentInfo = stepsInfo[currentStep]
 
   const canGoNext = () => {
-    if (currentStep === 0) return statut && (statut !== 'Autre' || customStatut.trim())
-    if (currentStep === 1) return secteur && (secteur !== 'Autre' || customSecteur.trim())
-    if (currentStep === 2) return objectif && (objectif !== 'Autre' || customObjectif.trim())
-    if (currentStep === 3) return pays && (pays !== 'Autre' || customPays.trim())
+    if (currentStep === 0) return prenom.trim().length > 0 && nom.trim().length > 0
+    if (currentStep === 1) return statut && (statut !== 'Autre' || customStatut.trim())
+    if (currentStep === 2) return secteur && (secteur !== 'Autre' || customSecteur.trim())
+    if (currentStep === 3) return objectif && (objectif !== 'Autre' || customObjectif.trim())
+    if (currentStep === 4) return source && (source !== 'Autre' || customSource.trim())
+    if (currentStep === 5) return pays && (pays !== 'Autre' || customPays.trim())
     return false
   }
 
@@ -231,8 +270,42 @@ export function OnboardingQuestionnaire({ userId, initialCompleted }: Onboarding
             <p className="text-xs text-slate-400 leading-relaxed">{currentInfo.subtitle}</p>
           </div>
 
-          {/* Step 0: Statut */}
+          {/* ── STEP 0: Nom & Prénom ────────────────────────────────────── */}
           {currentStep === 0 && (
+            <div className="space-y-4 py-2">
+              <div className="space-y-2">
+                <Label htmlFor="prenom" className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+                  Prénom
+                </Label>
+                <Input
+                  id="prenom"
+                  type="text"
+                  placeholder="Ex: Joël"
+                  value={prenom}
+                  onChange={(e) => setPrenom(e.target.value)}
+                  autoFocus
+                  className="bg-slate-800 border-slate-700 text-white placeholder-slate-500 rounded-xl h-11"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="nom" className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+                  Nom
+                </Label>
+                <Input
+                  id="nom"
+                  type="text"
+                  placeholder="Ex: EKON"
+                  value={nom}
+                  onChange={(e) => setNom(e.target.value)}
+                  className="bg-slate-800 border-slate-700 text-white placeholder-slate-500 rounded-xl h-11"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* ── STEP 1: Statut ───────────────────────────────────────────── */}
+          {currentStep === 1 && (
             <div className="space-y-2.5 max-h-[320px] overflow-y-auto custom-scrollbar pr-1">
               {STATUTS.map((item) => {
                 const isSelected = statut === item
@@ -267,8 +340,8 @@ export function OnboardingQuestionnaire({ userId, initialCompleted }: Onboarding
             </div>
           )}
 
-          {/* Step 1: Secteur */}
-          {currentStep === 1 && (
+          {/* ── STEP 2: Secteur ──────────────────────────────────────────── */}
+          {currentStep === 2 && (
             <div className="space-y-2.5 max-h-[320px] overflow-y-auto custom-scrollbar pr-1">
               {SECTEURS.map((item) => {
                 const isSelected = secteur === item
@@ -303,8 +376,8 @@ export function OnboardingQuestionnaire({ userId, initialCompleted }: Onboarding
             </div>
           )}
 
-          {/* Step 2: Objectif */}
-          {currentStep === 2 && (
+          {/* ── STEP 3: Objectif ─────────────────────────────────────────── */}
+          {currentStep === 3 && (
             <div className="space-y-2.5 max-h-[320px] overflow-y-auto custom-scrollbar pr-1">
               {OBJECTIFS.map((item) => {
                 const isSelected = objectif === item
@@ -339,8 +412,44 @@ export function OnboardingQuestionnaire({ userId, initialCompleted }: Onboarding
             </div>
           )}
 
-          {/* Step 3: Pays */}
-          {currentStep === 3 && (
+          {/* ── STEP 4: Source (Comment vous nous avez connus) ───────────── */}
+          {currentStep === 4 && (
+            <div className="space-y-2.5 max-h-[320px] overflow-y-auto custom-scrollbar pr-1">
+              {SOURCES.map((item) => {
+                const isSelected = source === item
+                return (
+                  <div key={item} className="space-y-2">
+                    <button
+                      onClick={() => setSource(item)}
+                      className={cn(
+                        'w-full flex items-center justify-between p-3.5 rounded-2xl border-2 transition-all text-left text-sm font-semibold',
+                        isSelected
+                          ? 'bg-primary/15 border-primary text-white shadow-md shadow-primary/10'
+                          : 'bg-slate-800/40 border-slate-700/50 text-slate-300 hover:bg-slate-800 hover:border-slate-600'
+                      )}
+                    >
+                      <span>{item}</span>
+                      {isSelected && <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />}
+                    </button>
+
+                    {item === 'Autre' && isSelected && (
+                      <Input
+                        type="text"
+                        placeholder="Précisez où vous avez entendu parler de nous..."
+                        value={customSource}
+                        onChange={(e) => setCustomSource(e.target.value)}
+                        autoFocus
+                        className="bg-slate-800 border-primary text-white placeholder-slate-500 rounded-xl"
+                      />
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
+          {/* ── STEP 5: Pays ─────────────────────────────────────────────── */}
+          {currentStep === 5 && (
             <div className="space-y-2.5 max-h-[320px] overflow-y-auto custom-scrollbar pr-1">
               {PAYS_LIST.map((item) => {
                 const isSelected = pays === item
