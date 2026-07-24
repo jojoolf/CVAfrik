@@ -2,8 +2,6 @@
 
 import { useMemo, useRef, useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Label } from '@/components/ui/label'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Lock, Download, Loader2, Sparkles, FileText, Maximize2, CheckCircle, ZoomIn, ZoomOut, MousePointerClick } from 'lucide-react'
@@ -239,69 +237,66 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
           </CardHeader>
 
           <CardContent className="p-4">
-            <RadioGroup
-              value={template}
-              onValueChange={onTemplateChange}
-              className="grid grid-cols-2 gap-3 max-h-[520px] overflow-y-auto custom-scrollbar pr-1"
-            >
+            {/* Plain div grid — no hidden radio inputs to avoid browser scroll-to-focus */}
+            <div className="grid grid-cols-2 gap-3 max-h-[520px] overflow-y-auto custom-scrollbar pr-1">
               {filteredTemplates.map((templateConfig) => {
                 const available = isTemplateAvailable(templateConfig)
                 const isSelected = template === templateConfig.id
                 return (
-                  <div key={templateConfig.id}>
-                    <RadioGroupItem
-                      value={templateConfig.id}
-                      id={templateConfig.id}
-                      disabled={!available}
-                      className="peer sr-only"
-                    />
-                    <Label
-                      htmlFor={templateConfig.id}
-                      className={cn(
-                        'flex cursor-pointer flex-col overflow-hidden rounded-2xl border-2 border-border/60 bg-card transition-all hover:border-primary/50 hover:shadow-md relative group',
-                        isSelected && 'border-primary ring-2 ring-primary/20 shadow-lg shadow-primary/10',
-                        !available && 'cursor-not-allowed opacity-50 bg-muted/20',
+                  <div
+                    key={templateConfig.id}
+                    role="radio"
+                    aria-checked={isSelected}
+                    aria-disabled={!available}
+                    onClick={(e) => {
+                      // Prevent page scroll on click
+                      e.preventDefault()
+                      if (available) onTemplateChange(templateConfig.id)
+                    }}
+                    className={cn(
+                      'flex cursor-pointer flex-col overflow-hidden rounded-2xl border-2 border-border/60 bg-card transition-all hover:border-primary/50 hover:shadow-md relative group select-none',
+                      isSelected && 'border-primary ring-2 ring-primary/20 shadow-lg shadow-primary/10',
+                      !available && 'cursor-not-allowed opacity-50 bg-muted/20 pointer-events-none',
+                    )}
+                  >
+                    {/* Color Preview Block */}
+                    <div className={`relative flex h-16 w-full items-center justify-center ${templateConfig.color}`}>
+                      <div className="flex gap-1.5 opacity-60">
+                        <div className="h-8 w-4 rounded-sm bg-white/30" />
+                        <div className="space-y-1">
+                          <div className="h-1.5 w-7 rounded-full bg-white/40" />
+                          <div className="h-1.5 w-5 rounded-full bg-white/30" />
+                          <div className="h-1.5 w-8 rounded-full bg-white/20" />
+                        </div>
+                      </div>
+
+                      {!available && (
+                        <div className="absolute right-1.5 top-1.5">
+                          <span className="flex items-center gap-1 rounded-md bg-slate-900/80 px-2 py-0.5 text-[9px] font-bold text-white backdrop-blur-sm border border-white/10">
+                            <Lock className="h-2.5 w-2.5" />
+                            {getLockLabel(templateConfig.plans)}
+                          </span>
+                        </div>
                       )}
-                    >
-                      {/* Color Preview Block */}
-                      <div className={`relative flex h-16 w-full items-center justify-center ${templateConfig.color}`}>
-                        <div className="flex gap-1.5 opacity-60">
-                          <div className="h-8 w-4 rounded-sm bg-white/30" />
-                          <div className="space-y-1">
-                            <div className="h-1.5 w-7 rounded-full bg-white/40" />
-                            <div className="h-1.5 w-5 rounded-full bg-white/30" />
-                            <div className="h-1.5 w-8 rounded-full bg-white/20" />
+
+                      {isSelected && (
+                        <div className="absolute left-1.5 top-1.5">
+                          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-md text-primary">
+                            <CheckCircle className="h-4 w-4" />
                           </div>
                         </div>
+                      )}
+                    </div>
 
-                        {!available && (
-                          <div className="absolute right-1.5 top-1.5">
-                            <span className="flex items-center gap-1 rounded-md bg-slate-900/80 px-2 py-0.5 text-[9px] font-bold text-white backdrop-blur-sm border border-white/10">
-                              <Lock className="h-2.5 w-2.5" />
-                              {getLockLabel(templateConfig.plans)}
-                            </span>
-                          </div>
-                        )}
-
-                        {isSelected && (
-                          <div className="absolute left-1.5 top-1.5">
-                            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-md text-primary">
-                              <CheckCircle className="h-4 w-4" />
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Info Block */}
-                      <div className="p-2.5 space-y-0.5">
-                        <p className="truncate text-xs font-bold text-foreground">{templateConfig.name}</p>
-                        <p className="truncate text-[10px] text-muted-foreground">{templateConfig.description}</p>
-                      </div>
-                    </Label>
+                    {/* Info Block */}
+                    <div className="p-2.5 space-y-0.5">
+                      <p className="truncate text-xs font-bold text-foreground">{templateConfig.name}</p>
+                      <p className="truncate text-[10px] text-muted-foreground">{templateConfig.description}</p>
+                    </div>
                   </div>
                 )
               })}
-            </RadioGroup>
+            </div>
           </CardContent>
         </Card>
 
