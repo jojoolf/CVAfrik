@@ -3,8 +3,9 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Check, Zap, Crown, Star, ChevronRight, Smartphone, CreditCard, ShieldCheck, Tag, X } from 'lucide-react'
+import { Check, Zap, Crown, ChevronRight, Smartphone, CreditCard, ShieldCheck, Tag, X, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { toast } from 'sonner'
 
 // ── Plans & Durées ─────────────────────────────────────────────────────────────
 
@@ -60,23 +61,24 @@ const FEATURES = [
 
 const PAYMENT_METHODS = [
   {
-    id: 'mobile',
-    label: 'Mobile Money',
+    id: 'paytech_mobile',
+    label: 'Mobile Money (PayTech)',
     icon: Smartphone,
     badges: [
       { name: 'Orange', color: 'bg-orange-500 text-white' },
+      { name: 'Wave', color: 'bg-sky-500 text-white' },
+      { name: 'Free', color: 'bg-red-600 text-white' },
       { name: 'MTN', color: 'bg-yellow-400 text-black' },
       { name: 'Moov', color: 'bg-blue-600 text-white' },
-      { name: 'Wave', color: 'bg-sky-500 text-white' },
     ],
   },
   {
-    id: 'card',
-    label: 'Carte bancaire',
+    id: 'paytech_card',
+    label: 'Carte Bancaire (PayTech)',
     icon: CreditCard,
     badges: [
       { name: 'Visa', color: 'bg-blue-700 text-white' },
-      { name: 'MC', color: 'bg-red-600 text-white' },
+      { name: 'Mastercard', color: 'bg-red-600 text-white' },
     ],
   },
 ]
@@ -89,9 +91,45 @@ export function PremiumPricingFlow({ currentPlan }: { currentPlan?: string | nul
   const [selectedPayment, setSelectedPayment] = useState(PAYMENT_METHODS[0])
   const [promoCode, setPromoCode] = useState('')
   const [showPromo, setShowPromo] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
-  const handleSubscribe = () => {
-    router.push(`/paiement?plan=pro&duration=${selectedDuration.id}&payment=${selectedPayment.id}`)
+  const handleSubscribe = async () => {
+    setIsLoading(true)
+
+    try {
+      const response = await fetch('/api/payment/paytech/initiate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: selectedDuration.priceTotal,
+          planId: 'pro',
+          durationId: selectedDuration.id,
+          durationLabel: selectedDuration.label,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (response.status === 401) {
+        toast.info('Veuillez vous connecter pour procéder au paiement.')
+        router.push(`/auth/connexion?redirect=/paiement/abonnement`)
+        return
+      }
+
+      if (!response.ok || !data.url) {
+        throw new Error(data.error || 'Impossible d\'initialiser le paiement PayTech.')
+      }
+
+      // Redirection vers la page de paiement sécurisée PayTech
+      toast.success('Redirection vers PayTech...')
+      window.location.href = data.url
+    } catch (err: any) {
+      console.error('PayTech subscription error:', err)
+      toast.error(err.message || 'Erreur lors de l\'initialisation du paiement.')
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -112,7 +150,6 @@ export function PremiumPricingFlow({ currentPlan }: { currentPlan?: string | nul
         <div className="bg-slate-800/50 border border-slate-700/60 rounded-3xl p-5 mb-4 space-y-3">
           {DURATIONS.map(dur => {
             const isSelected = selectedDuration.id === dur.id
-            const originalPrice = Math.round(dur.priceTotal / (1 + dur.discount / 100) * -1)
             return (
               <button
                 key={dur.id}
@@ -184,7 +221,7 @@ export function PremiumPricingFlow({ currentPlan }: { currentPlan?: string | nul
 
         {/* Step 2 – Payment method */}
         <div className="bg-slate-800/50 border border-slate-700/60 rounded-3xl p-5 mb-4">
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Comment veux-tu payer ?</p>
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Comment veux-tu payer ? (PayTech)</p>
           <div className="grid grid-cols-2 gap-3">
             {PAYMENT_METHODS.map(method => {
               const Icon = method.icon
@@ -256,11 +293,21 @@ export function PremiumPricingFlow({ currentPlan }: { currentPlan?: string | nul
 
           <button
             onClick={handleSubscribe}
-            className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-primary to-amber-500 hover:from-primary/90 hover:to-amber-500/90 text-white font-black text-base py-4 rounded-2xl shadow-xl shadow-primary/25 transition-all duration-200 active:scale-[0.98]"
+            disabled={isLoading}
+            className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-primary to-amber-500 hover:from-primary/90 hover:to-amber-500/90 disabled:opacity-50 text-white font-black text-base py-4 rounded-2xl shadow-xl shadow-primary/25 transition-all duration-200 active:scale-[0.98]"
           >
-            <Zap className="h-5 w-5" />
-            Passer au Pro — {selectedDuration.priceTotal.toLocaleString()} FCFA
-            <ChevronRight className="h-5 w-5" />
+            {isLoading ? (
+              <>
+                <Loader2 className="h-5 w-5 animate-spin" />
+                Redirection vers PayTech...
+              </>
+            ) : (
+              <>
+                <Zap className="h-5 w-5" />
+                Payer avec PayTech — {selectedDuration.priceTotal.toLocaleString()} FCFA
+                <ChevronRight className="h-5 w-5" />
+              </>
+            )}
           </button>
 
           <div className="flex items-center justify-center gap-5 pt-1">
@@ -271,7 +318,7 @@ export function PremiumPricingFlow({ currentPlan }: { currentPlan?: string | nul
             <div className="w-px h-3 bg-slate-700" />
             <div className="flex items-center gap-1.5 text-slate-500 text-[10px]">
               <ShieldCheck className="h-3 w-3 text-emerald-400" />
-              Paiement 100% sécurisé
+              PayTech certifié & sécurisé
             </div>
           </div>
         </div>

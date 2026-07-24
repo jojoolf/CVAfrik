@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Loader2, CreditCard, ShieldCheck, AlertCircle, CheckCircle2, Zap } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { FedaPayButton } from "@/components/payments/fedapay-button";
+import { PayTechButton } from "@/components/payments/paytech-button";
 import { PLANS } from "@/lib/types";
 
 function PaymentContent() {
@@ -122,21 +122,21 @@ function PaymentContent() {
           </div>
 
           <div className="space-y-6">
-            {/* Option FedaPay (Automatique) */}
+            {/* Option PayTech (Automatique) */}
             <div className="group">
-              <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-3 ml-1">Recommandé & Instantané</p>
-              <FedaPayButton 
+              <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-3 ml-1">Recommandé & Instantané (PayTech)</p>
+              <PayTechButton 
                 amount={amount}
                 planId={planId}
                 isAnnual={billing === 'annual'}
               />
               <div className="mt-6 flex flex-col items-center gap-4">
                 <div className="flex items-center justify-center gap-6 opacity-60">
-                        <div className="h-6 w-px bg-slate-200" />
+                  <div className="h-6 w-px bg-slate-200" />
                   <img src="https://upload.wikimedia.org/wikipedia/commons/d/d6/Visa_2021.svg" alt="Visa" className="h-4 object-contain grayscale hover:grayscale-0 transition-all cursor-help" />
                   <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" className="h-6 object-contain grayscale hover:grayscale-0 transition-all cursor-help" />
                 </div>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Paiements 100% sécurisés par FedaPay</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Paiements 100% sécurisés par PayTech</p>
               </div>
             </div>
 

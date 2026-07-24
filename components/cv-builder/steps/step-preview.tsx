@@ -103,9 +103,7 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
         backgroundColor: '#ffffff',
         width: A4_W,
         height: exportRef.current.scrollHeight,
-        // Force all styles to be inlined (avoids Tailwind class issues in capture)
         skipFonts: false,
-        useCORS: true,
       })
 
       const JSPDFClass =
