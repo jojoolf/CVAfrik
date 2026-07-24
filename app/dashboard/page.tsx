@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { CVAnalyzeButton } from '@/components/dashboard/cv-analyze-button'
 import { DashboardChart } from './dashboard-chart'
+import { OnboardingQuestionnaire } from '@/components/onboarding-questionnaire'
 
 export const metadata: Metadata = {
   title: 'Mon espace | CVAfrik',
@@ -23,17 +24,50 @@ export default async function DashboardPage() {
     .eq('id', user!.id)
     .maybeSingle()
 
-  const { data: cvs } = await supabase
+  const { data: allCvs } = await supabase
     .from('cvs')
     .select('id, titre, updated_at, created_at, template')
     .eq('user_id', user!.id)
     .order('updated_at', { ascending: false })
-    .limit(6)
 
-  const { count: lettresCount } = await supabase
+  const { data: allLettres } = await supabase
     .from('lettres_motivation')
-    .select('*', { count: 'exact', head: true })
+    .select('id, created_at')
     .eq('user_id', user!.id)
+
+  const cvs = allCvs?.slice(0, 6) || []
+  const totalCVs = allCvs?.length || 0
+  const totalLetters = allLettres?.length || 0
+
+  // Calculate real last 12 months chart data
+  const monthsNames = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc']
+  const now = new Date()
+  const monthlyData = []
+
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    const monthIndex = d.getMonth()
+    const year = d.getFullYear()
+    const monthName = monthsNames[monthIndex]
+
+    const cvCount = (allCvs || []).filter(cv => {
+      if (!cv.created_at) return false
+      const cvDate = new Date(cv.created_at)
+      return cvDate.getMonth() === monthIndex && cvDate.getFullYear() === year
+    }).length
+
+    const lettreCount = (allLettres || []).filter(l => {
+      if (!l.created_at) return false
+      const lDate = new Date(l.created_at)
+      return lDate.getMonth() === monthIndex && lDate.getFullYear() === year
+    }).length
+
+    monthlyData.push({
+      name: monthName,
+      cv: cvCount,
+      lettres: lettreCount,
+    })
+  }
 
   const displayName =
     [profile?.prenom, profile?.nom].filter(Boolean).join(' ').trim() ||
@@ -43,9 +77,6 @@ export default async function DashboardPage() {
 
   const planId = profile?.plan ?? 'gratuit'
   const isFreePlan = planId === 'gratuit'
-
-  const totalCVs = cvs?.length || 0
-  const totalLetters = lettresCount || 0
 
   const kpis = [
     {
@@ -181,7 +212,7 @@ export default async function DashboardPage() {
                   +{totalCVs} total
                 </Badge>
               </div>
-              <DashboardChart />
+              <DashboardChart data={monthlyData} />
             </CardContent>
           </Card>
         </div>
@@ -322,6 +353,12 @@ export default async function DashboardPage() {
           </div>
         )}
       </section>
+
+      {/* Onboarding Questionnaire Modal */}
+      <OnboardingQuestionnaire
+        userId={user!.id}
+        initialCompleted={profile?.onboarding_completed ?? false}
+      />
     </div>
   )
 }

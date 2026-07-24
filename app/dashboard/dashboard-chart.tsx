@@ -10,74 +10,94 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 
-const data = [
-  { name: 'Juil', cv: 2, lettres: 1 },
-  { name: 'Aoû', cv: 3, lettres: 2 },
-  { name: 'Sep', cv: 1, lettres: 0 },
-  { name: 'Oct', cv: 4, lettres: 2 },
-  { name: 'Nov', cv: 2, lettres: 1 },
-  { name: 'Déc', cv: 5, lettres: 3 },
-  { name: 'Jan', cv: 3, lettres: 2 },
-  { name: 'Fév', cv: 6, lettres: 4 },
-  { name: 'Mar', cv: 4, lettres: 2 },
-  { name: 'Avr', cv: 7, lettres: 3 },
-  { name: 'Mai', cv: 5, lettres: 4 },
-  { name: 'Juin', cv: 3, lettres: 2 },
+export interface ChartMonthData {
+  name: string
+  cv: number
+  lettres: number
+}
+
+interface DashboardChartProps {
+  data?: ChartMonthData[]
+}
+
+const defaultEmptyData: ChartMonthData[] = [
+  { name: 'Jan', cv: 0, lettres: 0 },
+  { name: 'Fév', cv: 0, lettres: 0 },
+  { name: 'Mar', cv: 0, lettres: 0 },
+  { name: 'Avr', cv: 0, lettres: 0 },
+  { name: 'Mai', cv: 0, lettres: 0 },
+  { name: 'Juin', cv: 0, lettres: 0 },
+  { name: 'Juil', cv: 0, lettres: 0 },
+  { name: 'Aoû', cv: 0, lettres: 0 },
+  { name: 'Sep', cv: 0, lettres: 0 },
+  { name: 'Oct', cv: 0, lettres: 0 },
+  { name: 'Nov', cv: 0, lettres: 0 },
+  { name: 'Déc', cv: 0, lettres: 0 },
 ]
 
-export function DashboardChart() {
+export function DashboardChart({ data }: DashboardChartProps) {
+  const chartData = data && data.length > 0 ? data : defaultEmptyData
+
   return (
     <div className="h-64 w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={data} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+        <AreaChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
           <defs>
             <linearGradient id="cvGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="oklch(0.7 0.18 55)" stopOpacity={0.3} />
-              <stop offset="95%" stopColor="oklch(0.7 0.18 55)" stopOpacity={0} />
+              <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.4} />
+              <stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
             </linearGradient>
             <linearGradient id="lettreGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="oklch(0.6 0.15 145)" stopOpacity={0.3} />
-              <stop offset="95%" stopColor="oklch(0.6 0.15 145)" stopOpacity={0} />
+              <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
+              <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.9 0.02 85 / 0.4)" />
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" />
           <XAxis
             dataKey="name"
-            tick={{ fontSize: 11, fill: 'oklch(0.5 0.02 45)' }}
-            axisLine={{ stroke: 'oklch(0.9 0.02 85)' }}
+            tick={{ fontSize: 11, fill: '#94a3b8' }}
+            axisLine={{ stroke: 'rgba(255,255,255,0.1)' }}
             tickLine={false}
           />
           <YAxis
-            tick={{ fontSize: 11, fill: 'oklch(0.5 0.02 45)' }}
+            tick={{ fontSize: 11, fill: '#94a3b8' }}
             axisLine={false}
             tickLine={false}
+            allowDecimals={false}
           />
           <Tooltip
             contentStyle={{
-              backgroundColor: 'oklch(1 0 0)',
-              border: '1px solid oklch(0.9 0.02 85)',
+              backgroundColor: '#0f172a',
+              borderColor: '#334155',
               borderRadius: '12px',
               fontSize: '13px',
-              boxShadow: '0 4px 24px -6px rgba(0,0,0,0.12)',
+              color: '#fff',
+              boxShadow: '0 4px 24px -6px rgba(0,0,0,0.5)',
             }}
+            formatter={(value: any, name: any) => [
+              value,
+              name === 'cv' ? 'CV créés' : 'Lettres générées'
+            ]}
           />
           <Area
             type="monotone"
             dataKey="cv"
-            stroke="oklch(0.7 0.18 55)"
-            strokeWidth={2}
+            name="cv"
+            stroke="#f59e0b"
+            strokeWidth={2.5}
             fill="url(#cvGradient)"
             dot={false}
-            activeDot={{ r: 4, fill: 'oklch(0.7 0.18 55)', stroke: 'oklch(1 0 0)', strokeWidth: 2 }}
+            activeDot={{ r: 5, fill: '#f59e0b', stroke: '#ffffff', strokeWidth: 2 }}
           />
           <Area
             type="monotone"
             dataKey="lettres"
-            stroke="oklch(0.6 0.15 145)"
-            strokeWidth={2}
+            name="lettres"
+            stroke="#10b981"
+            strokeWidth={2.5}
             fill="url(#lettreGradient)"
             dot={false}
-            activeDot={{ r: 4, fill: 'oklch(0.6 0.15 145)', stroke: 'oklch(1 0 0)', strokeWidth: 2 }}
+            activeDot={{ r: 5, fill: '#10b981', stroke: '#ffffff', strokeWidth: 2 }}
           />
         </AreaChart>
       </ResponsiveContainer>

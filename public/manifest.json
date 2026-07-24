@@ -1,0 +1,23 @@
+{
+  "name": "CVAfrik - Créez votre CV professionnel",
+  "short_name": "CVAfrik",
+  "description": "Créez des CV professionnels adaptés au marché de l'emploi africain.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#d97706",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
