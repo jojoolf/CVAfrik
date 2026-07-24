@@ -19,8 +19,8 @@ export function PricingCards({ currentPlan }: PricingCardsProps) {
 
   const handleSubscribe = async (planId: 'pro' | 'premium') => {
     setLoadingPlan(planId)
-    // Redirect to payment page
-    window.location.href = `/paiement?plan=${planId}${isAnnual ? '&billing=annual' : ''}`
+    // Redirect to new Farata-style subscription flow
+    window.location.href = `/paiement/abonnement`
   }
 
   return (
