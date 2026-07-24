@@ -120,7 +120,7 @@ export function PricingSection() {
               </div>
 
               <a
-                href={p.id === 'business' ? '/contact' : '/auth/inscription'}
+                href={p.id === 'business' ? '/dashboard/support' : p.id === 'pro' ? '/paiement/abonnement' : '/auth/inscription'}
                 className={`mt-6 block w-full rounded-full px-5 py-3 text-center text-sm font-semibold transition-transform hover:scale-[1.02] ${
                   p.popular
                     ? 'bg-gradient-gold text-primary-foreground shadow-glow'
