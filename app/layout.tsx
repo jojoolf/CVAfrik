@@ -105,10 +105,6 @@ export default async function RootLayout({
           <LocaleProvider serverLocale={locale}>
             {children}
             <Toaster richColors position="top-center" />
-            <Script 
-              src="https://checkout.fedapay.com/js/checkout.js" 
-              strategy="beforeInteractive"
-            />
             {process.env.NODE_ENV === 'production' && <Analytics />}
           </LocaleProvider>
         </ThemeProvider>
