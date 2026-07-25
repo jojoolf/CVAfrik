@@ -9,6 +9,7 @@ import Link from 'next/link'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { PLANS } from '@/lib/types'
+import { getEffectivePlan } from '@/lib/subscription'
 
 export default async function LettresPage({
   searchParams,
@@ -43,7 +44,8 @@ export default async function LettresPage({
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
 
-  const planId = profile?.plan ?? 'gratuit'
+  const subscription = await getEffectivePlan(supabase, user.id)
+  const planId = subscription.planId
   const planInfo = PLANS.find(p => p.id === planId) || PLANS[0]
 
   const currentMonthStart = new Date()

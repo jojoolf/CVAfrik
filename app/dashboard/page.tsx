@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { CVAnalyzeButton } from '@/components/dashboard/cv-analyze-button'
 import { DashboardChart } from './dashboard-chart'
 import { OnboardingQuestionnaire } from '@/components/onboarding-questionnaire'
+import { getEffectivePlan } from '@/lib/subscription'
 
 export const metadata: Metadata = {
   title: 'Mon espace | CVAfrik',
@@ -75,7 +76,8 @@ export default async function DashboardPage() {
     user!.email ||
     'Utilisateur'
 
-  const planId = profile?.plan ?? 'gratuit'
+  const subscription = await getEffectivePlan(supabase, user!.id)
+  const planId = subscription.planId
   const isFreePlan = planId === 'gratuit'
 
   const kpis = [
