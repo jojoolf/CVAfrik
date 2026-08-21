@@ -1,13 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Check, Zap, Crown, ChevronRight, Smartphone, CreditCard, ShieldCheck, Tag, X, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
-
-// ── Plans & Durées ─────────────────────────────────────────────────────────────
 
 const DURATIONS = [
   {
@@ -17,7 +14,6 @@ const DURATIONS = [
     discount: -20,
     priceTotal: 2000,
     pricePerMonth: 4000,
-    months: 0.5,
   },
   {
     id: '1m',
@@ -26,7 +22,6 @@ const DURATIONS = [
     discount: -40,
     priceTotal: 2600,
     pricePerMonth: 2600,
-    months: 1,
   },
   {
     id: '3m',
@@ -35,7 +30,6 @@ const DURATIONS = [
     discount: -33,
     priceTotal: 6500,
     pricePerMonth: 2167,
-    months: 3,
   },
   {
     id: '6m',
@@ -44,7 +38,6 @@ const DURATIONS = [
     discount: -49,
     priceTotal: 11000,
     pricePerMonth: 1833,
-    months: 6,
   },
 ]
 
@@ -54,15 +47,15 @@ const FEATURES = [
   'Export PDF haute qualité',
   'Score ATS + conseils IA',
   'Simulateur entretien illimité',
-  'Matching CV ↔ offre d\'emploi',
+  "Matching CV ↔ offre d'emploi",
   'Lettres de motivation IA',
   'Toutes les offres de stages',
 ]
 
 const PAYMENT_METHODS = [
   {
-    id: 'paytech_mobile',
-    label: 'Mobile Money (PayTech)',
+    id: 'fedapay_mobile',
+    label: 'Mobile Money (FedaPay)',
     icon: Smartphone,
     badges: [
       { name: 'Orange', color: 'bg-orange-500 text-white' },
@@ -73,8 +66,8 @@ const PAYMENT_METHODS = [
     ],
   },
   {
-    id: 'paytech_card',
-    label: 'Carte Bancaire (PayTech)',
+    id: 'fedapay_card',
+    label: 'Carte Bancaire (FedaPay)',
     icon: CreditCard,
     badges: [
       { name: 'Visa', color: 'bg-blue-700 text-white' },
@@ -83,11 +76,8 @@ const PAYMENT_METHODS = [
   },
 ]
 
-// ── Main Component ─────────────────────────────────────────────────────────────
-
 export function PremiumPricingFlow({ currentPlan }: { currentPlan?: string | null }) {
-  const router = useRouter()
-  const [selectedDuration, setSelectedDuration] = useState(DURATIONS[1]) // 1 mois par défaut
+  const [selectedDuration, setSelectedDuration] = useState(DURATIONS[1])
   const [selectedPayment, setSelectedPayment] = useState(PAYMENT_METHODS[0])
   const [promoCode, setPromoCode] = useState('')
   const [showPromo, setShowPromo] = useState(false)
@@ -97,7 +87,7 @@ export function PremiumPricingFlow({ currentPlan }: { currentPlan?: string | nul
     setIsLoading(true)
 
     try {
-      const response = await fetch('/api/payment/paytech/initiate', {
+      const response = await fetch('/api/payment/fedapay/initiate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -107,27 +97,27 @@ export function PremiumPricingFlow({ currentPlan }: { currentPlan?: string | nul
           planId: 'pro',
           durationId: selectedDuration.id,
           durationLabel: selectedDuration.label,
+          billing: selectedDuration.id === '15j' || selectedDuration.id === '1m' ? 'monthly' : 'annual',
         }),
       })
 
       const data = await response.json()
 
       if (response.status === 401) {
-        toast.info('Veuillez vous connecter pour procéder au paiement.')
-        router.push(`/auth/connexion?redirect=/paiement/abonnement`)
+        toast.info('Veuillez vous connecter pour proceder au paiement.')
+        window.location.href = '/auth/connexion?redirect=/paiement/abonnement'
         return
       }
 
       if (!response.ok || !data.url) {
-        throw new Error(data.error || 'Impossible d\'initialiser le paiement PayTech.')
+        throw new Error(data.error || "Impossible d'initialiser le paiement FedaPay.")
       }
 
-      // Redirection vers la page de paiement sécurisée PayTech
-      toast.success('Redirection vers PayTech...')
+      toast.success('Redirection vers FedaPay...')
       window.location.href = data.url
     } catch (err: any) {
-      console.error('PayTech subscription error:', err)
-      toast.error(err.message || 'Erreur lors de l\'initialisation du paiement.')
+      console.error('FedaPay subscription error:', err)
+      toast.error(err.message || "Erreur lors de l'initialisation du paiement.")
       setIsLoading(false)
     }
   }
@@ -135,8 +125,6 @@ export function PremiumPricingFlow({ currentPlan }: { currentPlan?: string | nul
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4">
       <div className="w-full max-w-lg">
-
-        {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-1.5 text-primary text-xs font-bold uppercase tracking-widest mb-4">
             <Crown className="h-3.5 w-3.5" />
@@ -146,9 +134,8 @@ export function PremiumPricingFlow({ currentPlan }: { currentPlan?: string | nul
           <p className="text-slate-400 text-sm">Plus c'est long, plus tu économises</p>
         </div>
 
-        {/* Step 1 – Duration selector */}
         <div className="bg-slate-800/50 border border-slate-700/60 rounded-3xl p-5 mb-4 space-y-3">
-          {DURATIONS.map(dur => {
+          {DURATIONS.map((dur) => {
             const isSelected = selectedDuration.id === dur.id
             return (
               <button
@@ -158,14 +145,13 @@ export function PremiumPricingFlow({ currentPlan }: { currentPlan?: string | nul
                   'w-full flex items-center justify-between p-4 rounded-2xl border-2 transition-all duration-200 text-left',
                   isSelected
                     ? 'bg-primary/10 border-primary shadow-lg shadow-primary/10'
-                    : 'bg-slate-800/40 border-slate-700/40 hover:border-slate-600/60 hover:bg-slate-800/60'
+                    : 'bg-slate-800/40 border-slate-700/40 hover:border-slate-600/60 hover:bg-slate-800/60',
                 )}
               >
                 <div className="flex items-center gap-3">
-                  {/* Radio */}
                   <div className={cn(
                     'w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0',
-                    isSelected ? 'border-primary bg-primary' : 'border-slate-600'
+                    isSelected ? 'border-primary bg-primary' : 'border-slate-600',
                   )}>
                     {isSelected && <div className="w-2 h-2 rounded-full bg-white" />}
                   </div>
@@ -182,7 +168,7 @@ export function PremiumPricingFlow({ currentPlan }: { currentPlan?: string | nul
                       )}
                       <span className={cn(
                         'text-[10px] font-bold px-1.5 py-0.5 rounded-md',
-                        isSelected ? 'bg-primary/20 text-primary' : 'bg-slate-700 text-slate-400'
+                        isSelected ? 'bg-primary/20 text-primary' : 'bg-slate-700 text-slate-400',
                       )}>
                         {dur.discount}%
                       </span>
@@ -206,11 +192,10 @@ export function PremiumPricingFlow({ currentPlan }: { currentPlan?: string | nul
           })}
         </div>
 
-        {/* Features included */}
         <div className="bg-slate-800/30 border border-slate-700/40 rounded-2xl p-4 mb-4">
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">✦ Inclus dans ton abonnement</p>
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Inclus dans ton abonnement</p>
           <div className="grid grid-cols-2 gap-y-2 gap-x-3">
-            {FEATURES.map(feat => (
+            {FEATURES.map((feat) => (
               <div key={feat} className="flex items-start gap-1.5">
                 <Check className="h-3.5 w-3.5 text-emerald-400 shrink-0 mt-0.5" />
                 <span className="text-xs text-slate-300 leading-tight">{feat}</span>
@@ -219,11 +204,10 @@ export function PremiumPricingFlow({ currentPlan }: { currentPlan?: string | nul
           </div>
         </div>
 
-        {/* Step 2 – Payment method */}
         <div className="bg-slate-800/50 border border-slate-700/60 rounded-3xl p-5 mb-4">
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Comment veux-tu payer ? (PayTech)</p>
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Comment veux-tu payer ? (FedaPay)</p>
           <div className="grid grid-cols-2 gap-3">
-            {PAYMENT_METHODS.map(method => {
+            {PAYMENT_METHODS.map((method) => {
               const Icon = method.icon
               const isSelected = selectedPayment.id === method.id
               return (
@@ -234,7 +218,7 @@ export function PremiumPricingFlow({ currentPlan }: { currentPlan?: string | nul
                     'p-4 rounded-2xl border-2 transition-all duration-200 text-left',
                     isSelected
                       ? 'bg-primary/10 border-primary'
-                      : 'bg-slate-800/40 border-slate-700/40 hover:border-slate-600'
+                      : 'bg-slate-800/40 border-slate-700/40 hover:border-slate-600',
                   )}
                 >
                   <Icon className={cn('h-6 w-6 mb-2', isSelected ? 'text-primary' : 'text-slate-400')} />
@@ -242,7 +226,7 @@ export function PremiumPricingFlow({ currentPlan }: { currentPlan?: string | nul
                     {method.label}
                   </p>
                   <div className="flex flex-wrap gap-1">
-                    {method.badges.map(b => (
+                    {method.badges.map((b) => (
                       <span key={b.name} className={cn('text-[9px] font-black px-1.5 py-0.5 rounded-md', b.color)}>
                         {b.name}
                       </span>
@@ -254,7 +238,6 @@ export function PremiumPricingFlow({ currentPlan }: { currentPlan?: string | nul
           </div>
         </div>
 
-        {/* Promo code */}
         <div className="mb-4">
           {showPromo ? (
             <div className="flex gap-2 bg-slate-800/50 border border-slate-700/60 rounded-2xl p-3">
@@ -262,7 +245,7 @@ export function PremiumPricingFlow({ currentPlan }: { currentPlan?: string | nul
               <input
                 type="text"
                 value={promoCode}
-                onChange={e => setPromoCode(e.target.value.toUpperCase())}
+                onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
                 placeholder="Entrer le code promo"
                 className="flex-1 bg-transparent text-sm text-white placeholder-slate-500 focus:outline-none"
               />
@@ -281,7 +264,6 @@ export function PremiumPricingFlow({ currentPlan }: { currentPlan?: string | nul
           )}
         </div>
 
-        {/* Total + CTA */}
         <div className="bg-slate-800/50 border border-slate-700/60 rounded-3xl p-5 space-y-4">
           <div className="flex items-center justify-between">
             <span className="text-slate-400 text-sm font-medium">Total à payer</span>
@@ -299,12 +281,12 @@ export function PremiumPricingFlow({ currentPlan }: { currentPlan?: string | nul
             {isLoading ? (
               <>
                 <Loader2 className="h-5 w-5 animate-spin" />
-                Redirection vers PayTech...
+                Redirection vers FedaPay...
               </>
             ) : (
               <>
                 <Zap className="h-5 w-5" />
-                Payer avec PayTech — {selectedDuration.priceTotal.toLocaleString()} FCFA
+                Payer avec FedaPay - {selectedDuration.priceTotal.toLocaleString()} FCFA
                 <ChevronRight className="h-5 w-5" />
               </>
             )}
@@ -313,17 +295,16 @@ export function PremiumPricingFlow({ currentPlan }: { currentPlan?: string | nul
           <div className="flex items-center justify-center gap-5 pt-1">
             <div className="flex items-center gap-1.5 text-slate-500 text-[10px]">
               <Zap className="h-3 w-3 text-emerald-400" />
-              Activation instantanée
+              Activation instantanee
             </div>
             <div className="w-px h-3 bg-slate-700" />
             <div className="flex items-center gap-1.5 text-slate-500 text-[10px]">
               <ShieldCheck className="h-3 w-3 text-emerald-400" />
-              PayTech certifié & sécurisé
+              FedaPay certifie & securise
             </div>
           </div>
         </div>
 
-        {/* Back link */}
         <div className="text-center mt-5">
           <Link href="/tarifs" className="text-slate-500 hover:text-slate-300 text-xs transition-colors">
             ← Voir tous les plans

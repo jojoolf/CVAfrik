@@ -39,8 +39,8 @@ export const metadata: Metadata = {
     default: 'CVAfrik - Creez votre CV professionnel pour l\'Afrique',
     template: '%s | CVAfrik',
   },
-  description: 'Creez des CV professionnels adaptes au marche de l\'emploi africain. Paiement Mobile Money (Orange, MTN, Moov). Templates modernes et conseils IA.',
-  keywords: ['CV', 'curriculum vitae', 'Afrique', 'emploi', 'recrutement', 'Mobile Money', 'Orange Money', 'MTN', 'Moov', 'CinetPay'],
+  description: 'Creez des CV professionnels adaptes au marche de l\'emploi africain. Paiement FedaPay, templates modernes et conseils IA.',
+  keywords: ['CV', 'curriculum vitae', 'Afrique', 'emploi', 'recrutement', 'FedaPay', 'Mobile Money', 'Orange Money', 'MTN', 'Moov'],
   authors: [{ name: 'CVAfrik' }],
   creator: 'CVAfrik',
   openGraph: {
@@ -49,12 +49,12 @@ export const metadata: Metadata = {
     url: 'https://cvafrik.com',
     siteName: 'CVAfrik',
     title: 'CVAfrik - CV Professionnels pour l\'Afrique',
-    description: 'Creez des CV qui font la difference. Paiement Mobile Money accepte.',
+    description: 'Creez des CV qui font la difference. Paiement FedaPay accepte.',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'CVAfrik - CV Professionnels pour l\'Afrique',
-    description: 'Creez des CV qui font la difference. Paiement Mobile Money accepte.',
+    description: 'Creez des CV qui font la difference. Paiement FedaPay accepte.',
   },
   robots: {
     index: true,
@@ -105,6 +105,10 @@ export default async function RootLayout({
           <LocaleProvider serverLocale={locale}>
             {children}
             <Toaster richColors position="top-center" />
+            <Script
+              src="https://cdn.fedapay.com/checkout.js?v=1.1.7"
+              strategy="beforeInteractive"
+            />
             {process.env.NODE_ENV === 'production' && <Analytics />}
           </LocaleProvider>
         </ThemeProvider>

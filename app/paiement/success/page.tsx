@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { CheckCircle2, ArrowRight, FileText, Sparkles } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
+import { fetchFedaPayTransaction, getFedaPaySecretKey, getPlanExpiryDateFromDuration, parseFedaPayTransactionId } from '@/lib/payment/fedapay'
 
 export const metadata: Metadata = {
   title: 'Paiement reussi',
@@ -12,14 +13,20 @@ export const metadata: Metadata = {
 }
 
 interface PageProps {
-  searchParams: Promise<{ transaction_id?: string; mock?: string }>
+  searchParams: Promise<{ transaction_id?: string; id?: string; status?: string; mock?: string }>
 }
 
 export default async function PaymentSuccessPage({ searchParams }: PageProps) {
   const params = await searchParams
-  const { transaction_id, mock } = params
+  const { mock, status } = params
+  const rawTransactionId = params.transaction_id || params.id
 
-  if (!transaction_id) {
+  if (!rawTransactionId) {
+    redirect('/tarifs')
+  }
+
+  const transactionId = parseFedaPayTransactionId(rawTransactionId)
+  if (!transactionId) {
     redirect('/tarifs')
   }
 
@@ -30,34 +37,82 @@ export default async function PaymentSuccessPage({ searchParams }: PageProps) {
     redirect('/auth/connexion')
   }
 
-  // If mock payment, update the payment status manually (for development)
-  if (mock === 'true') {
-    const { data: payment } = await supabase
-      .from('payments')
-      .select('*')
-      .eq('cinetpay_transaction_id', transaction_id)
-      .single()
+  const { data: existingPayment } = await supabase
+    .from('payments')
+    .select('*')
+    .eq('cinetpay_transaction_id', transactionId)
+    .maybeSingle()
 
-    if (payment && payment.statut === 'en_attente') {
-      // Update payment status
-      await supabase
-        .from('payments')
-        .update({ statut: 'accepte' })
-        .eq('cinetpay_transaction_id', transaction_id)
+  let payment = existingPayment
 
-      // Update user profile
-      const planExpiry = new Date()
-      planExpiry.setMonth(planExpiry.getMonth() + 1)
+  if (getFedaPaySecretKey()) {
+    try {
+      const transaction = await fetchFedaPayTransaction(transactionId)
+      const metadata = transaction?.custom_metadata || transaction?.metadata || {}
+      const planId = metadata?.plan_id || metadata?.planId || payment?.plan_achete || 'pro'
+      const billing = metadata?.billing === 'annual' ? 'annual' : 'monthly'
+      const durationId = metadata?.duration_id || metadata?.durationId || null
+      const amount = Number(transaction?.amount || payment?.montant_fcfa || 0)
+      const approved = String(transaction?.status || '').toLowerCase() === 'approved'
 
-      await supabase
-        .from('profiles')
-        .update({
-          plan: payment.plan_achete,
-          plan_expiry: planExpiry.toISOString(),
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', user.id)
+      if (!payment) {
+        const { data: createdPayment } = await supabase
+          .from('payments')
+          .insert({
+            user_id: user.id,
+            cinetpay_transaction_id: transactionId,
+            montant_fcfa: amount,
+            montant_usd: null,
+            plan_achete: planId,
+            operateur: 'FedaPay',
+            statut: approved ? 'accepte' : 'en_attente',
+            created_at: new Date().toISOString(),
+          })
+          .select('*')
+          .maybeSingle()
+
+        payment = createdPayment || null
+      } else if (approved && payment.statut === 'en_attente') {
+        await supabase
+          .from('payments')
+          .update({
+            statut: 'accepte',
+            operateur: 'FedaPay',
+            montant_fcfa: amount || payment.montant_fcfa,
+            plan_achete: planId,
+          })
+          .eq('cinetpay_transaction_id', transactionId)
+      }
+
+      if (approved) {
+        const expiry = getPlanExpiryDateFromDuration(durationId, billing)
+        await supabase
+          .from('profiles')
+          .update({
+            plan: planId,
+            plan_expiry: expiry.toISOString(),
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', user.id)
+      }
+    } catch (error) {
+      console.error('[paiement/success] verification FedaPay', error)
     }
+  } else if (mock === 'true' && payment && payment.statut === 'en_attente') {
+    const expiry = getPlanExpiryDateFromDuration(null, 'monthly')
+    await supabase
+      .from('payments')
+      .update({ statut: 'accepte', operateur: 'FedaPay' })
+      .eq('cinetpay_transaction_id', transactionId)
+
+    await supabase
+      .from('profiles')
+      .update({
+        plan: payment.plan_achete,
+        plan_expiry: expiry.toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', user.id)
   }
 
   // Get updated profile
@@ -82,8 +137,14 @@ export default async function PaymentSuccessPage({ searchParams }: PageProps) {
         <CardContent className="space-y-4">
           <div className="rounded-lg bg-secondary/50 p-4">
             <p className="text-sm text-muted-foreground">Transaction ID</p>
-            <p className="font-mono text-xs text-foreground">{transaction_id}</p>
+            <p className="font-mono text-xs text-foreground">{transactionId}</p>
           </div>
+
+          {status && (
+            <div className="rounded-lg bg-emerald-50 p-4 text-sm text-emerald-700">
+              Statut FedaPay: {status}
+            </div>
+          )}
 
           <div className="space-y-2 text-left">
             <h3 className="font-semibold text-foreground">Vous pouvez maintenant:</h3>

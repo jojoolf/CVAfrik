@@ -1,103 +1,151 @@
-import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
-import { PLANS } from "@/lib/types";
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
+import { PLANS } from '@/lib/types'
+import {
+  buildFedaPayPaymentCallbackUrl,
+  getAppOrigin,
+  getFedaPayApiBaseUrl,
+  getFedaPaySecretKey,
+  parseFedaPayTransactionId,
+} from '@/lib/payment/fedapay'
 
-export async function POST(req: Request) {
+const DURATION_AMOUNTS: Record<string, number> = {
+  '15j': 2000,
+  '1m': 2600,
+  '3m': 6500,
+  '6m': 11000,
+}
+
+export async function POST(req: NextRequest) {
   try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
     }
 
-    const { planId } = await req.json();
-    const plan = PLANS.find((p) => p.id === planId);
+    const body = await req.json().catch(() => ({}))
+    const { planId, billing, amount: requestedAmount, durationId, durationLabel } = body as {
+      planId?: string
+      billing?: 'monthly' | 'annual'
+      amount?: number | string
+      durationId?: string
+      durationLabel?: string
+    }
+    const plan = PLANS.find((p) => p.id === planId)
 
-    if (!plan || plan.id === "gratuit") {
-      return NextResponse.json({ error: "Plan invalide" }, { status: 400 });
+    if (!plan || plan.id === 'gratuit') {
+      return NextResponse.json({ error: 'Plan invalide' }, { status: 400 })
     }
 
-    // Get user profile for more info
     const { data: profile } = await supabase
       .from('profiles')
-      .select('*')
+      .select('prenom, nom, email, telephone, pays')
       .eq('id', user.id)
-      .maybeSingle();
+      .maybeSingle()
 
-    const secretKey = (process.env.FEDAPAY_SECRET_KEY || "").trim();
-    
+    const secretKey = getFedaPaySecretKey()
     if (!secretKey) {
-      console.error("FEDAPAY_SECRET_KEY is missing or empty");
-      return NextResponse.json({ error: "Configuration de paiement manquante" }, { status: 500 });
+      console.error('FEDAPAY_SECRET_KEY is missing or empty')
+      return NextResponse.json({ error: 'Configuration de paiement manquante' }, { status: 500 })
     }
 
-    const amount = plan.prix_fcfa;
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://cv-afrik.vercel.app";
+    const selectedBilling = billing === 'annual' ? 'annual' : 'monthly'
+    const amount = durationId && DURATION_AMOUNTS[durationId]
+      ? DURATION_AMOUNTS[durationId]
+      : selectedBilling === 'annual'
+        ? (plan.prix_annuel_fcfa || plan.prix_fcfa)
+        : plan.prix_fcfa
+    const appUrl = getAppOrigin(req)
 
-    const customerData: any = {
-      firstname: (profile?.prenom || user.user_metadata?.first_name || "Client").substring(0, 50),
-      lastname: (profile?.nom || user.user_metadata?.last_name || "CVAfrik").substring(0, 50),
+    const customer: Record<string, unknown> = {
+      firstname: (profile?.prenom || user.user_metadata?.first_name || 'Client').substring(0, 50),
+      lastname: (profile?.nom || user.user_metadata?.last_name || 'CVAfrik').substring(0, 50),
       email: user.email,
-    };
+    }
 
     if (profile?.telephone) {
-      customerData.phone_number = {
+      customer.phone_number = {
         number: profile.telephone.replace(/\s/g, ''),
-        country: profile.pays?.toLowerCase() || "tg"
-      };
-    }
-
-    // FedaPay API Request
-    const response = await fetch("https://api.fedapay.com/v1/transactions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${secretKey}`,
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-      },
-      body: JSON.stringify({
-        description: `Abonnement CVAfrik - Plan ${plan.nom}`,
-        amount: amount,
-        currency: { iso: "XOF" },
-        callback_url: `${appUrl}/dashboard?payment=success`,
-        customer: customerData,
-        metadata: {
-          userId: user.id,
-          planId: plan.id
-        }
-      }),
-    });
-
-    const data = await response.json();
-
-    if (data.v1 && data.v1.transaction) {
-      const tokenResponse = await fetch(`https://api.fedapay.com/v1/transactions/${data.v1.transaction.id}/token`, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${secretKey}`,
-          "Content-Type": "application/json",
-        }
-      });
-      
-      const tokenData = await tokenResponse.json();
-      
-      if (tokenData.v1 && tokenData.v1.token) {
-        return NextResponse.json({ url: tokenData.v1.url });
-      } else {
-        console.error("FedaPay Token Error:", tokenData);
-        return NextResponse.json({ error: "Erreur lors de la génération du token FedaPay" }, { status: 500 });
+        country: profile.pays?.toLowerCase() || 'tg',
       }
     }
 
-    console.error("FedaPay Transaction Error:", JSON.stringify(data, null, 2));
-    return NextResponse.json({ 
-      error: "Erreur FedaPay", 
-      details: data.message || "Erreur inconnue" 
-    }, { status: 500 });
-    
+    const transactionResponse = await fetch(`${getFedaPayApiBaseUrl()}/transactions`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${secretKey}`,
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({
+        description: `Abonnement CVAfrik - Plan ${plan.nom}`,
+        amount,
+        currency: { iso: 'XOF' },
+        callback_url: buildFedaPayPaymentCallbackUrl(req),
+        customer,
+        custom_metadata: {
+          user_id: user.id,
+          plan_id: plan.id,
+          billing: selectedBilling,
+          duration_id: durationId || null,
+          duration_label: durationLabel || null,
+          app_url: appUrl,
+        },
+      }),
+    })
+
+    const transactionData = await transactionResponse.json().catch(() => null)
+    const transactionId = parseFedaPayTransactionId(
+      transactionData?.id ?? transactionData?.transaction?.id ?? transactionData?.v1?.transaction?.id,
+    )
+
+    if (!transactionResponse.ok || !transactionId) {
+      console.error('FedaPay Transaction Error:', JSON.stringify(transactionData, null, 2))
+      return NextResponse.json(
+        { error: 'Erreur FedaPay', details: transactionData?.message || 'Impossible de creer la transaction' },
+        { status: 500 },
+      )
+    }
+
+    const tokenResponse = await fetch(`${getFedaPayApiBaseUrl()}/transactions/${transactionId}/token`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${secretKey}`,
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+    })
+
+    const tokenData = await tokenResponse.json().catch(() => null)
+    const paymentUrl = tokenData?.url || tokenData?.data?.url || tokenData?.v1?.url
+
+    if (!tokenResponse.ok || !paymentUrl) {
+      console.error('FedaPay Token Error:', JSON.stringify(tokenData, null, 2))
+      return NextResponse.json(
+        { error: 'Erreur lors de la generation du lien FedaPay' },
+        { status: 500 },
+      )
+    }
+
+    await supabase.from('payments').insert({
+      user_id: user.id,
+      cinetpay_transaction_id: String(transactionId),
+      montant_fcfa: amount,
+      montant_usd: null,
+      plan_achete: plan.id,
+      operateur: 'FedaPay',
+      statut: 'en_attente',
+    })
+
+    return NextResponse.json({
+      success: true,
+      url: paymentUrl,
+      transaction_id: String(transactionId),
+    })
   } catch (error: any) {
-    console.error("FedaPay Initiation Error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('FedaPay Initiation Error:', error)
+    return NextResponse.json({ error: error.message || 'Erreur serveur' }, { status: 500 })
   }
 }

@@ -33,7 +33,7 @@ export default async function FacturesPage() {
     operateur: p.operateur,
     statut: p.statut,
     created_at: p.created_at,
-    methode: 'CinetPay',
+    methode: 'FedaPay',
   }))
 
   const manualPayments = (manualRes.data || []).map(p => ({

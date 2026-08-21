@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { CreditCard, Loader2, Smartphone } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface FedaPayButtonProps {
   amount: number;
@@ -13,27 +15,46 @@ interface FedaPayButtonProps {
 
 export function FedaPayButton({ amount, planId, isAnnual, variant = 'mobile' }: FedaPayButtonProps) {
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
-  const handleClick = () => {
+  const handleClick = async () => {
     setLoading(true);
-    
-    // Redirection vers le manuel si > 20k
-    if (amount >= 20000) {
-      window.location.href = `/paiement/manuel?plan=${planId}&billing=annual`;
-      return;
+    try {
+      const response = await fetch('/api/payment/fedapay/initiate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          planId,
+          billing: isAnnual ? 'annual' : 'monthly',
+          amount,
+        }),
+      })
+
+      const data = await response.json().catch(() => ({}))
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          router.push(`/auth/connexion?redirect=${encodeURIComponent(`/paiement?plan=${planId}${isAnnual ? '&billing=annual' : ''}`)}`)
+          return
+        }
+
+        toast.error(data.error || data.message || 'Impossible de lancer le paiement')
+        return
+      }
+
+      if (!data?.url) {
+        toast.error('Lien de paiement FedaPay introuvable')
+        return
+      }
+
+      window.location.href = data.url
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Une erreur est survenue')
+    } finally {
+      setLoading(false)
     }
-
-    const links: Record<string, string> = {
-      'pro_monthly': 'https://me.fedapay.com/QQieaVUI',
-      'pro_annual': 'https://me.fedapay.com/BBcNp6bS',
-      'premium_monthly': 'https://me.fedapay.com/TEcHFhRT',
-      'premium_annual': 'https://me.fedapay.com/dZShMsdh'
-    };
-
-    const key = `${planId}_${isAnnual ? 'annual' : 'monthly'}`;
-    const targetLink = links[key] || links['pro_monthly'];
-    
-    window.location.href = targetLink;
   };
 
   if (variant === 'card') {

@@ -110,7 +110,7 @@ export function PricingSection() {
             </Link>
 
             <div className="mt-3 flex items-center justify-center gap-4 text-[10px] text-muted-foreground">
-              <span>🔒 Paiement sécurisé PayTech</span>
+              <span>🔒 Paiement sécurisé FedaPay</span>
               <span>⚡ Activation instantanée</span>
             </div>
 

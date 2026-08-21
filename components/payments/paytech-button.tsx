@@ -19,7 +19,7 @@ export function PayTechButton({ amount, planId, isAnnual, variant = 'mobile' }: 
     setLoading(true);
 
     try {
-      const response = await fetch('/api/payment/paytech/initiate', {
+      const response = await fetch('/api/payment/fedapay/initiate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -27,21 +27,20 @@ export function PayTechButton({ amount, planId, isAnnual, variant = 'mobile' }: 
         body: JSON.stringify({
           amount: amount,
           planId: planId,
-          durationId: isAnnual ? 'annual' : '1m',
-          durationLabel: isAnnual ? '1 An' : '1 Mois',
+          billing: isAnnual ? 'annual' : 'monthly',
         }),
       });
 
       const data = await response.json();
 
       if (!response.ok || !data.url) {
-        throw new Error(data.error || 'Erreur lors de l\'initialisation PayTech');
+        throw new Error(data.error || 'Erreur lors de l\'initialisation FedaPay');
       }
 
       window.location.href = data.url;
     } catch (err: any) {
-      console.error('PayTech initiation error:', err);
-      toast.error(err.message || 'Erreur de connexion à PayTech.');
+      console.error('FedaPay initiation error:', err);
+      toast.error(err.message || 'Erreur de connexion à FedaPay.');
       setLoading(false);
     }
   };
@@ -53,7 +52,7 @@ export function PayTechButton({ amount, planId, isAnnual, variant = 'mobile' }: 
         disabled={loading}
         className="w-full h-14 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-black text-lg shadow-xl gap-3 transition-all border-b-4 border-slate-700 active:border-b-0 active:translate-y-1"
       >
-        {loading ? <Loader2 className="animate-spin" /> : <><CreditCard className="h-6 w-6" /> Payer par Carte Bancaire (PayTech)</>}
+        {loading ? <Loader2 className="animate-spin" /> : <><CreditCard className="h-6 w-6" /> Payer par Carte Bancaire (FedaPay)</>}
       </Button>
     );
   }
@@ -64,7 +63,7 @@ export function PayTechButton({ amount, planId, isAnnual, variant = 'mobile' }: 
       disabled={loading}
       className="w-full h-14 rounded-2xl bg-[#00875A] hover:bg-[#00704A] text-white font-black text-lg shadow-xl gap-3 transition-all border-b-4 border-emerald-900 active:border-b-0 active:translate-y-1"
     >
-      {loading ? <Loader2 className="animate-spin" /> : <><Smartphone className="h-6 w-6" /> Payer par Mobile Money (PayTech)</>}
+      {loading ? <Loader2 className="animate-spin" /> : <><Smartphone className="h-6 w-6" /> Payer par Mobile Money (FedaPay)</>}
     </Button>
   );
 }
