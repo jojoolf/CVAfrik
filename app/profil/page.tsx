@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { createClient } from '@/lib/supabase/server'
+import { checkAndGetProfile } from '@/lib/supabase/profile'
 import { PLANS } from '@/lib/types'
 
 export const metadata: Metadata = {
@@ -24,7 +25,7 @@ export default async function ProfilPage() {
     redirect('/auth/connexion?redirect=/profil')
   }
 
-  const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle()
+  const profile = await checkAndGetProfile(supabase, user.id)
 
   const displayName =
     [profile?.prenom, profile?.nom].filter(Boolean).join(' ').trim() ||

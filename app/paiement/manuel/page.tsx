@@ -36,7 +36,7 @@ function ManualPaymentContent() {
   const formattedAmount = amount.toLocaleString('fr-FR');
 
   const paymentMethods = [
-    { id: "tmoney", name: "T-Money / Moov", number: "+228 90 64 32 52", color: "bg-yellow-400", text: "text-black", owner: "Mixx by yas" },
+    { id: "tmoney", name: "Mixx by Yas / Moov", number: "+228 90 64 32 52", color: "bg-yellow-400", text: "text-black", owner: "Mixx by yas" },
   ];
 
   const handleCopy = (text: string) => {
@@ -159,7 +159,7 @@ function ManualPaymentContent() {
             <div className="space-y-2">
               <Label className="text-xs font-black uppercase text-slate-400 ml-1">Méthode utilisée</Label>
               <div className="grid grid-cols-2 gap-2">
-                {["T-Money", "Moov"].map((m) => (
+                {["Mixx by Yas", "Moov"].map((m) => (
                   <button
                     key={m}
                     type="button"

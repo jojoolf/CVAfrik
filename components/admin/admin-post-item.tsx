@@ -43,12 +43,17 @@ export function AdminPostItem({ post }: AdminPostItemProps) {
     const supabase = createClient()
     
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('blog_posts')
         .delete()
         .eq('id', post.id)
+        .select()
 
       if (error) throw error
+
+      if (!data || data.length === 0) {
+        throw new Error("Suppression refusée par la base de données. L'article n'a pas été supprimé. Vérifie les règles RLS de Supabase.")
+      }
 
       toast.success('Article supprimé')
       router.refresh()

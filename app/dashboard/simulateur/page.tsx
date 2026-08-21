@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { checkAndGetProfile } from '@/lib/supabase/profile'
 import { redirect } from 'next/navigation'
 import { EnhancedInterviewChat } from '@/components/simulateur/enhanced-interview-chat'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -16,11 +17,7 @@ export default async function SimulateurPage() {
     redirect('/auth/connexion')
   }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('plan, prenom')
-    .eq('id', user.id)
-    .single()
+  const profile = await checkAndGetProfile(supabase, user.id)
 
   const planId = profile?.plan ?? 'gratuit'
   const planInfo = PLANS.find(p => p.id === planId) || PLANS[0]

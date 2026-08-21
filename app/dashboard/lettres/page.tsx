@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { checkAndGetProfile } from '@/lib/supabase/profile'
 import { redirect } from 'next/navigation'
 import { LettreGeneratorForm } from './lettre-generator-form'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -27,11 +28,7 @@ export default async function LettresPage({
   const newParam = resolvedSearchParams?.new
   const isCreating = Array.isArray(newParam) ? newParam.includes('true') : newParam === 'true'
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single()
+  const profile = await checkAndGetProfile(supabase, user.id)
 
   const { data: cvs } = await supabase
     .from('cvs')

@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { checkAndGetProfile } from '@/lib/supabase/profile'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { PLANS } from '@/lib/types'
 
@@ -14,11 +15,7 @@ export async function startSimulation(data: { cvId: string; poste: string; nombr
     if (!user) return { success: false, error: 'Non authentifie' }
 
     // Check plan limits
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('plan, simulations_faites_ce_mois')
-      .eq('id', user.id)
-      .single()
+    const profile = await checkAndGetProfile(supabase, user.id)
 
     const plan = PLANS.find(p => p.id === profile?.plan) || PLANS[0]
     if (plan.id === 'gratuit' && (profile?.simulations_faites_ce_mois || 0) >= 3) {
@@ -85,6 +82,8 @@ export async function startSimulation(data: { cvId: string; poste: string; nombr
 export async function sendMessage(id: string, message: string, history: any[]) {
   try {
     const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { success: false, error: 'Non authentifie' }
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
 
     // Read the simulation to get nombre_questions
@@ -92,6 +91,7 @@ export async function sendMessage(id: string, message: string, history: any[]) {
       .from('simulations_entretien')
       .select('nombre_questions')
       .eq('id', id)
+      .eq('user_id', user.id)
       .single()
 
     const nombreQuestions = sim?.nombre_questions ?? 8
@@ -135,6 +135,7 @@ export async function sendMessage(id: string, message: string, history: any[]) {
           score: data.score 
         })
         .eq('id', id)
+        .eq('user_id', user.id)
 
       if (updateError) {
         console.error("Erreur update simulations_entretien:", updateError)
@@ -159,6 +160,7 @@ export async function sendMessage(id: string, message: string, history: any[]) {
       .from('simulations_entretien')
       .update({ messages: [...history, { role: 'assistant', content: nextQuestion }] })
       .eq('id', id)
+      .eq('user_id', user.id)
 
     if (updateError) {
       console.error("Erreur update simulations_entretien:", updateError)
@@ -231,11 +233,7 @@ export async function startEnhancedSimulation(data: {
     if (!user) return { success: false, error: 'Non authentifie' }
 
     // Check plan limits
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('plan, simulations_faites_ce_mois')
-      .eq('id', user.id)
-      .single()
+    const profile = await checkAndGetProfile(supabase, user.id)
 
     const plan = PLANS.find(p => p.id === profile?.plan) || PLANS[0]
     if (plan.id === 'gratuit' && (profile?.simulations_faites_ce_mois || 0) >= 3) {
@@ -308,12 +306,15 @@ export async function startEnhancedSimulation(data: {
 export async function sendEnhancedMessage(id: string, message: string, history: any[]) {
   try {
     const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { success: false, error: 'Non authentifie' }
     
     // Read the simulation to get details
     const { data: sim } = await supabase
       .from('simulations_entretien_v2')
       .select('*')
       .eq('id', id)
+      .eq('user_id', user.id)
       .single()
 
     if (!sim) {
@@ -385,6 +386,7 @@ export async function sendEnhancedMessage(id: string, message: string, history: 
           completed_at: new Date().toISOString()
         })
         .eq('id', id)
+        .eq('user_id', user.id)
 
       if (updateError) {
         console.error("Erreur update simulations_entretien_v2:", updateError)
@@ -411,6 +413,7 @@ export async function sendEnhancedMessage(id: string, message: string, history: 
       .from('simulations_entretien_v2')
       .update({ messages: [...history, { role: 'assistant', content: nextQuestion }] })
       .eq('id', id)
+      .eq('user_id', user.id)
 
     if (updateError) {
       console.error("Erreur update simulations_entretien_v2:", updateError)

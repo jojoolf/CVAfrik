@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { checkAndGetProfile } from '@/lib/supabase/profile'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { PLANS } from '@/lib/types'
 
@@ -89,11 +90,7 @@ function getMonthlyLimitError(limit: number) {
 
 async function getProfileAndLetterLimit(userId: string) {
   const supabase = await createClient()
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('plan, lettres_generees_ce_mois')
-    .eq('id', userId)
-    .single()
+  const profile = await checkAndGetProfile(supabase, userId)
 
   if (!profile) {
     return { profile: null, limit: null as number | null }

@@ -18,7 +18,7 @@ interface PageProps {
 
 export default async function PaymentSuccessPage({ searchParams }: PageProps) {
   const params = await searchParams
-  const { mock, status } = params
+  const { status } = params
   const rawTransactionId = params.transaction_id || params.id
 
   if (!rawTransactionId) {
@@ -41,14 +41,19 @@ export default async function PaymentSuccessPage({ searchParams }: PageProps) {
     .from('payments')
     .select('*')
     .eq('cinetpay_transaction_id', transactionId)
+    .eq('user_id', user.id)
     .maybeSingle()
 
   let payment = existingPayment
+  let paymentApproved = existingPayment?.statut === 'accepte'
 
   if (getFedaPaySecretKey()) {
     try {
       const transaction = await fetchFedaPayTransaction(transactionId)
       const metadata = transaction?.custom_metadata || transaction?.metadata || {}
+      if (metadata?.user_id && String(metadata.user_id) !== user.id) {
+        redirect('/paiement?error=transaction_invalide')
+      }
       const planId = metadata?.plan_id || metadata?.planId || payment?.plan_achete || 'pro'
       const billing = metadata?.billing === 'annual' ? 'annual' : 'monthly'
       const durationId = metadata?.duration_id || metadata?.durationId || null
@@ -72,6 +77,7 @@ export default async function PaymentSuccessPage({ searchParams }: PageProps) {
           .maybeSingle()
 
         payment = createdPayment || null
+        paymentApproved = approved
       } else if (approved && payment.statut === 'en_attente') {
         await supabase
           .from('payments')
@@ -82,9 +88,11 @@ export default async function PaymentSuccessPage({ searchParams }: PageProps) {
             plan_achete: planId,
           })
           .eq('cinetpay_transaction_id', transactionId)
+        paymentApproved = true
       }
 
       if (approved) {
+        paymentApproved = true
         const expiry = getPlanExpiryDateFromDuration(durationId, billing)
         await supabase
           .from('profiles')
@@ -98,21 +106,10 @@ export default async function PaymentSuccessPage({ searchParams }: PageProps) {
     } catch (error) {
       console.error('[paiement/success] verification FedaPay', error)
     }
-  } else if (mock === 'true' && payment && payment.statut === 'en_attente') {
-    const expiry = getPlanExpiryDateFromDuration(null, 'monthly')
-    await supabase
-      .from('payments')
-      .update({ statut: 'accepte', operateur: 'FedaPay' })
-      .eq('cinetpay_transaction_id', transactionId)
+  }
 
-    await supabase
-      .from('profiles')
-      .update({
-        plan: payment.plan_achete,
-        plan_expiry: expiry.toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', user.id)
+  if (!paymentApproved) {
+    redirect(`/paiement?payment=pending&transaction_id=${encodeURIComponent(transactionId)}`)
   }
 
   // Get updated profile

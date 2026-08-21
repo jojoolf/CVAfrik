@@ -97,7 +97,7 @@ export function OnboardingQuestionnaire({
   const [secteur, setSecteur] = useState('')
   const [customSecteur, setCustomSecteur] = useState('')
 
-  const [objectif, setObjectif] = useState('')
+  const [objectif, setObjectif] = useState<string[]>([])
   const [customObjectif, setCustomObjectif] = useState('')
 
   const [source, setSource] = useState('')
@@ -125,7 +125,9 @@ export function OnboardingQuestionnaire({
     try {
       const finalStatut = statut === 'Autre' ? customStatut || 'Autre' : statut
       const finalSecteur = secteur === 'Autre' ? customSecteur || 'Autre' : secteur
-      const finalObjectif = objectif === 'Autre' ? customObjectif || 'Autre' : objectif
+      const finalObjectif = objectif
+        .map((item) => (item === 'Autre' ? customObjectif.trim() || 'Autre' : item))
+        .join(', ')
       const finalSource = source === 'Autre' ? customSource || 'Autre' : source
       const finalPays = pays === 'Autre' ? customPays || 'Autre' : pays
 
@@ -203,7 +205,7 @@ export function OnboardingQuestionnaire({
     if (currentStep === 0) return prenom.trim().length > 0 && nom.trim().length > 0
     if (currentStep === 1) return statut && (statut !== 'Autre' || customStatut.trim())
     if (currentStep === 2) return secteur && (secteur !== 'Autre' || customSecteur.trim())
-    if (currentStep === 3) return objectif && (objectif !== 'Autre' || customObjectif.trim())
+    if (currentStep === 3) return objectif.length >= 2 && (!objectif.includes('Autre') || customObjectif.trim())
     if (currentStep === 4) return source && (source !== 'Autre' || customSource.trim())
     if (currentStep === 5) return pays && (pays !== 'Autre' || customPays.trim())
     return false
@@ -380,11 +382,18 @@ export function OnboardingQuestionnaire({
           {currentStep === 3 && (
             <div className="space-y-2.5 max-h-[320px] overflow-y-auto custom-scrollbar pr-1">
               {OBJECTIFS.map((item) => {
-                const isSelected = objectif === item
+                const isSelected = objectif.includes(item)
                 return (
                   <div key={item} className="space-y-2">
                     <button
-                      onClick={() => setObjectif(item)}
+                      type="button"
+                      onClick={() => {
+                        setObjectif((current) => {
+                          if (current.includes(item)) return current.filter((value) => value !== item)
+                          if (current.length >= 3) return current
+                          return [...current, item]
+                        })
+                      }}
                       className={cn(
                         'w-full flex items-center justify-between p-3.5 rounded-2xl border-2 transition-all text-left text-sm font-semibold',
                         isSelected
@@ -409,6 +418,7 @@ export function OnboardingQuestionnaire({
                   </div>
                 )
               })}
+              <p className="pt-1 text-xs text-slate-400">Sélectionnez 2 ou 3 objectifs.</p>
             </div>
           )}
 

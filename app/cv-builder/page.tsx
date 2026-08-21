@@ -2,6 +2,7 @@ import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { CVBuilderForm } from '@/components/cv-builder/cv-builder-form'
 import { createClient } from '@/lib/supabase/server'
+import { checkAndGetProfile } from '@/lib/supabase/profile'
 import { PLANS } from '@/lib/types'
 
 export const metadata: Metadata = {
@@ -23,11 +24,7 @@ export default async function CVBuilderPage({ searchParams }: PageProps) {
   }
 
   // Get user profile
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single()
+  const profile = await checkAndGetProfile(supabase, user.id)
 
   if (!profile) {
     redirect('/profil/modifier')

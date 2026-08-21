@@ -65,10 +65,17 @@ export async function POST(req: NextRequest) {
       email: user.email,
     }
 
+    const countryCodes: Record<string, string> = {
+      "cote d'ivoire": 'ci', 'côte d\'ivoire': 'ci', sénégal: 'sn', senegal: 'sn',
+      cameroun: 'cm', bénin: 'bj', benin: 'bj', togo: 'tg', mali: 'ml',
+      'burkina faso': 'bf', 'rd congo': 'cd', congo: 'cg',
+    }
+    const country = countryCodes[(profile?.pays || '').trim().toLowerCase()] || 'tg'
+
     if (profile?.telephone) {
       customer.phone_number = {
         number: profile.telephone.replace(/\s/g, ''),
-        country: profile.pays?.toLowerCase() || 'tg',
+        country,
       }
     }
 

@@ -68,7 +68,7 @@ export default function ModifierPost({ params }: ModifierPostProps) {
     const supabase = createClient()
     
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('blog_posts')
         .update({
           titre,
@@ -79,8 +79,13 @@ export default function ModifierPost({ params }: ModifierPostProps) {
           updated_at: new Date().toISOString()
         })
         .eq('id', resolvedParams.id)
+        .select()
 
       if (error) throw error
+
+      if (!data || data.length === 0) {
+        throw new Error("Mise à jour refusée par la base de données. L'article n'a pas été modifié. Vérifie les règles RLS de Supabase.")
+      }
 
       // Envoyer la newsletter si l'article est publié
       if (publie) {

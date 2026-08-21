@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { checkAndGetProfile } from '@/lib/supabase/profile'
 import { FileText, FileSignature, MessageSquareCode, ArrowRight, Clock, TrendingUp, Sparkles, Users, Star } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -19,11 +20,7 @@ export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user!.id)
-    .maybeSingle()
+  const profile = await checkAndGetProfile(supabase, user!.id)
 
   const { data: allCvs } = await supabase
     .from('cvs')
