@@ -129,7 +129,23 @@ export async function POST(req: NextRequest) {
     })
 
     const transactionData = await transactionResponse.json().catch(() => null)
-    const transactionId = findTransactionId(transactionData)
+    let transactionId = findTransactionId(transactionData)
+
+    // Some live FedaPay responses acknowledge the transaction without returning
+    // its id. Resolve it using the unique merchant reference in that case.
+    if (!transactionId) {
+      const lookupResponse = await fetch(
+        `${getFedaPayApiBaseUrl()}/transactions/merchant/${encodeURIComponent(merchantReference)}`,
+        {
+          headers: {
+            Authorization: `Bearer ${secretKey}`,
+            Accept: 'application/json',
+          },
+        },
+      )
+      const lookupData = await lookupResponse.json().catch(() => null)
+      transactionId = findTransactionId(lookupData)
+    }
 
     if (!transactionResponse.ok || !transactionId) {
       console.error('FedaPay Transaction Error:', JSON.stringify(transactionData, null, 2))
