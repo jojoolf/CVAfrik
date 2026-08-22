@@ -111,7 +111,11 @@ export async function POST(req: NextRequest) {
 
     const transactionData = await transactionResponse.json().catch(() => null)
     const transactionId = parseFedaPayTransactionId(
-      transactionData?.id ?? transactionData?.transaction?.id ?? transactionData?.v1?.transaction?.id,
+      transactionData?.id
+        ?? transactionData?.data?.id
+        ?? transactionData?.transaction?.id
+        ?? transactionData?.data?.transaction?.id
+        ?? transactionData?.v1?.transaction?.id,
     )
 
     if (!transactionResponse.ok || !transactionId) {
@@ -119,7 +123,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           error: 'Erreur FedaPay',
-          details: transactionData?.message || transactionData?.error || transactionData?.errors || 'Impossible de creer la transaction',
+          details: transactionData?.message
+            || transactionData?.error?.message
+            || transactionData?.error
+            || transactionData?.errors
+            || `Réponse FedaPay invalide (HTTP ${transactionResponse.status})`,
           environment: getFedaPayApiBaseUrl().includes('sandbox') ? 'sandbox' : 'live',
         },
         { status: 500 },
