@@ -13,6 +13,7 @@ export interface Profile {
   date_naissance: string | null
   adresse: string | null
   linkedin: string | null
+  avatar_url?: string | null
   plan: Plan
   plan_expiry: string | null
   cvs_generes_ce_mois: number

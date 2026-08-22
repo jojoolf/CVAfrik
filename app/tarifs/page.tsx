@@ -5,6 +5,7 @@ import { PricingCards } from '@/components/pricing/pricing-cards'
 import { PaymentMethods } from '@/components/pricing/payment-methods'
 import { FAQ } from '@/components/pricing/faq'
 import { createClient } from '@/lib/supabase/server'
+import { createTranslator } from '@/lib/i18n/server'
 
 import { Lock } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -20,6 +21,7 @@ export default async function TarifsPage({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
   const params = await searchParams
+  const { t } = await createTranslator()
   const locked = params.locked as string
 
   let lockedMessage = null
@@ -52,11 +54,10 @@ export default async function TarifsPage({
         <section className="bg-gradient-to-b from-secondary/50 to-background py-16 md:py-24">
           <div className="container mx-auto px-4 text-center">
             <h1 className="text-4xl font-bold tracking-tight text-foreground md:text-5xl">
-              Des tarifs <span className="text-primary">accessibles</span> pour tous
+              {t('pricing.title')}
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
-              Commencez gratuitement et passez a un plan superieur quand vous en avez besoin.
-              Paiement Mobile Money accepte dans toute l&apos;Afrique.
+              {t('pricing.subtitle')}
             </p>
           </div>
         </section>

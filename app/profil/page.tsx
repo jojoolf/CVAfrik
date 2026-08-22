@@ -6,6 +6,7 @@ import { Footer } from '@/components/layout/footer'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { createClient } from '@/lib/supabase/server'
 import { checkAndGetProfile } from '@/lib/supabase/profile'
 import { PLANS } from '@/lib/types'
@@ -34,6 +35,8 @@ export default async function ProfilPage() {
 
   const planId = profile?.plan ?? 'gratuit'
   const planLabel = PLANS.find((p) => p.id === planId)?.nom ?? planId
+  const avatarUrl = profile?.avatar_url || user.user_metadata?.avatar_url
+  const initials = `${profile?.prenom?.[0] || ''}${profile?.nom?.[0] || ''}`.toUpperCase() || 'CA'
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -49,9 +52,15 @@ export default async function ProfilPage() {
           </div>
 
           <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>Identite</CardTitle>
-              <CardDescription>Donnees enregistrees sur votre profil.</CardDescription>
+            <CardHeader className="flex flex-row items-center gap-4 space-y-0">
+              <Avatar className="h-16 w-16 ring-4 ring-primary/10">
+                <AvatarImage src={avatarUrl || undefined} alt="Photo de profil" />
+                <AvatarFallback className="bg-primary/10 text-lg font-bold text-primary">{initials}</AvatarFallback>
+              </Avatar>
+              <div>
+                <CardTitle>Identité</CardTitle>
+                <CardDescription>Données enregistrées sur votre profil.</CardDescription>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4 text-sm">
               <div className="grid gap-1">

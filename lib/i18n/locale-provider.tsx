@@ -1,7 +1,8 @@
 'use client'
 
-import { createContext, useContext, useState, useCallback, useEffect } from 'react'
-import { getTranslation, defaultLocale, type Locale } from './index'
+import { createContext, useContext, useState, useCallback, useEffect, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
+import { getTranslation, defaultLocale, supportedLocales, type Locale } from './index'
 
 const COOKIE_NAME = 'locale'
 
@@ -18,7 +19,7 @@ function getInitialLocale(): Locale {
   try {
     const cookie = document.cookie.split('; ').find(row => row.startsWith(`${COOKIE_NAME}=`))
     const val = cookie?.split('=')[1] as Locale | undefined
-    if (val && ['fr', 'en', 'pt'].includes(val)) return val
+    if (val && supportedLocales.includes(val as Locale)) return val as Locale
   } catch {}
   return defaultLocale
 }
@@ -31,6 +32,8 @@ export function LocaleProvider({
   serverLocale?: Locale
 }) {
   const [locale, setLocaleState] = useState<Locale>(serverLocale || getInitialLocale)
+  const router = useRouter()
+  const [, startTransition] = useTransition()
 
   useEffect(() => {
     const cookieLocale = getInitialLocale()
@@ -40,9 +43,12 @@ export function LocaleProvider({
   }, [])
 
   const setLocale = useCallback((newLocale: Locale) => {
+    if (newLocale === locale) return
+
+    document.cookie = `${COOKIE_NAME}=${newLocale};path=/;max-age=31536000;samesite=lax`
     setLocaleState(newLocale)
-    document.cookie = `${COOKIE_NAME}=${newLocale};path=/;max-age=31536000`
-  }, [])
+    startTransition(() => router.refresh())
+  }, [locale, router, startTransition])
 
   const t = useCallback((path: string): string => {
     return getTranslation(locale, path)

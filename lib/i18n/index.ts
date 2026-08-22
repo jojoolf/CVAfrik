@@ -1,6 +1,6 @@
 import common from './locales/common.json'
 
-export type Locale = 'fr' | 'en' | 'pt'
+export type Locale = 'fr' | 'en'
 export type TranslationKey = string
 
 const translations = common as Record<Locale, Record<string, Record<string, string>>>
@@ -8,7 +8,7 @@ const translations = common as Record<Locale, Record<string, Record<string, stri
 const COOKIE_NAME = 'locale'
 
 export const defaultLocale: Locale = 'fr'
-export const supportedLocales: Locale[] = ['fr', 'en', 'pt']
+export const supportedLocales: Locale[] = ['fr', 'en']
 
 export function isValidLocale(locale: string): locale is Locale {
   return supportedLocales.includes(locale as Locale)

@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { CVAnalyzeButton } from '@/components/dashboard/cv-analyze-button'
+import { CVActions } from '@/components/dashboard/cv-actions'
 import { DashboardChart } from './dashboard-chart'
 import { OnboardingQuestionnaire } from '@/components/onboarding-questionnaire'
 import { getEffectivePlan } from '@/lib/subscription'
@@ -244,9 +245,12 @@ export default async function DashboardPage() {
                             : '—'}
                         </p>
                       </div>
-                      <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20">
-                        Nouveau
-                      </Badge>
+                      <div className="flex items-center gap-1">
+                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20">
+                          Nouveau
+                        </Badge>
+                        <CVActions cv={{ id: cv.id, titre: cv.titre || 'Sans titre' }} />
+                      </div>
                     </div>
                   ))
                 ) : (
@@ -343,6 +347,7 @@ export default async function DashboardPage() {
                           userEmail={user!.email}
                           userName={displayName}
                         />
+                        <CVActions cv={{ id: cv.id, titre: cv.titre || 'Sans titre' }} />
                       </div>
                     </div>
                   </CardContent>

@@ -6,6 +6,7 @@ import { useState } from 'react'
 import type { User } from '@supabase/supabase-js'
 import { LayoutDashboard, LogOut, UserRound, LifeBuoy } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,7 +26,7 @@ interface UserNavProps {
 }
 
 function displayLabel(user: User) {
-  const meta = user.user_metadata as { prenom?: string; nom?: string; full_name?: string } | undefined
+  const meta = user.user_metadata as { prenom?: string; nom?: string; full_name?: string; avatar_url?: string } | undefined
   const fromMeta = [meta?.prenom, meta?.nom].filter(Boolean).join(' ').trim()
   if (fromMeta) return fromMeta
   if (meta?.full_name) return meta.full_name
@@ -37,6 +38,8 @@ export function UserNav({ user, onNavigate, variant = 'dropdown' }: UserNavProps
   const [loading, setLoading] = useState(false)
   const label = displayLabel(user)
   const email = user.email ?? ''
+  const avatarUrl = (user.user_metadata as { avatar_url?: string } | undefined)?.avatar_url
+  const initials = label.split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase() || 'CA'
 
   const handleSignOut = async () => {
     setLoading(true)
@@ -84,7 +87,10 @@ export function UserNav({ user, onNavigate, variant = 'dropdown' }: UserNavProps
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" className="gap-2 border-border/60 hover:bg-secondary/80 dark:hover:bg-slate-800 transition-colors">
-          <UserRound className="h-4 w-4 shrink-0" />
+          <Avatar className="h-6 w-6 shrink-0">
+            <AvatarImage src={avatarUrl} alt="Photo de profil" />
+            <AvatarFallback className="bg-primary/10 text-[10px] font-semibold text-primary">{initials}</AvatarFallback>
+          </Avatar>
           <span className="max-w-[140px] truncate text-sm font-medium">{label}</span>
         </Button>
       </DropdownMenuTrigger>

@@ -11,12 +11,14 @@ import { ModeToggle } from '@/components/layout/mode-toggle'
 import { LanguageSwitcher } from '@/components/language-switcher'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
+import { useTranslation } from '@/lib/i18n/use-translation'
 
 interface NavbarProps {
   user?: User | null
 }
 
 export function Navbar({ user }: NavbarProps) {
+  const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
   const [plan, setPlan] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -43,26 +45,26 @@ export function Navbar({ user }: NavbarProps) {
   const getNavigation = (): { name: string; href: string; icon?: any }[] => {
     if (!user) {
       return [
-        { name: 'Fonctionnalités', href: '/#fonctionnalites' },
-        { name: 'Templates', href: '/templates' },
-        { name: 'Tarifs', href: '/tarifs' },
-        { name: 'Blog & Emploi', href: '/blog' },
+        { name: t('nav.fonctionnalites'), href: '/#fonctionnalites' },
+        { name: t('nav.templates'), href: '/templates' },
+        { name: t('nav.tarifs'), href: '/tarifs' },
+        { name: t('nav.blogEmploi'), href: '/blog' },
       ]
     }
 
     // Menu pour utilisateur connecté
     const baseMenu = [
-      { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-      { name: 'CV', href: '/cv-builder', icon: FileText },
-      { name: 'Lettres', href: '/dashboard/lettres', icon: FileSignature },
-      { name: 'Entretien', href: '/dashboard/simulateur', icon: MessageSquareCode },
-      { name: 'Blog', href: '/blog', icon: Sparkles },
+      { name: t('nav.dashboard'), href: '/dashboard', icon: LayoutDashboard },
+      { name: t('nav.cv'), href: '/cv-builder', icon: FileText },
+      { name: t('nav.lettres'), href: '/dashboard/lettres', icon: FileSignature },
+      { name: t('nav.entretien'), href: '/dashboard/simulateur', icon: MessageSquareCode },
+      { name: t('nav.blog'), href: '/blog', icon: Sparkles },
     ]
 
     return [
       ...baseMenu,
-      { name: 'Modèles', href: '/templates', icon: undefined },
-      { name: 'Support', href: '/dashboard/support', icon: LifeBuoy },
+      { name: t('nav.modeles'), href: '/templates', icon: undefined },
+      { name: t('nav.support'), href: '/dashboard/support', icon: LifeBuoy },
     ]
   }
 
@@ -107,10 +109,10 @@ export function Navbar({ user }: NavbarProps) {
           ) : (
             <>
               <Button variant="ghost" asChild className="rounded-full">
-                <Link href="/auth/connexion">Connexion</Link>
+                <Link href="/auth/connexion">{t('nav.connexion')}</Link>
               </Button>
               <Button asChild className="rounded-full shadow-lg shadow-primary/20">
-                <Link href="/auth/inscription">Commencer gratuitement</Link>
+                <Link href="/auth/inscription">{t('nav.commencer')}</Link>
               </Button>
             </>
           )}
@@ -121,7 +123,7 @@ export function Navbar({ user }: NavbarProps) {
           <SheetTrigger asChild className="md:hidden">
             <Button variant="ghost" size="icon" className="rounded-full">
               <Menu className="h-5 w-5" />
-              <span className="sr-only">Menu</span>
+              <span className="sr-only">{t('nav.menu')}</span>
             </Button>
           </SheetTrigger>
           <SheetContent side="right" className="w-[300px] sm:w-[400px] rounded-l-[2rem]">
@@ -159,10 +161,10 @@ export function Navbar({ user }: NavbarProps) {
                 ) : (
                   <>
                     <Button variant="outline" asChild className="rounded-2xl" onClick={() => setIsOpen(false)}>
-                      <Link href="/auth/connexion">Connexion</Link>
+                      <Link href="/auth/connexion">{t('nav.connexion')}</Link>
                     </Button>
                     <Button asChild className="rounded-2xl shadow-lg shadow-primary/20" onClick={() => setIsOpen(false)}>
-                      <Link href="/auth/inscription">Commencer gratuitement</Link>
+                      <Link href="/auth/inscription">{t('nav.commencer')}</Link>
                     </Button>
                   </>
                 )}

@@ -9,16 +9,15 @@ import type { Locale } from '@/lib/i18n'
 const labels: Record<Locale, string> = {
   fr: 'Français',
   en: 'English',
-  pt: 'Português',
 }
 
 export function LanguageSwitcher() {
-  const { locale, setLocale } = useTranslation()
+  const { locale, setLocale, t } = useTranslation()
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full">
+        <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full" aria-label={t('nav.langue')}>
           <Globe className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>

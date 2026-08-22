@@ -52,7 +52,7 @@ export default async function PaymentSuccessPage({ searchParams }: PageProps) {
       const transaction = await fetchFedaPayTransaction(transactionId)
       const metadata = transaction?.custom_metadata || transaction?.metadata || {}
       if (metadata?.user_id && String(metadata.user_id) !== user.id) {
-        redirect('/paiement?error=transaction_invalide')
+        redirect('/paiement/abonnement?error=transaction_invalide')
       }
       const planId = metadata?.plan_id || metadata?.planId || payment?.plan_achete || 'pro'
       const billing = metadata?.billing === 'annual' ? 'annual' : 'monthly'
@@ -109,7 +109,7 @@ export default async function PaymentSuccessPage({ searchParams }: PageProps) {
   }
 
   if (!paymentApproved) {
-    redirect(`/paiement?payment=pending&transaction_id=${encodeURIComponent(transactionId)}`)
+    redirect('/paiement/abonnement?payment=pending')
   }
 
   // Get updated profile

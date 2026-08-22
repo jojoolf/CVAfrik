@@ -1,10 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Navbar } from '@/components/layout/navbar'
-import { Footer } from '@/components/layout/footer'
 import { SupportForm } from './support-form'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { LifeBuoy, Mail, MessageCircle, HelpCircle } from 'lucide-react'
+import { LifeBuoy, Mail, HelpCircle } from 'lucide-react'
 
 export default async function SupportPage() {
   const supabase = await createClient()
@@ -59,16 +58,7 @@ export default async function SupportPage() {
                     </div>
                     <div>
                       <p className="font-semibold text-foreground">Email</p>
-                      <p className="text-muted-foreground">contact@cvafrik.com</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="h-8 w-8 rounded-full bg-green-500/10 flex items-center justify-center shrink-0">
-                      <MessageCircle className="h-4 w-4 text-green-600" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-foreground">WhatsApp</p>
-                      <p className="text-muted-foreground">+225 XX XX XX XX</p>
+                      <a href="mailto:cvafrik@gmail.com" className="text-muted-foreground hover:text-primary transition-colors">cvafrik@gmail.com</a>
                     </div>
                   </div>
                 </CardContent>
@@ -96,7 +86,6 @@ export default async function SupportPage() {
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   )
 }
