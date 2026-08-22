@@ -27,9 +27,12 @@ export function Footer() {
   const { t } = useTranslation()
   const paymentMethods = [
     { name: t('footer.card'), color: 'bg-blue-600', icon: CreditCard },
-    { name: 'Orange Money', color: 'bg-orange-500' },
-    { name: 'MTN Money', color: 'bg-yellow-500' },
+    { name: 'Celltiis Cash', color: 'bg-emerald-600' },
+    { name: 'Coris Money', color: 'bg-red-700' },
     { name: 'Moov Money', color: 'bg-blue-700' },
+    { name: 'TMoney', color: 'bg-amber-400' },
+    { name: 'Mixx by Yas', color: 'bg-sky-700' },
+    { name: 'Wave', color: 'bg-sky-400' },
   ]
 
   return (

@@ -103,17 +103,19 @@ export function EditProfileForm({ initialProfile, userId }: EditProfileFormProps
       if (!user || user.id !== userId) throw new Error('Utilisateur non trouvé')
 
       const nextAvatarUrl = await uploadAvatar(supabase)
-      const { error: upsertError } = await supabase
+      const { data: updatedProfile, error: updateError } = await supabase
         .from('profiles')
-        .upsert({
-          id: userId,
-          email: user.email,
+        .update({
           ...formData,
           avatar_url: nextAvatarUrl,
           updated_at: new Date().toISOString(),
         })
+        .eq('id', userId)
+        .select('id')
+        .maybeSingle()
 
-      if (upsertError) throw upsertError
+      if (updateError) throw updateError
+      if (!updatedProfile) throw new Error('Profil introuvable. Réessaie après avoir rechargé la page.')
 
       const { error: authError } = await supabase.auth.updateUser({
         data: {
@@ -152,8 +154,8 @@ export function EditProfileForm({ initialProfile, userId }: EditProfileFormProps
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex flex-col gap-4 rounded-2xl border border-border/70 bg-muted/20 p-4 sm:flex-row sm:items-center">
-            <Avatar className="h-20 w-20 ring-4 ring-primary/10">
-              <AvatarImage src={avatarPreview || undefined} alt="Photo de profil" />
+            <Avatar className="h-24 w-24 shrink-0 rounded-2xl border border-primary/20 bg-muted ring-4 ring-primary/10">
+              <AvatarImage src={avatarPreview || undefined} alt="Photo de profil" className="h-full w-full object-cover object-center" />
               <AvatarFallback className="bg-primary/10 text-lg font-bold text-primary">{initials}</AvatarFallback>
             </Avatar>
             <div className="flex-1 space-y-1">

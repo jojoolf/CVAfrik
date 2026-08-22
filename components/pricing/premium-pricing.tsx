@@ -58,11 +58,12 @@ const PAYMENT_METHODS = [
     label: 'Mobile Money (FedaPay)',
     icon: Smartphone,
     badges: [
-      { name: 'Orange', color: 'bg-orange-500 text-white' },
-      { name: 'Wave', color: 'bg-sky-500 text-white' },
-      { name: 'Free', color: 'bg-red-600 text-white' },
-      { name: 'MTN', color: 'bg-yellow-400 text-black' },
-      { name: 'Moov', color: 'bg-blue-600 text-white' },
+      { name: 'Celltiis Cash', color: 'bg-emerald-600 text-white' },
+      { name: 'Coris Money', color: 'bg-red-700 text-white' },
+      { name: 'Moov Money', color: 'bg-blue-600 text-white' },
+      { name: 'TMoney', color: 'bg-amber-400 text-black' },
+      { name: 'Mixx by Yas', color: 'bg-sky-700 text-white' },
+      { name: 'Wave', color: 'bg-sky-400 text-slate-950' },
     ],
   },
   {
