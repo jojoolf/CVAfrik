@@ -24,14 +24,16 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import Image from 'next/image'
+import { ProfileImportDialog } from '../profile-import-dialog'
 
 interface StepPersonalInfoProps {
   data: CVDonnees
   onUpdate: (updates: Partial<CVDonnees>) => void
   plan: PlanConfig
+  onImport?: (data: CVDonnees) => void
 }
 
-export function StepPersonalInfo({ data, onUpdate, plan }: StepPersonalInfoProps) {
+export function StepPersonalInfo({ data, onUpdate, plan, onImport }: StepPersonalInfoProps) {
   const isFreePlan = plan.id === 'gratuit'
   const [isGeneratingBio, setIsGeneratingBio] = useState(false)
 
@@ -96,6 +98,12 @@ export function StepPersonalInfo({ data, onUpdate, plan }: StepPersonalInfoProps
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
+      {onImport && (
+        <div className="sm:hidden">
+          <ProfileImportDialog currentData={data} onApply={onImport} />
+        </div>
+      )}
+
       {/* Header Banner */}
       <div className="text-center space-y-1.5 pb-2">
         <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Informations Personnelles</h2>

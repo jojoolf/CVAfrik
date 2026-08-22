@@ -26,7 +26,6 @@ import {
   Sparkles
 } from 'lucide-react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import type { Profile, PlanConfig, CV, CVDonnees } from '@/lib/types'
 import { motion, AnimatePresence } from 'framer-motion'
 import { renderCvTemplate } from './templates/cv-preview-collection'
@@ -110,50 +109,47 @@ export function CVBuilderForm({
     setCvData(prev => ({ ...prev, ...updates }))
   }, [])
 
+  const applyImportedData = useCallback((data: CVDonnees) => {
+    setCvData(data)
+    const fullName = [data.informations_personnelles.prenom, data.informations_personnelles.nom].filter(Boolean).join(' ')
+    if (fullName) setCvTitle(`CV de ${fullName}`)
+    setCurrentStep(0)
+    toast.success('Profil importé : vérifie les informations avant de générer ton CV.')
+  }, [])
+
   const progress = Math.round(((currentStep + 1) / steps.length) * 100)
 
   const handleSave = async (redirect = false) => {
     setIsSaving(true)
 
     try {
-      const supabase = createClient()
-      
-      if (existingCV) {
-        const { error } = await supabase
-          .from('cvs')
-          .update({
-            titre: cvTitle,
-            donnees: cvData,
-            template,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', existingCV.id)
+      const response = await fetch('/api/cv/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cvId: existingCV?.id ?? null,
+          titre: cvTitle,
+          donnees: cvData,
+          template,
+        }),
+      })
+      const result = await response.json()
 
-        if (error) throw error
-        toast.success('CV mis à jour avec succès !')
-      } else {
-        const { error } = await supabase
-          .from('cvs')
-          .insert({
-            user_id: profile.id,
-            titre: cvTitle,
-            donnees: cvData,
-            template,
-          })
-
-        if (error) throw error
-
-        await supabase
-          .from('profiles')
-          .update({
-            cvs_generes_ce_mois: profile.cvs_generes_ce_mois + 1,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', profile.id)
-
-        toast.success('CV créé avec succès !')
+      if (!response.ok || !result.success) {
+        if (result.code === 'template_locked') {
+          toast.error('Ce modèle est réservé au plan Pro.')
+          router.push('/tarifs?locked=template')
+          return
+        }
+        if (result.code === 'cv_limit') {
+          toast.error('Votre limite mensuelle de CV est atteinte.')
+          router.push('/tarifs?locked=cv')
+          return
+        }
+        throw new Error(result.error || 'La sauvegarde a échoué.')
       }
 
+      toast.success(existingCV ? 'CV mis à jour avec succès !' : 'CV créé avec succès !')
       setLastSavedTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))
 
       if (redirect) {
@@ -247,16 +243,7 @@ export function CVBuilderForm({
           <div className="flex items-center gap-3">
             {!existingCV && (
               <div className="hidden sm:block">
-                <ProfileImportDialog
-                  currentData={cvData}
-                  onApply={(data) => {
-                    setCvData(data)
-                    const fullName = [data.informations_personnelles.prenom, data.informations_personnelles.nom].filter(Boolean).join(' ')
-                    if (fullName) setCvTitle(`CV de ${fullName}`)
-                    setCurrentStep(0)
-                    toast.success('Profil importé : vérifie les informations avant de générer ton CV.')
-                  }}
-                />
+                <ProfileImportDialog currentData={cvData} onApply={applyImportedData} />
               </div>
             )}
             {/* Status Indicator */}
@@ -391,6 +378,7 @@ export function CVBuilderForm({
                     data={cvData}
                     onUpdate={updateCVData}
                     plan={plan}
+                    onImport={applyImportedData}
                   />
                 )}
                 {currentStep === 1 && (

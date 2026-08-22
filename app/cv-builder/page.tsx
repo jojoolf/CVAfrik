@@ -4,6 +4,8 @@ import { CVBuilderForm } from '@/components/cv-builder/cv-builder-form'
 import { createClient } from '@/lib/supabase/server'
 import { checkAndGetProfile } from '@/lib/supabase/profile'
 import { PLANS } from '@/lib/types'
+import { getEffectivePlan } from '@/lib/subscription'
+import { templateCatalog } from '@/components/cv-builder/templates/cv-preview-collection'
 
 export const metadata: Metadata = {
   title: 'Creer mon CV',
@@ -30,8 +32,19 @@ export default async function CVBuilderPage({ searchParams }: PageProps) {
     redirect('/profil/modifier')
   }
 
-  // Get plan limits
-  const plan = PLANS.find(p => p.id === profile.plan) || PLANS[0]
+  // Get the effective subscription before granting access to paid templates.
+  const subscription = await getEffectivePlan(supabase, user.id)
+  const plan = PLANS.find(p => p.id === subscription.planId) || PLANS[0]
+
+  const requestedTemplate = params.template || 'moderne'
+  const templateExists = templateCatalog.some((item) => item.id === requestedTemplate)
+  const templateAllowed = templateExists && (
+    plan.limites.templates.includes('all') || plan.limites.templates.includes(requestedTemplate)
+  )
+
+  if (!templateAllowed) {
+    redirect('/tarifs?locked=template')
+  }
 
   // Check if editing existing CV
   let existingCV = null
@@ -60,7 +73,7 @@ export default async function CVBuilderPage({ searchParams }: PageProps) {
       plan={plan}
       existingCV={existingCV}
       canCreate={canCreate}
-      selectedTemplate={params.template || 'moderne'}
+      selectedTemplate={requestedTemplate}
     />
   )
 }
