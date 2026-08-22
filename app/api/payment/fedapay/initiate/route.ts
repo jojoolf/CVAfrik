@@ -16,6 +16,25 @@ const DURATION_AMOUNTS: Record<string, number> = {
   '6m': 11000,
 }
 
+function findTransactionId(payload: unknown): string | null {
+  if (!payload || typeof payload !== 'object') return null
+
+  if (Array.isArray(payload)) {
+    return findTransactionId(payload[0])
+  }
+
+  const value = payload as Record<string, unknown>
+  const directId = parseFedaPayTransactionId(value.id)
+  if (directId) return directId
+
+  for (const key of ['entity', 'data', 'transaction', 'v1', 'response']) {
+    const nestedId = findTransactionId(value[key])
+    if (nestedId) return nestedId
+  }
+
+  return null
+}
+
 export async function POST(req: NextRequest) {
   try {
     const supabase = await createClient()
@@ -110,14 +129,7 @@ export async function POST(req: NextRequest) {
     })
 
     const transactionData = await transactionResponse.json().catch(() => null)
-    const transactionId = parseFedaPayTransactionId(
-      transactionData?.id
-        ?? transactionData?.data?.id
-        ?? transactionData?.transaction?.id
-        ?? transactionData?.data?.transaction?.id
-        ?? transactionData?.entity?.id
-        ?? transactionData?.v1?.transaction?.id,
-    )
+    const transactionId = findTransactionId(transactionData)
 
     if (!transactionResponse.ok || !transactionId) {
       console.error('FedaPay Transaction Error:', JSON.stringify(transactionData, null, 2))
