@@ -115,6 +115,7 @@ export async function POST(req: NextRequest) {
         ?? transactionData?.data?.id
         ?? transactionData?.transaction?.id
         ?? transactionData?.data?.transaction?.id
+        ?? transactionData?.entity?.id
         ?? transactionData?.v1?.transaction?.id,
     )
 
