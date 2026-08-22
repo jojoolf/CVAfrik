@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Pencil, Trash2, Loader2, MoreVertical } from 'lucide-react'
 import { toast } from 'sonner'
@@ -40,22 +39,17 @@ export function AdminPostItem({ post }: AdminPostItemProps) {
 
   const handleDelete = async () => {
     setLoading(true)
-    const supabase = createClient()
-    
     try {
-      const { data, error } = await supabase
-        .from('blog_posts')
-        .delete()
-        .eq('id', post.id)
-        .select()
+      const response = await fetch(`/api/admin/posts/${post.id}`, {
+        method: 'DELETE',
+      })
+      const result = await response.json().catch(() => null)
 
-      if (error) throw error
-
-      if (!data || data.length === 0) {
-        throw new Error("Suppression refusée par la base de données. L'article n'a pas été supprimé. Vérifie les règles RLS de Supabase.")
+      if (!response.ok) {
+        throw new Error(result?.error || 'La suppression de l’article a échoué.')
       }
 
-      toast.success('Article supprimé')
+      toast.success('Article supprimé avec succès.')
       router.refresh()
     } catch (error: any) {
       toast.error(error.message || 'Erreur lors de la suppression')

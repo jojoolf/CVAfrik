@@ -1,66 +1,136 @@
-import { createClient } from '@/lib/supabase/server'
-import { Button } from '@/components/ui/button'
-import { Activity, ArrowUpRight, BarChart3, CreditCard, FileText, Mail, PenLine, ShieldCheck, Users } from 'lucide-react'
 import Link from 'next/link'
+import {
+  Activity,
+  ArrowRight,
+  ArrowUpRight,
+  BarChart3,
+  FilePlus2,
+  FileText,
+  Mail,
+  PenLine,
+  ScrollText,
+  Sparkles,
+  Users,
+} from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { createClient } from '@/lib/supabase/server'
 import { AdminPostItem } from '@/components/admin/admin-post-item'
-
-const ADMIN_EMAILS = ['nokejoel@gmail.com', 'jojoolf@gmail.com']
 
 export default async function AdminPage() {
   const supabase = await createClient()
-  const [userResult, usersResult, postsResult, subscribersResult, pendingResult, recentPostsResult, logsResult] = await Promise.all([
+  const [userResult, usersResult, cvsResult, postsResult, subscribersResult, recentPostsResult, logsResult] = await Promise.all([
     supabase.auth.getUser(),
     supabase.from('profiles').select('*', { count: 'exact', head: true }),
+    supabase.from('cvs').select('*', { count: 'exact', head: true }),
     supabase.from('blog_posts').select('*', { count: 'exact', head: true }),
     supabase.from('newsletter_subscribers').select('*', { count: 'exact', head: true }),
-    supabase.from('manual_payments').select('*', { count: 'exact', head: true }).eq('statut', 'en_attente'),
-    supabase.from('blog_posts').select('*').order('created_at', { ascending: false }).limit(5),
-    supabase.from('admin_logs').select('action, admin_email, created_at').order('created_at', { ascending: false }).limit(4),
+    supabase.from('blog_posts').select('id, titre, categorie, publie, created_at').order('created_at', { ascending: false }).limit(6),
+    supabase.from('admin_logs').select('action, admin_email, created_at').order('created_at', { ascending: false }).limit(5),
   ])
 
   const user = userResult.data.user
-  const usersCount = usersResult.count || 0
-  const postsCount = postsResult.count || 0
-  const subscribersCount = subscribersResult.count || 0
-  const pendingPaymentsCount = pendingResult.count || 0
   const posts = recentPostsResult.data || []
   const logs = logsResult.data || []
+  const firstName = user?.user_metadata?.prenom || user?.user_metadata?.first_name || 'Admin'
+
   const metrics = [
-    { label: 'Utilisateurs', value: usersCount, detail: 'comptes inscrits', icon: Users, tone: 'text-sky-600 bg-sky-50 dark:bg-sky-950/40' },
-    { label: 'Paiements en attente', value: pendingPaymentsCount, detail: pendingPaymentsCount ? 'à traiter maintenant' : 'aucune action urgente', icon: CreditCard, tone: pendingPaymentsCount ? 'text-amber-600 bg-amber-50 dark:bg-amber-950/40' : 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40' },
-    { label: 'Articles publiés', value: postsCount, detail: 'contenus dans le blog', icon: FileText, tone: 'text-violet-600 bg-violet-50 dark:bg-violet-950/40' },
-    { label: 'Newsletter', value: subscribersCount, detail: 'abonnés actifs', icon: Mail, tone: 'text-rose-600 bg-rose-50 dark:bg-rose-950/40' },
-  ]
-  const quickLinks: Array<{ href: string; label: string; detail: string; icon: typeof Activity }> = [
-    { href: '/admin/statistiques', label: 'Statistiques', detail: 'Suivre les indicateurs clés', icon: BarChart3 },
-    { href: '/admin/paiements', label: 'Paiements', detail: pendingPaymentsCount ? `${pendingPaymentsCount} demande(s) à traiter` : 'Tout est à jour', icon: CreditCard },
-    { href: '/admin/logs', label: 'Journal d’activité', detail: 'Voir les dernières actions', icon: Activity },
+    { label: 'Utilisateurs', value: usersResult.count || 0, detail: 'comptes créés', icon: Users, tone: 'text-sky-300 bg-sky-400/10 ring-sky-400/20' },
+    { label: 'CV créés', value: cvsResult.count || 0, detail: 'documents enregistrés', icon: FileText, tone: 'text-emerald-300 bg-emerald-400/10 ring-emerald-400/20' },
+    { label: 'Contenus', value: postsResult.count || 0, detail: 'articles et opportunités', icon: PenLine, tone: 'text-violet-300 bg-violet-400/10 ring-violet-400/20' },
+    { label: 'Newsletter', value: subscribersResult.count || 0, detail: 'abonnés actifs', icon: Mail, tone: 'text-rose-300 bg-rose-400/10 ring-rose-400/20' },
   ]
 
   return (
-    <div className="min-h-screen bg-slate-950 px-4 py-8 text-white sm:px-6 lg:px-8">
+    <div className="min-h-full px-4 py-6 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        <section className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-slate-900 via-slate-900 to-primary/20 p-6 shadow-2xl sm:p-9">
-          <div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
-          <div className="relative flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
+        <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900 via-slate-900 to-primary/20 p-6 shadow-2xl sm:p-8">
+          <div className="absolute -right-20 -top-24 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
+          <div className="absolute bottom-0 left-1/3 h-32 w-64 rounded-full bg-violet-500/10 blur-3xl" />
+          <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <div className="mb-4 flex items-center gap-2 text-xs font-black uppercase tracking-[0.25em] text-primary"><ShieldCheck className="h-4 w-4" /> Centre de contrôle</div>
-              <h1 className="max-w-2xl text-3xl font-black tracking-tight sm:text-5xl">Bonjour, {user?.user_metadata?.first_name || 'Admin'}.</h1>
-              <p className="mt-3 max-w-xl text-sm leading-6 text-slate-300">Pilote les paiements, le contenu et la croissance de CVAfrik depuis un seul espace.</p>
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-black uppercase tracking-[0.16em] text-primary">
+                <Sparkles className="h-3.5 w-3.5" /> Tableau de bord
+              </div>
+              <h1 className="text-3xl font-black tracking-tight text-white sm:text-4xl">Bonjour, {firstName}.</h1>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">Gère le contenu, observe la croissance de CVAfrik et garde une vue claire sur l’activité de la plateforme.</p>
             </div>
-            <div className="flex flex-wrap gap-3"><Button asChild className="rounded-xl bg-primary font-black text-primary-foreground hover:bg-primary/90"><Link href="/admin/paiements"><CreditCard className="mr-2 h-4 w-4" /> Voir les paiements</Link></Button><Button asChild variant="outline" className="rounded-xl border-white/15 bg-white/5 font-bold text-white hover:bg-white/10 hover:text-white"><Link href="/admin/blog/nouveau"><PenLine className="mr-2 h-4 w-4" /> Nouvel article</Link></Button></div>
+            <div className="flex flex-wrap gap-3">
+              <Button asChild className="rounded-xl bg-primary font-bold text-primary-foreground hover:bg-primary/90">
+                <Link href="/admin/blog/nouveau"><FilePlus2 className="mr-2 h-4 w-4" /> Nouveau contenu</Link>
+              </Button>
+              <Button asChild variant="outline" className="rounded-xl border-white/15 bg-white/5 font-bold text-white hover:bg-white/10 hover:text-white">
+                <Link href="/admin/statistiques"><BarChart3 className="mr-2 h-4 w-4" /> Voir les statistiques</Link>
+              </Button>
+            </div>
           </div>
         </section>
 
         <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {metrics.map(({ label, value, detail, icon: Icon, tone }) => <div key={label} className="rounded-2xl border border-white/10 bg-slate-900/80 p-5 shadow-xl"><div className="flex items-start justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-wider text-slate-400">{label}</p><p className="mt-3 text-3xl font-black">{value.toLocaleString()}</p></div><div className={`rounded-xl p-3 ${tone}`}><Icon className="h-5 w-5" /></div></div><p className="mt-3 text-xs text-slate-500">{detail}</p></div>)}
+          {metrics.map(({ label, value, detail, icon: Icon, tone }) => (
+            <article key={label} className="rounded-2xl border border-white/10 bg-slate-900/80 p-5 shadow-xl shadow-black/10">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wider text-slate-400">{label}</p>
+                  <p className="mt-3 text-3xl font-black text-white">{value.toLocaleString('fr-FR')}</p>
+                </div>
+                <span className={`rounded-xl p-3 ring-1 ${tone}`}><Icon className="h-5 w-5" /></span>
+              </div>
+              <p className="mt-3 text-xs text-slate-500">{detail}</p>
+            </article>
+          ))}
         </section>
 
         <div className="mt-6 grid gap-6 lg:grid-cols-[1.35fr_0.65fr]">
-          <section className="overflow-hidden rounded-2xl border border-white/10 bg-slate-900/80"><div className="flex items-center justify-between border-b border-white/10 px-5 py-4"><div><h2 className="font-black">Contenu récent</h2><p className="mt-1 text-xs text-slate-500">Les derniers articles et offres ajoutés.</p></div><Button asChild variant="ghost" size="sm" className="text-primary hover:bg-primary/10 hover:text-primary"><Link href="/admin/blog/nouveau">Ajouter <ArrowUpRight className="ml-1 h-4 w-4" /></Link></Button></div><div className="divide-y divide-white/10">{posts.map(post => <AdminPostItem key={post.id} post={post} />)}{posts.length === 0 && <div className="p-10 text-center text-sm text-slate-500">Aucun contenu pour le moment.</div>}</div></section>
-          <section className="rounded-2xl border border-white/10 bg-slate-900/80 p-5"><div className="flex items-center justify-between"><div><h2 className="font-black">Accès rapide</h2><p className="mt-1 text-xs text-slate-500">Les outils de gestion.</p></div><Activity className="h-5 w-5 text-primary" /></div><div className="mt-5 space-y-3">{quickLinks.map(({ href, label, detail, icon: ActionIcon }) => <Link key={href} href={href} className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-3 transition hover:border-primary/50 hover:bg-primary/5"><span className="rounded-lg bg-primary/10 p-2 text-primary"><ActionIcon className="h-4 w-4" /></span><span className="min-w-0"><span className="block text-sm font-bold">{label}</span><span className="block truncate text-xs text-slate-500">{detail}</span></span><ArrowUpRight className="ml-auto h-4 w-4 text-slate-500" /></Link>)}</div><div className="mt-7 border-t border-white/10 pt-5"><p className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-500">Activité récente</p>{logs.length ? logs.map(log => <div key={`${log.created_at}-${log.action}`} className="flex items-center justify-between gap-3 py-2 text-xs"><span className="truncate text-slate-300">{log.action.replaceAll('_', ' ')}</span><span className="shrink-0 text-slate-600">{new Date(log.created_at).toLocaleDateString('fr-FR')}</span></div>) : <p className="text-sm text-slate-600">Aucune activité enregistrée.</p>}</div></section>
+          <section className="overflow-hidden rounded-2xl border border-white/10 bg-slate-900/80 shadow-xl shadow-black/10">
+            <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
+              <div>
+                <h2 className="font-black text-white">Contenu récent</h2>
+                <p className="mt-1 text-xs text-slate-500">Derniers articles, offres et opportunités publiés.</p>
+              </div>
+              <Button asChild variant="ghost" size="sm" className="text-primary hover:bg-primary/10 hover:text-primary">
+                <Link href="/admin/blog/nouveau">Créer <ArrowUpRight className="ml-1 h-4 w-4" /></Link>
+              </Button>
+            </div>
+            <div className="divide-y divide-white/10">
+              {posts.map((post) => <AdminPostItem key={post.id} post={post} />)}
+              {posts.length === 0 && <div className="p-10 text-center text-sm text-slate-500">Aucun contenu pour le moment.</div>}
+            </div>
+          </section>
+
+          <aside className="space-y-6">
+            <section className="rounded-2xl border border-white/10 bg-slate-900/80 p-5 shadow-xl shadow-black/10">
+              <div className="flex items-center gap-2"><Activity className="h-5 w-5 text-primary" /><h2 className="font-black text-white">Actions rapides</h2></div>
+              <div className="mt-4 space-y-2">
+                <AdminAction href="/admin/blog/nouveau" icon={PenLine} title="Publier un contenu" detail="Article, offre ou opportunité" />
+                <AdminAction href="/admin/statistiques" icon={BarChart3} title="Consulter les statistiques" detail="Suivre les indicateurs de la plateforme" />
+                <AdminAction href="/admin/logs" icon={ScrollText} title="Voir le journal" detail="Contrôler les actions administratives" />
+              </div>
+            </section>
+
+            <section className="rounded-2xl border border-white/10 bg-slate-900/80 p-5 shadow-xl shadow-black/10">
+              <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Activité récente</p>
+              <div className="mt-3 space-y-1">
+                {logs.length ? logs.map((log) => (
+                  <div key={`${log.created_at}-${log.action}`} className="flex items-center justify-between gap-3 border-b border-white/5 py-2 last:border-0">
+                    <span className="truncate text-xs text-slate-300">{log.action.replaceAll('_', ' ')}</span>
+                    <span className="shrink-0 text-[11px] text-slate-600">{new Date(log.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}</span>
+                  </div>
+                )) : <p className="py-3 text-sm text-slate-600">Aucune activité enregistrée.</p>}
+              </div>
+            </section>
+          </aside>
         </div>
       </div>
     </div>
+  )
+}
+
+function AdminAction({ href, icon: Icon, title, detail }: { href: string; icon: typeof Activity; title: string; detail: string }) {
+  return (
+    <Link href={href} className="group flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-3 transition hover:border-primary/50 hover:bg-primary/5">
+      <span className="rounded-lg bg-primary/10 p-2 text-primary"><Icon className="h-4 w-4" /></span>
+      <span className="min-w-0"><span className="block text-sm font-bold text-white">{title}</span><span className="block truncate text-xs text-slate-500">{detail}</span></span>
+      <ArrowRight className="ml-auto h-4 w-4 text-slate-500 transition group-hover:translate-x-0.5 group-hover:text-primary" />
+    </Link>
   )
 }
