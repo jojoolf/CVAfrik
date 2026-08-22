@@ -100,6 +100,7 @@ export function CVBuilderForm({
         telephone: profile.telephone || '',
         adresse: profile.adresse || '',
         linkedin: profile.linkedin || '',
+        photo: profile.avatar_url || '',
       },
     }
   )

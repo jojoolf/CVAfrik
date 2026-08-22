@@ -1,268 +1,79 @@
-"use client";
+'use client'
 
-import React, { useState } from "react";
-import ClassicTemplate from "@/components/templates/ClassicTemplate";
-import ModernTemplate from "@/components/templates/ModernTemplate";
-import { CVPreviewPremiumFinance } from "@/components/cv-builder/templates/cv-preview-premium-finance";
-import { CVPreviewPremiumTech } from "@/components/cv-builder/templates/cv-preview-premium-tech";
-import { CVPreviewPremiumMarketing } from "@/components/cv-builder/templates/cv-preview-premium-marketing";
-import { CVPreviewPremiumStudent } from "@/components/cv-builder/templates/cv-preview-premium-student";
-import { CVPreviewPremiumExecutive } from "@/components/cv-builder/templates/cv-preview-premium-executive";
-import { Navbar } from "@/components/layout/navbar";
-import { Footer } from "@/components/layout/footer";
-import { Layout, Grid, List, Sparkles, ChevronLeft, ChevronRight, Download, Eye, Lock } from "lucide-react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import type { CVDonnees } from "@/lib/types";
+import Image from 'next/image'
+import Link from 'next/link'
+import { useMemo, useState } from 'react'
+import { ArrowRight, CheckCircle2, Eye, Lock, Sparkles } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Footer } from '@/components/layout/footer'
+import { Navbar } from '@/components/layout/navbar'
+import { renderCvTemplate, templateCatalog, type TemplateCatalogItem } from '@/components/cv-builder/templates/cv-preview-collection'
+import type { CVDonnees } from '@/lib/types'
 
-const mockDataLegacy = {
-  profile: {
-    first_name: "Amina",
-    last_name: "Coulibaly",
-    title: "Juriste d'Affaires Senior",
-    email: "amina.coulibaly@email.com",
-    phone: "+228 90 00 00 00",
-    address: "Lomé, Togo",
-    summary: "Juriste passionnée avec plus de 8 ans d'expérience dans le conseil juridique aux entreprises en Afrique. Spécialisée en droit OHADA, contrats commerciaux et conformité réglementaire. Excellente capacité d'analyse et de négociation.",
-  },
+const previewData: CVDonnees = {
+  informations_personnelles: { prenom: 'Amina', nom: 'Kouassi', email: 'amina.kouassi@email.com', telephone: '+225 07 12 34 56 78', adresse: 'Abidjan, Côte d’Ivoire', linkedin: 'linkedin.com/in/amina-kouassi' },
+  titre_professionnel: 'Product & Marketing Specialist',
+  resume: 'Professionnelle orientée résultats, avec une expérience en stratégie produit, marketing digital et croissance de marques ambitieuses en Afrique.',
   experiences: [
-    {
-      company: "Cabinet Juridique & Co",
-      role: "Responsable Juridique",
-      period: "2019 - Présent",
-      description: "• Supervision de la conformité légale pour plus de 50 clients corporatifs.\n• Rédaction et négociation de contrats complexes internationaux.\n• Gestion des litiges commerciaux et représentation devant les tribunaux.",
-    },
-    {
-      company: "Africa Bank Group",
-      role: "Conseiller Juridique Junior",
-      period: "2015 - 2019",
-      description: "• Revue des garanties bancaires et des contrats de prêt.\n• Veille juridique sur les évolutions réglementaires de la BCEAO.\n• Support au secrétariat du conseil d'administration.",
-    },
+    { id: '1', poste: 'Product & Marketing Lead', entreprise: 'PayTech Africa', ville: 'Abidjan', pays: 'Côte d’Ivoire', date_debut: '2021-01', date_fin: '', en_cours: true, description: 'Pilotage de la stratégie produit et de la croissance digitale.', realisations: ['Lancement de produits à fort impact.', 'Hausse de 35% de l’adoption utilisateur.'] },
+    { id: '2', poste: 'Growth Marketing Manager', entreprise: 'Innova Solutions', ville: 'Abidjan', pays: 'Côte d’Ivoire', date_debut: '2018-03', date_fin: '2020-12', en_cours: false, description: 'Conception de campagnes d’acquisition et d’activation.', realisations: ['Optimisation des performances marketing.'] },
   ],
-  education: [
-    {
-      school: "Université de Lomé",
-      degree: "Master 2 en Droit des Affaires",
-      year: "2015",
-    },
-    {
-      school: "Université de Dakar",
-      degree: "Licence en Droit Privé",
-      year: "2013",
-    },
-  ],
-  skills: ["Droit OHADA", "Contrats Internationaux", "Négociation", "Arbitrage", "Conformité", "Anglais Juridique"],
-};
-
-const mockDataV2: CVDonnees = {
-  informations_personnelles: {
-    prenom: "Amina",
-    nom: "Coulibaly",
-    email: "amina.coulibaly@email.com",
-    telephone: "+228 90 00 00 00",
-    adresse: "Lomé, Togo",
-    linkedin: "linkedin.com/in/amina-coulibaly",
-  },
-  titre_professionnel: "Juriste d'Affaires Senior",
-  resume: "Juriste passionnée avec plus de 8 ans d'expérience dans le conseil juridique aux entreprises en Afrique. Spécialisée en droit OHADA, contrats commerciaux et conformité réglementaire. Excellente capacité d'analyse et de négociation.",
-  experiences: [
-    {
-      id: "1",
-      poste: "Responsable Juridique",
-      entreprise: "Cabinet Juridique & Co",
-      ville: "Lomé",
-      pays: "Togo",
-      date_debut: "2019-01",
-      date_fin: "",
-      en_cours: true,
-      description: "Supervision de la conformité légale pour plus de 50 clients corporatifs.",
-      realisations: [
-        "Rédaction et négociation de contrats complexes internationaux.",
-        "Gestion des litiges commerciaux et représentation devant les tribunaux."
-      ]
-    },
-    {
-      id: "2",
-      poste: "Conseiller Juridique Junior",
-      entreprise: "Africa Bank Group",
-      ville: "Dakar",
-      pays: "Sénégal",
-      date_debut: "2015-06",
-      date_fin: "2019-12",
-      en_cours: false,
-      description: "Revue des garanties bancaires et des contrats de prêt.",
-      realisations: [
-        "Veille juridique sur les évolutions réglementaires de la BCEAO.",
-        "Support au secrétariat du conseil d'administration."
-      ]
-    }
-  ],
-  formations: [
-    {
-      id: "1",
-      diplome: "Master 2 en Droit des Affaires",
-      etablissement: "Université de Lomé",
-      ville: "Lomé",
-      pays: "Togo",
-      date_debut: "2013-10",
-      date_fin: "2015-07",
-      en_cours: false
-    },
-    {
-      id: "2",
-      diplome: "Licence en Droit Privé",
-      etablissement: "Université de Dakar",
-      ville: "Dakar",
-      pays: "Sénégal",
-      date_debut: "2010-10",
-      date_fin: "2013-07",
-      en_cours: false
-    }
-  ],
-  competences: [
-    { id: "1", nom: "Droit OHADA", niveau: "expert", categorie: "technique" },
-    { id: "2", nom: "Contrats Internationaux", niveau: "expert", categorie: "technique" },
-    { id: "3", nom: "Négociation", niveau: "avance", categorie: "technique" },
-    { id: "4", nom: "Conformité", niveau: "avance", categorie: "technique" }
-  ],
-  langues: [
-    { id: "1", nom: "Français", niveau: "natif" },
-    { id: "2", nom: "Anglais", niveau: "courant" }
-  ],
-  certifications: [
-    { id: "1", nom: "Certification Conformité Africaine", organisme: "Institut de Conformité", date_obtention: "2020-11" }
-  ]
-};
-
-const templates = [
-  { id: "classic", name: "Classique Professional", component: ClassicTemplate, desc: "Sobre, élégant et intemporel.", isPremium: false, isNewV2: false },
-  { id: "modern", name: "Modern Sidebar", component: ModernTemplate, desc: "Contemporain, dynamique et structuré.", isPremium: false, isNewV2: false },
-  { id: "premium_finance", name: "Premium Finance", component: CVPreviewPremiumFinance, desc: "Design marine et or, parfait pour la banque et finance.", isPremium: true, isNewV2: true },
-  { id: "premium_tech", name: "Premium Tech", component: CVPreviewPremiumTech, desc: "Design moderne avec dégradés pour profils tech.", isPremium: true, isNewV2: true },
-  { id: "premium_marketing", name: "Premium Marketing", component: CVPreviewPremiumMarketing, desc: "Créatif avec dégradé et frise chronologique.", isPremium: true, isNewV2: true },
-  { id: "premium_student", name: "Premium Student", component: CVPreviewPremiumStudent, desc: "Valorise la formation, idéal étudiants et jeunes diplômés.", isPremium: true, isNewV2: true },
-  { id: "premium_executive", name: "Premium Executive", component: CVPreviewPremiumExecutive, desc: "Thème sombre luxueux avec accents dorés pour directeurs.", isPremium: true, isNewV2: true }
-];
+  formations: [{ id: '1', diplome: 'Master Marketing & Stratégie', etablissement: 'Université de Cocody', ville: 'Abidjan', pays: 'Côte d’Ivoire', date_debut: '2015-10', date_fin: '2017-07', en_cours: false }],
+  competences: [{ id: '1', nom: 'Stratégie produit', niveau: 'expert', categorie: 'technique' }, { id: '2', nom: 'Marketing digital', niveau: 'avance', categorie: 'technique' }, { id: '3', nom: 'Analyse de données', niveau: 'avance', categorie: 'technique' }],
+  langues: [{ id: '1', nom: 'Français', niveau: 'natif' }, { id: '2', nom: 'Anglais', niveau: 'courant' }],
+  certifications: [],
+}
 
 export default function TemplatesPage() {
-  const [selectedTemplate, setSelectedTemplate] = useState(templates[0]);
-  const [viewMode, setViewMode] = useState<"desktop" | "mobile">("desktop");
+  const [filter, setFilter] = useState<'Tous' | 'Gratuit' | 'Pro'>('Tous')
+  const [selectedTemplate, setSelectedTemplate] = useState<TemplateCatalogItem>(templateCatalog[0])
 
-  const ActiveTemplate = selectedTemplate.component as any;
+  const templates = useMemo(
+    () => filter === 'Tous' ? templateCatalog : templateCatalog.filter((template) => template.category === filter),
+    [filter],
+  )
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="flex min-h-screen flex-col bg-[#090b12] text-white">
       <Navbar />
-      <main className="flex-1 pt-12 pb-20">
-        <div className="container mx-auto px-4">
-          <header className="flex flex-col md:flex-row justify-between items-end mb-12 gap-8">
-            <div className="max-w-xl">
-              <div className="inline-flex items-center gap-2 text-primary bg-primary/10 px-4 py-2 rounded-full text-sm font-bold uppercase tracking-widest mb-4">
-                <Sparkles size={16} /> Nos Templates
-              </div>
-              <h1 className="text-4xl md:text-5xl font-black text-foreground mb-4">Choisissez votre style</h1>
-              <p className="text-muted-foreground leading-relaxed">
-                Chaque template a été validé par des experts RH pour maximiser vos chances de recrutement en Afrique.
-              </p>
-            </div>
-
-            <div className="flex flex-wrap bg-muted p-1.5 rounded-2xl border border-border gap-1 max-w-full">
-              {templates.map((t) => (
-                <button
-                  key={t.id}
-                  onClick={() => setSelectedTemplate(t)}
-                  className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center gap-1.5 ${
-                    selectedTemplate.id === t.id 
-                      ? "bg-background text-foreground shadow-sm" 
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {t.name}
-                  {t.isPremium && (
-                    <span className="bg-amber-500 text-black text-[9px] font-extrabold px-1.5 py-0.5 rounded-md flex items-center gap-0.5">
-                      <Lock size={8} /> PREM
-                    </span>
-                  )}
-                </button>
-              ))}
-            </div>
-          </header>
-
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-            {/* Controls Panel */}
-            <aside className="lg:col-span-3 space-y-6">
-              <div className="bg-muted/30 border border-border rounded-3xl p-8">
-                <h3 className="font-black text-foreground mb-6 flex items-center gap-2">
-                  <Layout size={18} className="text-primary" /> Options
-                </h3>
-                
-                <div className="space-y-4">
-                  <Button variant="outline" className="w-full justify-between h-14 rounded-2xl group border-border/60">
-                    <div className="flex items-center gap-3">
-                      <Download size={18} className="text-muted-foreground group-hover:text-primary" />
-                      <span className="text-sm font-bold">Exporter PDF</span>
-                    </div>
-                    <ChevronRight size={16} className="text-muted-foreground" />
-                  </Button>
-                  <Button variant="outline" className="w-full justify-between h-14 rounded-2xl group border-border/60">
-                    <div className="flex items-center gap-3">
-                      <Eye size={18} className="text-muted-foreground group-hover:text-primary" />
-                      <span className="text-sm font-bold">Mode Aperçu</span>
-                    </div>
-                    <ChevronRight size={16} className="text-muted-foreground" />
-                  </Button>
-                </div>
-              </div>
-
-              <div className="bg-primary text-primary-foreground rounded-3xl p-8 shadow-2xl shadow-primary/20">
-                <h4 className="font-black mb-2">Plan Premium</h4>
-                <p className="text-primary-foreground/80 text-xs mb-6 leading-relaxed">
-                  Débloquez tous nos templates exclusifs et le scoring IA en passant au plan Premium.
-                </p>
-                <Button variant="secondary" className="w-full font-black text-xs h-11" asChild>
-                  <Link href="/tarifs">Mettre à niveau</Link>
-                </Button>
-              </div>
-            </aside>
-
-            {/* Preview Panel */}
-            <div className="lg:col-span-9">
-              <div className="bg-muted/20 border border-border rounded-[2.5rem] p-4 md:p-12 overflow-hidden shadow-sm">
-                <div className="flex justify-between items-center mb-8">
-                  <p className="text-xs text-muted-foreground font-semibold italic max-w-xs sm:max-w-md">
-                    {selectedTemplate.desc}
-                  </p>
-                  <div className="bg-muted p-1 rounded-xl flex border border-border">
-                    <button 
-                      onClick={() => setViewMode("desktop")}
-                      className={`p-2 rounded-lg transition-all ${viewMode === "desktop" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"}`}
-                    >
-                      <Grid size={18} />
-                    </button>
-                    <button 
-                      onClick={() => setViewMode("mobile")}
-                      className={`p-2 rounded-lg transition-all ${viewMode === "mobile" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"}`}
-                    >
-                      <List size={18} />
-                    </button>
-                  </div>
-                </div>
-
-                <div className={`transition-all duration-500 mx-auto ${viewMode === "mobile" ? "max-w-[400px]" : "max-w-[800px]"}`}>
-                  <div className="transform scale-[0.6] md:scale-100 origin-top">
-                    {selectedTemplate.isNewV2 ? (
-                      <ActiveTemplate data={mockDataV2} showWatermark={true} />
-                    ) : (
-                      <ActiveTemplate data={mockDataLegacy} />
-                    )}
-                  </div>
-                </div>
-              </div>
+      <main className="flex-1 pt-28 pb-20">
+        <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-[#1c1010] via-[#111318] to-[#0b1225] px-6 py-12 sm:px-10 lg:px-14">
+            <div className="absolute -right-32 -top-36 h-96 w-96 rounded-full bg-orange-500/15 blur-3xl" />
+            <div className="absolute -bottom-44 left-1/3 h-80 w-80 rounded-full bg-blue-600/15 blur-3xl" />
+            <div className="relative max-w-3xl">
+              <div className="inline-flex items-center gap-2 rounded-full border border-orange-400/20 bg-orange-400/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-orange-300"><Sparkles className="h-3.5 w-3.5" /> Collection CVAfrik</div>
+              <h1 className="mt-5 text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">Des modèles qui donnent <span className="bg-gradient-to-r from-amber-300 to-orange-500 bg-clip-text text-transparent">envie de postuler.</span></h1>
+              <p className="mt-5 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">Choisis parmi 15 designs conçus pour valoriser chaque parcours. Commence gratuitement, puis débloque les styles Pro qui mettent en avant ton expertise, tes projets et ton impact.</p>
+              <div className="mt-7 flex flex-wrap gap-3 text-sm text-slate-300"><span className="inline-flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-emerald-400" /> 3 modèles gratuits</span><span className="inline-flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-orange-400" /> 12 modèles Pro</span></div>
             </div>
           </div>
-        </div>
+
+          <div className="mt-10 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+            <div><h2 className="text-2xl font-black">Trouve ton style</h2><p className="mt-1 text-sm text-slate-400">Chaque modèle utilise les informations de ton CV automatiquement.</p></div>
+            <div className="flex rounded-xl border border-white/10 bg-white/[0.04] p-1">
+              {(['Tous', 'Gratuit', 'Pro'] as const).map((item) => <button key={item} onClick={() => setFilter(item)} className={`rounded-lg px-4 py-2 text-sm font-bold transition ${filter === item ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20' : 'text-slate-400 hover:text-white'}`}>{item === 'Tous' ? `Tous (${templateCatalog.length})` : item === 'Gratuit' ? 'Gratuits (3)' : 'Pro (12)'}</button>)}
+            </div>
+          </div>
+
+          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {templates.map((template) => {
+              const isPro = template.category === 'Pro'
+              const isActive = selectedTemplate.id === template.id
+              return <button key={template.id} onClick={() => setSelectedTemplate(template)} className={`group overflow-hidden rounded-2xl border text-left transition duration-300 ${isActive ? 'border-orange-400 ring-2 ring-orange-400/30' : 'border-white/10 bg-white/[0.03] hover:-translate-y-1 hover:border-orange-400/50 hover:bg-white/[0.05]'}`}>
+                <div className="relative aspect-[3/4] overflow-hidden bg-slate-900"><Image src={template.previewImage} alt={`Template ${template.name}`} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw" className="object-cover object-top transition duration-500 group-hover:scale-105" /><div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/80 to-transparent" />{isPro && <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-orange-500 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-white"><Lock className="h-3 w-3" /> Pro</span>}<span className="absolute bottom-3 left-3 text-sm font-black text-white">{template.name}</span></div>
+                <div className="flex items-center justify-between gap-2 p-4"><div><p className="text-sm font-bold text-white">{template.description}</p><p className="mt-1 text-xs text-slate-500">{isPro ? 'Disponible avec CVAfrik Pro' : 'Disponible gratuitement'}</p></div><Eye className="h-4 w-4 shrink-0 text-slate-500 transition group-hover:text-orange-400" /></div>
+              </button>
+            })}
+          </div>
+
+          <section className="mt-16 grid gap-8 rounded-3xl border border-white/10 bg-white/[0.03] p-5 lg:grid-cols-[340px_minmax(0,1fr)] lg:p-8">
+            <div className="flex flex-col justify-between"><div><span className="inline-flex rounded-full bg-orange-500/10 px-3 py-1 text-xs font-black uppercase tracking-wide text-orange-300">Aperçu dynamique</span><h2 className="mt-4 text-3xl font-black">{selectedTemplate.name}</h2><p className="mt-3 leading-6 text-slate-400">{selectedTemplate.description}. Lorsque tu remplis ton CV, tes coordonnées, expériences, formations, compétences et langues s’affichent dans ce design.</p></div><div className="mt-8 space-y-3"><Button asChild className="w-full bg-orange-500 font-bold text-white hover:bg-orange-400"><Link href={`/cv-builder?template=${selectedTemplate.id}`}>Utiliser ce modèle <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>{selectedTemplate.category === 'Pro' && <Button asChild variant="outline" className="w-full border-orange-400/30 bg-transparent text-orange-200 hover:bg-orange-400/10 hover:text-white"><Link href="/paiement/abonnement">Débloquer les modèles Pro</Link></Button>}</div></div>
+            <div className="max-h-[780px] overflow-hidden rounded-xl bg-slate-800 p-3 shadow-2xl"><div className="origin-top scale-[0.44] sm:scale-[0.55] lg:scale-[0.63]" style={{ width: 794 }}>{renderCvTemplate(selectedTemplate.id, { data: previewData, showWatermark: selectedTemplate.category === 'Gratuit' })}</div></div>
+          </section>
+        </section>
       </main>
       <Footer />
     </div>
-  );
+  )
 }

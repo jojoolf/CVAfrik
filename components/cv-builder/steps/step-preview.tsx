@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useRef, useState, useEffect } from 'react'
+import Image from 'next/image'
 import { createPortal } from 'react-dom'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -25,10 +26,8 @@ interface StepPreviewProps {
   plan: PlanConfig
 }
 
-function getLockLabel(templatePlans: string[]) {
-  if (templatePlans.length === 1 && templatePlans[0] === 'premium') return 'PREMIUM'
-  if (templatePlans.includes('pro')) return 'PRO'
-  return 'VERROUILLÉ'
+function getLockLabel() {
+  return 'PRO'
 }
 
 // True A4 at 96 dpi — never change these, PDF depends on them
@@ -79,13 +78,13 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
 
   const filteredTemplates = useMemo(() => {
     if (activeCategory === 'all') return templates
-    if (activeCategory === 'free') return templates.filter(t => t.plans.includes('gratuit'))
-    if (activeCategory === 'pro') return templates.filter(t => t.plans.includes('pro'))
-    if (activeCategory === 'premium') return templates.filter(t => t.plans.includes('premium'))
+    if (activeCategory === 'free') return templates.filter(t => t.category === 'Gratuit')
+    if (activeCategory === 'pro') return templates.filter(t => t.category === 'Pro')
     return templates
   }, [templates, activeCategory])
 
-  const isTemplateAvailable = (t: TemplateCatalogItem) => t.plans.includes(plan.id)
+  const isTemplateAvailable = (t: TemplateCatalogItem) =>
+    plan.id !== 'gratuit' || t.plans.includes('gratuit')
 
   // ── PDF EXPORT ──────────────────────────────────────────────────────────────
   const handleDownloadPDF = async () => {
@@ -258,7 +257,6 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
                 { id: 'all', label: 'Tous' },
                 { id: 'free', label: 'Gratuits' },
                 { id: 'pro', label: 'Pro' },
-                { id: 'premium', label: 'Premium' },
               ].map(cat => (
                 <button
                   key={cat.id}
@@ -296,32 +294,31 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
                     className={cn(
                       'flex cursor-pointer flex-col overflow-hidden rounded-2xl border-2 border-border/60 bg-card transition-all hover:border-primary/50 hover:shadow-md relative select-none',
                       isSelected && 'border-primary ring-2 ring-primary/20 shadow-lg shadow-primary/10',
+                      'group',
                       !available && 'cursor-not-allowed opacity-50 bg-muted/20 pointer-events-none',
                     )}
                   >
-                    {/* Color swatch */}
-                    <div className={`relative flex h-16 w-full items-center justify-center ${tpl.color}`}>
-                      <div className="flex gap-1.5 opacity-60">
-                        <div className="h-8 w-4 rounded-sm bg-white/30" />
-                        <div className="space-y-1">
-                          <div className="h-1.5 w-7 rounded-full bg-white/40" />
-                          <div className="h-1.5 w-5 rounded-full bg-white/30" />
-                          <div className="h-1.5 w-8 rounded-full bg-white/20" />
-                        </div>
-                      </div>
-
+                    <div className="relative h-40 w-full overflow-hidden bg-muted">
+                      <Image
+                        src={tpl.previewImage}
+                        alt={`Aperçu du template ${tpl.name}`}
+                        fill
+                        sizes="(max-width: 1024px) 50vw, 20vw"
+                        className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/65 to-transparent" />
+                      <span className="absolute bottom-2 left-2 rounded-md bg-black/65 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white backdrop-blur-sm">{tpl.category}</span>
                       {!available && (
                         <div className="absolute right-1.5 top-1.5">
-                          <span className="flex items-center gap-1 rounded-md bg-slate-900/80 px-2 py-0.5 text-[9px] font-bold text-white backdrop-blur-sm border border-white/10">
+                          <span className="flex items-center gap-1 rounded-md bg-slate-900/90 px-2 py-1 text-[9px] font-bold text-white backdrop-blur-sm border border-white/10">
                             <Lock className="h-2.5 w-2.5" />
-                            {getLockLabel(tpl.plans)}
+                            {getLockLabel()}
                           </span>
                         </div>
                       )}
-
                       {isSelected && (
                         <div className="absolute left-1.5 top-1.5">
-                          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-md text-primary">
+                          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-white shadow-md text-primary">
                             <CheckCircle className="h-4 w-4" />
                           </div>
                         </div>

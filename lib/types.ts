@@ -210,7 +210,7 @@ export const PLANS: PlanConfig[] = [
     fonctionnalites: [
       '3 CV par mois',
       '3 lettres de motivation / mois',
-      '3 templates basiques',
+      '3 templates gratuits',
       'Export PDF (avec watermark)',
       'Accès aux offres de stages',
     ],
@@ -238,7 +238,7 @@ export const PLANS: PlanConfig[] = [
     fonctionnalites: [
       'CV illimités',
       'Lettres de motivation illimitées',
-      '45+ templates premium',
+      '12 templates Pro exclusifs',
       'Export PDF sans watermark',
       'Score ATS détaillé + conseils',
       'Simulateur entretien illimité',
