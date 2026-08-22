@@ -144,7 +144,7 @@ export function DashboardShell({
         )}>
           <Link href="/dashboard" className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 ring-1 ring-primary/20">
-              <Image src="/brand/cvafrik-mark.png" alt="" width={32} height={32} className="h-7 w-7 object-contain" priority />
+              <Image src="/brand/cvafrik-mark.svg" alt="" width={32} height={32} className="h-7 w-7 object-contain" priority />
             </div>
             <span className={cn(
               'font-bold text-foreground transition-opacity duration-200',

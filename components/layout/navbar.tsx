@@ -77,7 +77,7 @@ export function Navbar({ user }: NavbarProps) {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 ring-1 ring-primary/20">
-            <Image src="/brand/cvafrik-mark.png" alt="" width={36} height={36} className="h-8 w-8 object-contain" priority />
+            <Image src="/brand/cvafrik-mark.svg" alt="" width={36} height={36} className="h-8 w-8 object-contain" priority />
           </div>
           <span className="text-xl font-bold text-foreground font-syne">
             CV<span className="text-primary">Afrik</span>
@@ -131,7 +131,7 @@ export function Navbar({ user }: NavbarProps) {
               <div className="flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-2" onClick={() => setIsOpen(false)}>
                   <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 ring-1 ring-primary/20">
-                    <Image src="/brand/cvafrik-mark.png" alt="" width={36} height={36} className="h-8 w-8 object-contain" />
+                    <Image src="/brand/cvafrik-mark.svg" alt="" width={36} height={36} className="h-8 w-8 object-contain" />
                   </div>
                   <span className="text-xl font-bold font-syne text-foreground">
                     CV<span className="text-primary">Afrik</span>
