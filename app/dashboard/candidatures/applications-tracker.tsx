@@ -1,0 +1,41 @@
+'use client'
+
+import { useMemo, useState } from 'react'
+import { CalendarClock, CheckCircle2, CircleDotDashed, Loader2, Plus, Send, XCircle, type LucideIcon } from 'lucide-react'
+import { toast } from 'sonner'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
+
+type Application = { id: string; nom_entreprise: string; poste: string; date_candidature: string; statut: string; notes: string | null; rappel_date: string | null; cv_id: string | null; lettre_id: string | null }
+const statuses = [{ id: 'envoye', label: 'Envoyée' }, { id: 'relance', label: 'À relancer' }, { id: 'entretien', label: 'Entretien' }, { id: 'accepte', label: 'Acceptée' }, { id: 'refuse', label: 'Refusée' }] as const
+
+export function ApplicationsTracker({ initialApplications, cvs, letters }: { initialApplications: Application[]; cvs: { id: string; titre: string | null }[]; letters: { id: string; titre: string | null }[] }) {
+  const [items, setItems] = useState(initialApplications)
+  const [saving, setSaving] = useState(false)
+  const [form, setForm] = useState({ entreprise: '', poste: '', cvId: cvs[0]?.id || '', lettreId: '', date: new Date().toISOString().slice(0, 10), statut: 'envoye', rappel: '', notes: '' })
+  const stats = useMemo(() => ({ sent: items.filter((item) => item.statut === 'envoye').length, interviews: items.filter((item) => item.statut === 'entretien').length, accepted: items.filter((item) => item.statut === 'accepte').length }), [items])
+  const statCards: Array<{ value: number; label: string; icon: LucideIcon }> = [
+    { value: stats.sent, label: 'Envoyées', icon: Send },
+    { value: stats.interviews, label: 'Entretiens', icon: CalendarClock },
+    { value: stats.accepted, label: 'Acceptées', icon: CheckCircle2 },
+  ]
+
+  const create = async (event: React.FormEvent) => {
+    event.preventDefault(); setSaving(true)
+    try {
+      const response = await fetch('/api/applications', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) }); const payload = await response.json()
+      if (!response.ok) throw new Error(payload.error)
+      setItems((current) => [payload.application, ...current]); setForm({ entreprise: '', poste: '', cvId: cvs[0]?.id || '', lettreId: '', date: new Date().toISOString().slice(0, 10), statut: 'envoye', rappel: '', notes: '' }); toast.success('Candidature ajoutée au suivi.')
+    } catch (error) { toast.error(error instanceof Error ? error.message : 'La candidature n’a pas pu être créée.') } finally { setSaving(false) }
+  }
+
+  const setStatus = async (item: Application, statut: string) => {
+    try { const response = await fetch(`/api/applications/${item.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ statut }) }); const payload = await response.json(); if (!response.ok) throw new Error(payload.error); setItems((current) => current.map((entry) => entry.id === item.id ? { ...entry, statut } : entry)); toast.success('Statut mis à jour.') } catch (error) { toast.error(error instanceof Error ? error.message : 'Mise à jour impossible.') }
+  }
+
+  return <div className="p-4 lg:p-6"><div className="mx-auto max-w-6xl space-y-6"><div className="rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/10 via-background to-emerald-500/10 p-6 lg:p-8"><p className="flex items-center gap-1.5 text-sm font-semibold text-primary"><CircleDotDashed className="h-4 w-4" />Suivi de candidatures</p><h1 className="mt-2 text-2xl font-bold tracking-tight lg:text-3xl">Gardez le cap sur vos candidatures</h1><p className="mt-2 text-sm text-muted-foreground">Enregistrez chaque envoi, préparez vos relances et suivez les entretiens au même endroit.</p></div><div className="grid gap-3 sm:grid-cols-3">{statCards.map(({ value, label, icon: Icon }) => <Card key={label}><CardContent className="flex items-center gap-3 p-4"><div className="rounded-lg bg-primary/10 p-2 text-primary"><Icon className="h-4 w-4" /></div><div><p className="text-lg font-bold">{value}</p><p className="text-xs text-muted-foreground">{label}</p></div></CardContent></Card>)}</div><div className="grid gap-6 lg:grid-cols-[390px_minmax(0,1fr)]"><Card className="h-fit"><CardHeader><CardTitle className="text-lg">Ajouter une candidature</CardTitle><CardDescription>Conservez le CV et la lettre utilisés pour chaque envoi.</CardDescription></CardHeader><CardContent><form className="space-y-4" onSubmit={create}><div className="space-y-2"><Label>Entreprise *</Label><Input value={form.entreprise} required onChange={(event) => setForm((current) => ({ ...current, entreprise: event.target.value }))} /></div><div className="space-y-2"><Label>Poste *</Label><Input value={form.poste} required onChange={(event) => setForm((current) => ({ ...current, poste: event.target.value }))} /></div><div className="grid grid-cols-2 gap-3"><div className="space-y-2"><Label>Date</Label><Input type="date" value={form.date} onChange={(event) => setForm((current) => ({ ...current, date: event.target.value }))} /></div><div className="space-y-2"><Label>Rappel</Label><Input type="date" value={form.rappel} onChange={(event) => setForm((current) => ({ ...current, rappel: event.target.value }))} /></div></div><div className="space-y-2"><Label>CV utilisé</Label><Select value={form.cvId} onValueChange={(cvId) => setForm((current) => ({ ...current, cvId }))}><SelectTrigger><SelectValue placeholder="Aucun CV" /></SelectTrigger><SelectContent>{cvs.map((cv) => <SelectItem key={cv.id} value={cv.id}>{cv.titre || 'CV sans titre'}</SelectItem>)}</SelectContent></Select></div><div className="space-y-2"><Label>Lettre utilisée</Label><Select value={form.lettreId || 'none'} onValueChange={(lettreId) => setForm((current) => ({ ...current, lettreId: lettreId === 'none' ? '' : lettreId }))}><SelectTrigger><SelectValue placeholder="Sans lettre" /></SelectTrigger><SelectContent><SelectItem value="none">Sans lettre</SelectItem>{letters.map((letter) => <SelectItem key={letter.id} value={letter.id}>{letter.titre || 'Lettre sans titre'}</SelectItem>)}</SelectContent></Select></div><div className="space-y-2"><Label>Notes</Label><Textarea value={form.notes} onChange={(event) => setForm((current) => ({ ...current, notes: event.target.value }))} /></div><Button className="w-full" disabled={saving}>{saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}Ajouter</Button></form></CardContent></Card><Card><CardHeader><CardTitle className="text-lg">Mes candidatures</CardTitle><CardDescription>{items.length} candidature{items.length > 1 ? 's' : ''} enregistrée{items.length > 1 ? 's' : ''}</CardDescription></CardHeader><CardContent className="space-y-3">{items.length ? items.map((item) => <div key={item.id} className="flex flex-col gap-3 rounded-xl border border-border p-4 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-semibold">{item.poste}</p><p className="mt-1 text-sm text-muted-foreground">{item.nom_entreprise} · Envoyée le {new Intl.DateTimeFormat('fr-FR').format(new Date(`${item.date_candidature}T12:00:00`))}</p>{item.rappel_date ? <p className="mt-1 text-xs text-amber-600 dark:text-amber-400">Rappel : {new Intl.DateTimeFormat('fr-FR').format(new Date(`${item.rappel_date}T12:00:00`))}</p> : null}</div><Select value={item.statut} onValueChange={(statut) => void setStatus(item, statut)}><SelectTrigger className="w-36"><SelectValue /></SelectTrigger><SelectContent>{statuses.map((status) => <SelectItem key={status.id} value={status.id}>{status.label}</SelectItem>)}</SelectContent></Select></div>) : <div className="py-16 text-center"><XCircle className="mx-auto mb-3 h-8 w-8 text-muted-foreground" /><p className="font-semibold">Aucune candidature suivie</p><p className="mt-1 text-sm text-muted-foreground">Ajoutez votre premier envoi pour ne manquer aucune relance.</p></div>}</CardContent></Card></div></div></div>
+}

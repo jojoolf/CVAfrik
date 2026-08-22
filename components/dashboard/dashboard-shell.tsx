@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   FileText,
   FileSignature,
+  ClipboardList,
   MessageSquareCode,
   FileSearch,
   LifeBuoy,
@@ -54,6 +55,11 @@ const sidebarLinks = [
     labelKey: 'dashboard.letters',
     href: '/dashboard/lettres',
     icon: FileSignature,
+  },
+  {
+    labelKey: 'dashboard.applications',
+    href: '/dashboard/candidatures',
+    icon: ClipboardList,
   },
   {
     labelKey: 'dashboard.ats',
