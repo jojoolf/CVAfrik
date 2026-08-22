@@ -4,7 +4,13 @@ export type FedaPayEnvironment = 'sandbox' | 'live'
 export type FedaPayBilling = 'monthly' | 'annual'
 
 export function getFedaPayEnvironment(): FedaPayEnvironment {
-  return process.env.FEDAPAY_ENV?.trim().toLowerCase() === 'live' ? 'live' : 'sandbox'
+  const configured = process.env.FEDAPAY_ENV?.trim().toLowerCase()
+  if (configured === 'live' || configured === 'sandbox') {
+    return configured
+  }
+
+  // Vercel production should use the live API unless explicitly overridden.
+  return process.env.VERCEL_ENV === 'production' ? 'live' : 'sandbox'
 }
 
 export function getFedaPayApiBaseUrl(): string {

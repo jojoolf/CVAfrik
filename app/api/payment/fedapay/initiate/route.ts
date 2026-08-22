@@ -59,6 +59,10 @@ export async function POST(req: NextRequest) {
         : plan.prix_fcfa
     const appUrl = getAppOrigin(req)
 
+    if (!Number.isInteger(amount) || amount <= 0) {
+      return NextResponse.json({ error: 'Montant de paiement invalide' }, { status: 400 })
+    }
+
     const customer: Record<string, unknown> = {
       firstname: (profile?.prenom || user.user_metadata?.first_name || 'Client').substring(0, 50),
       lastname: (profile?.nom || user.user_metadata?.last_name || 'CVAfrik').substring(0, 50),
@@ -79,6 +83,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    const merchantReference = `CVA-${user.id.slice(0, 8)}-${Date.now()}`
     const transactionResponse = await fetch(`${getFedaPayApiBaseUrl()}/transactions`, {
       method: 'POST',
       headers: {
@@ -91,6 +96,7 @@ export async function POST(req: NextRequest) {
         amount,
         currency: { iso: 'XOF' },
         callback_url: buildFedaPayPaymentCallbackUrl(req),
+        merchant_reference: merchantReference,
         customer,
         custom_metadata: {
           user_id: user.id,
@@ -111,7 +117,11 @@ export async function POST(req: NextRequest) {
     if (!transactionResponse.ok || !transactionId) {
       console.error('FedaPay Transaction Error:', JSON.stringify(transactionData, null, 2))
       return NextResponse.json(
-        { error: 'Erreur FedaPay', details: transactionData?.message || 'Impossible de creer la transaction' },
+        {
+          error: 'Erreur FedaPay',
+          details: transactionData?.message || transactionData?.error || transactionData?.errors || 'Impossible de creer la transaction',
+          environment: getFedaPayApiBaseUrl().includes('sandbox') ? 'sandbox' : 'live',
+        },
         { status: 500 },
       )
     }
@@ -131,7 +141,10 @@ export async function POST(req: NextRequest) {
     if (!tokenResponse.ok || !paymentUrl) {
       console.error('FedaPay Token Error:', JSON.stringify(tokenData, null, 2))
       return NextResponse.json(
-        { error: 'Erreur lors de la generation du lien FedaPay' },
+        {
+          error: 'Erreur lors de la generation du lien FedaPay',
+          details: tokenData?.message || tokenData?.error || tokenData?.errors || 'FedaPay n’a pas renvoye de lien de paiement',
+        },
         { status: 500 },
       )
     }

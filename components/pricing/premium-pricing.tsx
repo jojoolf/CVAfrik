@@ -110,7 +110,12 @@ export function PremiumPricingFlow({ currentPlan }: { currentPlan?: string | nul
       }
 
       if (!response.ok || !data.url) {
-        throw new Error(data.error || "Impossible d'initialiser le paiement FedaPay.")
+        const details = typeof data.details === 'string'
+          ? data.details
+          : data.details
+            ? JSON.stringify(data.details)
+            : ''
+        throw new Error([data.error, details].filter(Boolean).join(' : ') || "Impossible d'initialiser le paiement FedaPay.")
       }
 
       toast.success('Redirection vers FedaPay...')
