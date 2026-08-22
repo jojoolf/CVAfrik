@@ -81,8 +81,7 @@
       "proFeature4": "Score ATS détaillé et conseils IA",
       "proFeature5": "Simulateur d'entretien illimité",
       "proFeature6": "Matching CV ↔ offre d'emploi",
-      "proFeature7": "Lettres de motivation IA",
-      "proFeature8": "Traduction anglais/français"
+      "proFeature7": "Lettres de motivation IA"
     },
     "payment": {
       "title": "Moyens de paiement acceptés",
@@ -258,8 +257,7 @@
       "proFeature4": "Detailed ATS score and AI advice",
       "proFeature5": "Unlimited interview simulator",
       "proFeature6": "CV ↔ job matching",
-      "proFeature7": "AI cover letters",
-      "proFeature8": "English/French translation"
+      "proFeature7": "AI cover letters"
     },
     "payment": {
       "title": "Accepted payment methods",

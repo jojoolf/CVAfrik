@@ -244,7 +244,6 @@ export const PLANS: PlanConfig[] = [
       'Simulateur entretien illimité',
       'Coaching IA après entretien',
       'Matching CV ↔ offre d\'emploi',
-      'Traduction anglais/français',
       'Toutes les offres de stages',
       'Mini-cours vidéo soft skills',
     ],

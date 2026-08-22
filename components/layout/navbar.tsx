@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import type { User } from '@supabase/supabase-js'
 import { Button } from '@/components/ui/button'
@@ -75,8 +76,8 @@ export function Navbar({ user }: NavbarProps) {
       <nav className="container mx-auto flex h-16 items-center justify-between px-4">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary shadow-sm shadow-primary/20">
-            <FileText className="h-5 w-5 text-primary-foreground" />
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 ring-1 ring-primary/20">
+            <Image src="/brand/cvafrik-mark.png" alt="" width={36} height={36} className="h-8 w-8 object-contain" priority />
           </div>
           <span className="text-xl font-bold text-foreground font-syne">
             CV<span className="text-primary">Afrik</span>
@@ -129,8 +130,8 @@ export function Navbar({ user }: NavbarProps) {
             <div className="flex flex-col gap-8 pt-10">
               <div className="flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-2" onClick={() => setIsOpen(false)}>
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-                    <FileText className="h-5 w-5 text-primary-foreground" />
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 ring-1 ring-primary/20">
+                    <Image src="/brand/cvafrik-mark.png" alt="" width={36} height={36} className="h-8 w-8 object-contain" />
                   </div>
                   <span className="text-xl font-bold font-syne text-foreground">
                     CV<span className="text-primary">Afrik</span>

@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard,
@@ -142,8 +143,8 @@ export function DashboardShell({
           !sidebarOpen && 'justify-center px-0',
         )}>
           <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-primary text-white text-xs font-bold shadow-sm">
-              CA
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 ring-1 ring-primary/20">
+              <Image src="/brand/cvafrik-mark.png" alt="" width={32} height={32} className="h-7 w-7 object-contain" priority />
             </div>
             <span className={cn(
               'font-bold text-foreground transition-opacity duration-200',
