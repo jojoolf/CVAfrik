@@ -101,21 +101,30 @@ export function PremiumPricingFlow({ currentPlan }: { currentPlan?: string | nul
         }),
       })
 
-      const data = await response.json()
+      const responseText = await response.text()
+      let data: { error?: string; details?: unknown; url?: string } = {}
+
+      try {
+        data = responseText ? JSON.parse(responseText) : {}
+      } catch {
+        console.error('Réponse non JSON lors de l’initialisation FedaPay:', {
+          status: response.status,
+          body: responseText,
+        })
+      }
 
       if (response.status === 401) {
-        toast.info('Veuillez vous connecter pour proceder au paiement.')
+        toast.info('Veuillez vous connecter pour procéder au paiement.')
         window.location.href = '/auth/connexion?redirect=/paiement/abonnement'
         return
       }
 
       if (!response.ok || !data.url) {
-        const details = typeof data.details === 'string'
-          ? data.details
-          : data.details
-            ? JSON.stringify(data.details)
-            : ''
-        throw new Error([data.error, details].filter(Boolean).join(' : ') || "Impossible d'initialiser le paiement FedaPay.")
+        console.error('Erreur d’initialisation FedaPay:', {
+          status: response.status,
+          details: data.details ?? responseText,
+        })
+        throw new Error(data.error || "Impossible d'initialiser le paiement FedaPay. Réessayez dans quelques instants.")
       }
 
       toast.success('Redirection vers FedaPay...')

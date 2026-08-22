@@ -128,38 +128,62 @@ export async function POST(req: NextRequest) {
       }),
     })
 
-    const transactionData = await transactionResponse.json().catch(() => null)
-    let transactionId = findTransactionId(transactionData)
+    const transactionResponseText = await transactionResponse.text()
+    let transactionData: Record<string, unknown> | null = null
 
-    // Some live FedaPay responses acknowledge the transaction without returning
-    // its id. Resolve it using the unique merchant reference in that case.
-    if (!transactionId) {
-      const lookupResponse = await fetch(
-        `${getFedaPayApiBaseUrl()}/transactions/merchant/${encodeURIComponent(merchantReference)}`,
-        {
-          headers: {
-            Authorization: `Bearer ${secretKey}`,
-            Accept: 'application/json',
-          },
-        },
-      )
-      const lookupData = await lookupResponse.json().catch(() => null)
-      transactionId = findTransactionId(lookupData)
+    try {
+      transactionData = transactionResponseText
+        ? JSON.parse(transactionResponseText) as Record<string, unknown>
+        : null
+    } catch {
+      console.error('FedaPay Transaction Error: réponse non JSON', {
+        status: transactionResponse.status,
+        body: transactionResponseText,
+      })
     }
 
-    if (!transactionResponse.ok || !transactionId) {
-      console.error('FedaPay Transaction Error:', JSON.stringify(transactionData, null, 2))
+    if (!transactionResponse.ok) {
+      console.error('FedaPay Transaction Error:', {
+        status: transactionResponse.status,
+        body: transactionData ?? transactionResponseText,
+      })
+
+      const responseError = transactionData?.error
+      const responseErrorMessage = responseError && typeof responseError === 'object'
+        ? (responseError as Record<string, unknown>).message
+        : responseError
+
       return NextResponse.json(
         {
-          error: 'Erreur FedaPay',
+          error: 'Erreur FedaPay lors de la création de la transaction',
           details: transactionData?.message
-            || transactionData?.error?.message
-            || transactionData?.error
+            || responseErrorMessage
             || transactionData?.errors
-            || `Réponse FedaPay invalide (HTTP ${transactionResponse.status})`,
+            || `FedaPay a répondu HTTP ${transactionResponse.status}`,
           environment: getFedaPayApiBaseUrl().includes('sandbox') ? 'sandbox' : 'live',
         },
-        { status: 500 },
+        { status: 502 },
+      )
+    }
+
+    // The documented response contains the transaction id directly. Keep the
+    // parser tolerant of known response envelopes, but do not call an
+    // undocumented lookup endpoint that can hide the actual upstream response.
+    const transactionId = findTransactionId(transactionData)
+
+    if (!transactionId) {
+      console.error('FedaPay Transaction Error: réponse sans identifiant', {
+        status: transactionResponse.status,
+        body: transactionData ?? transactionResponseText,
+      })
+
+      return NextResponse.json(
+        {
+          error: 'FedaPay a répondu sans identifiant de transaction',
+          details: 'Consultez les logs serveur FedaPay pour voir la réponse exacte.',
+          environment: getFedaPayApiBaseUrl().includes('sandbox') ? 'sandbox' : 'live',
+        },
+        { status: 502 },
       )
     }
 
@@ -172,17 +196,48 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    const tokenData = await tokenResponse.json().catch(() => null)
-    const paymentUrl = tokenData?.url || tokenData?.data?.url || tokenData?.v1?.url
+    const tokenResponseText = await tokenResponse.text()
+    let tokenData: Record<string, unknown> | null = null
 
-    if (!tokenResponse.ok || !paymentUrl) {
-      console.error('FedaPay Token Error:', JSON.stringify(tokenData, null, 2))
+    try {
+      tokenData = tokenResponseText
+        ? JSON.parse(tokenResponseText) as Record<string, unknown>
+        : null
+    } catch {
+      console.error('FedaPay Token Error: réponse non JSON', {
+        status: tokenResponse.status,
+        body: tokenResponseText,
+      })
+    }
+
+    const tokenDataRecord = tokenData?.data && typeof tokenData.data === 'object'
+      ? tokenData.data as Record<string, unknown>
+      : null
+    const tokenV1Record = tokenData?.v1 && typeof tokenData.v1 === 'object'
+      ? tokenData.v1 as Record<string, unknown>
+      : null
+    const paymentUrl = tokenData?.url || tokenDataRecord?.url || tokenV1Record?.url
+
+    if (!tokenResponse.ok || typeof paymentUrl !== 'string' || !paymentUrl) {
+      console.error('FedaPay Token Error:', {
+        status: tokenResponse.status,
+        body: tokenData ?? tokenResponseText,
+      })
+
+      const tokenError = tokenData?.error
+      const tokenErrorMessage = tokenError && typeof tokenError === 'object'
+        ? (tokenError as Record<string, unknown>).message
+        : tokenError
+
       return NextResponse.json(
         {
-          error: 'Erreur lors de la generation du lien FedaPay',
-          details: tokenData?.message || tokenData?.error || tokenData?.errors || 'FedaPay n’a pas renvoye de lien de paiement',
+          error: 'Erreur lors de la génération du lien FedaPay',
+          details: tokenData?.message
+            || tokenErrorMessage
+            || tokenData?.errors
+            || `FedaPay n’a pas renvoyé de lien de paiement (HTTP ${tokenResponse.status})`,
         },
-        { status: 500 },
+        { status: 502 },
       )
     }
 
