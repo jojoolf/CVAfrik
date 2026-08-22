@@ -36,6 +36,7 @@ import { StepFormation } from './steps/step-formation'
 import { StepExperience } from './steps/step-experience'
 import { StepCompetences } from './steps/step-competences'
 import { StepPreview } from './steps/step-preview'
+import { ProfileImportDialog } from './profile-import-dialog'
 
 const steps = [
   { id: 'personal', title: 'Informations', icon: User, description: 'Coordonnées & profil' },
@@ -244,6 +245,20 @@ export function CVBuilderForm({
           </div>
 
           <div className="flex items-center gap-3">
+            {!existingCV && (
+              <div className="hidden sm:block">
+                <ProfileImportDialog
+                  currentData={cvData}
+                  onApply={(data) => {
+                    setCvData(data)
+                    const fullName = [data.informations_personnelles.prenom, data.informations_personnelles.nom].filter(Boolean).join(' ')
+                    if (fullName) setCvTitle(`CV de ${fullName}`)
+                    setCurrentStep(0)
+                    toast.success('Profil importé : vérifie les informations avant de générer ton CV.')
+                  }}
+                />
+              </div>
+            )}
             {/* Status Indicator */}
             {lastSavedTime && (
               <span className="hidden md:flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
@@ -351,7 +366,7 @@ export function CVBuilderForm({
       </header>
 
       {/* Main Content Area - Split Screen Layout */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+          <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
         <div className={`grid gap-8 transition-all duration-300 ${
           showLivePreview && currentStep !== 4
             ? 'lg:grid-cols-12' 
