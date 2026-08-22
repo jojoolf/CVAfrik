@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { checkAndGetProfile } from '@/lib/supabase/profile'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { PLANS } from '@/lib/types'
+import { getLetterType, type LetterType } from '@/lib/letters/types'
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
 
@@ -110,6 +111,7 @@ export async function generateThreeLetters(formData: {
   poste: string
   offreEmploi: string
   secteurActivite: string
+  letterType: LetterType
 }) {
   try {
     const supabase = await createClient()
@@ -143,6 +145,7 @@ export async function generateThreeLetters(formData: {
     if (!cv) return { success: false, error: 'CV non trouve' as const }
 
     const candidate = buildCandidateSummary(cv.donnees)
+    const letterType = getLetterType(formData.letterType)
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
 
     const commonPrompt = `
@@ -160,6 +163,8 @@ INFOS POSTE :
 - Poste vise: ${formData.poste}
 - Secteur d'activite: ${formData.secteurActivite || 'Non precise'}
 - Destinataire: ${formData.destinataire || 'Responsable du recrutement'}
+- Type de lettre: ${letterType.label}
+- Consigne liée au type: ${letterType.promptInstruction}
 ${formData.offreEmploi ? `- Extrait offre d'emploi: ${formData.offreEmploi}` : ''}
 
 CONSIGNES COMMUNES :
@@ -204,6 +209,11 @@ export async function saveLetter(data: {
   titre: string
   cvId: string
   offreEmploi?: string
+  letterType: LetterType
+  destinataire?: string
+  entreprise?: string
+  poste?: string
+  secteurActivite?: string
 }) {
   try {
     const supabase = await createClient()
@@ -238,6 +248,11 @@ export async function saveLetter(data: {
         titre: data.titre || 'Lettre de motivation',
         contenu: content,
         offre_emploi: data.offreEmploi || null,
+        type_lettre: data.letterType,
+        destinataire: data.destinataire?.trim() || null,
+        entreprise: data.entreprise?.trim() || null,
+        poste: data.poste?.trim() || null,
+        secteur_activite: data.secteurActivite?.trim() || null,
       })
       .select('id')
       .single()

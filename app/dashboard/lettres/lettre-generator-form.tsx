@@ -11,6 +11,7 @@ import { toast } from 'sonner'
 import { Loader2, Sparkles, WandSparkles } from 'lucide-react'
 import { generateThreeLetters, saveLetter, type GeneratedLetter } from './actions'
 import { LettrePicker } from './lettre-picker'
+import { LETTER_TYPES, type LetterType } from '@/lib/letters/types'
 
 interface LettreGeneratorFormProps {
   cvs: { id: string; titre: string | null }[]
@@ -30,6 +31,7 @@ export function LettreGeneratorForm({ cvs }: LettreGeneratorFormProps) {
     poste: '',
     offreEmploi: '',
     secteurActivite: '',
+    letterType: 'emploi' as LetterType,
   })
 
   const generateLetters = async () => {
@@ -72,6 +74,11 @@ export function LettreGeneratorForm({ cvs }: LettreGeneratorFormProps) {
         titre: title,
         cvId: formData.cvId,
         offreEmploi: formData.offreEmploi,
+        letterType: formData.letterType,
+        destinataire: formData.destinataire,
+        entreprise: formData.entreprise,
+        poste: formData.poste,
+        secteurActivite: formData.secteurActivite,
       })
 
       if (!result.success) {
@@ -133,8 +140,33 @@ export function LettreGeneratorForm({ cvs }: LettreGeneratorFormProps) {
     )
   }
 
+  const selectedType = LETTER_TYPES.find((item) => item.id === formData.letterType) || LETTER_TYPES[0]
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="space-y-3">
+        <div>
+          <Label>Type de lettre *</Label>
+          <p className="mt-1 text-xs text-muted-foreground">Choisissez le contexte pour adapter la structure et les arguments de la lettre.</p>
+        </div>
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {LETTER_TYPES.map((letterType) => {
+            const selected = formData.letterType === letterType.id
+            return (
+              <button
+                key={letterType.id}
+                type="button"
+                onClick={() => setFormData((prev) => ({ ...prev, letterType: letterType.id }))}
+                className={`rounded-xl border p-3 text-left transition-all ${selected ? 'border-primary bg-primary/5 shadow-sm ring-1 ring-primary/20' : 'border-border hover:border-primary/40 hover:bg-muted/40'}`}
+              >
+                <span className="block text-sm font-semibold text-foreground">{letterType.label}</span>
+                <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">{letterType.description}</span>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
       <div className="grid gap-6 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="cvId">CV de reference *</Label>
@@ -167,10 +199,10 @@ export function LettreGeneratorForm({ cvs }: LettreGeneratorFormProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="entreprise">Entreprise *</Label>
+          <Label htmlFor="entreprise">{selectedType.recipientLabel} *</Label>
           <Input
             id="entreprise"
-            placeholder="Ex: Orange, Wave, Google..."
+            placeholder={formData.letterType === 'bourse' ? 'Ex: Fondation Mastercard, université...' : 'Ex: Orange, Wave, Google...'}
             value={formData.entreprise}
             onChange={(e) => setFormData((prev) => ({ ...prev, entreprise: e.target.value }))}
             required
@@ -178,10 +210,10 @@ export function LettreGeneratorForm({ cvs }: LettreGeneratorFormProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="poste">Poste vise *</Label>
+          <Label htmlFor="poste">{selectedType.targetLabel} *</Label>
           <Input
             id="poste"
-            placeholder="Ex: Responsable Marketing, Developpeur..."
+            placeholder={formData.letterType === 'bourse' ? 'Ex: Bourse de master en informatique' : 'Ex: Responsable Marketing, Développeur...'}
             value={formData.poste}
             onChange={(e) => setFormData((prev) => ({ ...prev, poste: e.target.value }))}
             required

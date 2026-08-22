@@ -11,6 +11,7 @@ import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { PLANS } from '@/lib/types'
 import { getEffectivePlan } from '@/lib/subscription'
+import { getLetterType } from '@/lib/letters/types'
 
 export default async function LettresPage({
   searchParams,
@@ -155,7 +156,10 @@ export default async function LettresPage({
                         <Clock className="h-3 w-3" />
                         {format(new Date(lettre.created_at), 'dd MMMM yyyy', { locale: fr })}
                       </div>
-                      <div className="mt-3 flex items-center gap-2">
+                      <div className="mt-3 flex flex-wrap items-center gap-2">
+                        <Badge variant="outline" className="text-[10px] px-2 py-0 h-5 bg-primary/5 text-primary border-primary/20">
+                          {getLetterType(lettre.type_lettre).label}
+                        </Badge>
                         <Badge variant="outline" className="text-[10px] px-2 py-0 h-5">
                           {lettre.entreprise || 'Non spécifiée'}
                         </Badge>
