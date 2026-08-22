@@ -27,7 +27,9 @@ function findTransactionId(payload: unknown): string | null {
   const directId = parseFedaPayTransactionId(value.id)
   if (directId) return directId
 
-  for (const key of ['entity', 'data', 'transaction', 'v1', 'response']) {
+  // FedaPay's official Node SDK handles transaction creation responses
+  // wrapped under a versioned key such as { "v1/transaction": { id: ... } }.
+  for (const key of ['v1/transaction', 'entity', 'data', 'transaction', 'v1', 'response']) {
     const nestedId = findTransactionId(value[key])
     if (nestedId) return nestedId
   }
