@@ -7,6 +7,7 @@ import {
   FileText,
   FileSignature,
   MessageSquareCode,
+  FileSearch,
   LifeBuoy,
   ChevronLeft,
   ChevronRight,
@@ -53,6 +54,11 @@ const sidebarLinks = [
     labelKey: 'dashboard.letters',
     href: '/dashboard/lettres',
     icon: FileSignature,
+  },
+  {
+    labelKey: 'dashboard.ats',
+    href: '/dashboard/ats',
+    icon: FileSearch,
   },
   {
     labelKey: 'dashboard.simulator',
