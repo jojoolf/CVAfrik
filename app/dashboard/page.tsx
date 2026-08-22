@@ -34,9 +34,18 @@ export default async function DashboardPage() {
     .select('id, created_at')
     .eq('user_id', user!.id)
 
+  const { data: allApplications } = await supabase
+    .from('suivi_candidatures')
+    .select('id, nom_entreprise, poste, rappel_date, statut')
+    .eq('user_id', user!.id)
+
   const cvs = allCvs?.slice(0, 6) || []
   const totalCVs = allCvs?.length || 0
   const totalLetters = allLettres?.length || 0
+  const today = new Date().toISOString().slice(0, 10)
+  const reminders = (allApplications || [])
+    .filter((application) => application.rappel_date && application.rappel_date <= today && !['accepte', 'refuse'].includes(application.statut))
+    .slice(0, 4)
 
   // Calculate real last 12 months chart data
   const monthsNames = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc']
@@ -195,6 +204,18 @@ export default async function DashboardPage() {
           </Card>
         ))}
       </div>
+
+      {reminders.length > 0 && (
+        <Card className="border-amber-500/25 bg-amber-500/5 shadow-elegant">
+          <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="flex items-center gap-2 font-semibold text-foreground"><Clock className="h-4 w-4 text-amber-600 dark:text-amber-400" />{reminders.length} relance{reminders.length > 1 ? 's' : ''} à prévoir</p>
+              <p className="mt-1 text-sm text-muted-foreground">{reminders.map((application) => `${application.poste} · ${application.nom_entreprise}`).join(' — ')}</p>
+            </div>
+            <Button asChild variant="outline" className="shrink-0 border-amber-500/30 bg-background"><Link href="/dashboard/candidatures">Voir mes candidatures <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Chart and Recent CVs */}
       <div className="grid gap-6 lg:grid-cols-3">
