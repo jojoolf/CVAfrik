@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { BarChart3, FilePlus2, LayoutDashboard, ScrollText, ShieldCheck } from 'lucide-react'
+import { BarChart3, BriefcaseBusiness, FilePlus2, LayoutDashboard, ScrollText, ShieldCheck } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { Navbar } from '@/components/layout/navbar'
 import { isAdminEmail } from '@/lib/admin/access'
@@ -8,6 +8,7 @@ import { isAdminEmail } from '@/lib/admin/access'
 const adminLinks = [
   { href: '/admin', label: 'Vue d’ensemble', icon: LayoutDashboard },
   { href: '/admin/blog/nouveau', label: 'Nouveau contenu', icon: FilePlus2 },
+  { href: '/admin/opportunites', label: 'Opportunités', icon: BriefcaseBusiness },
   { href: '/admin/statistiques', label: 'Statistiques', icon: BarChart3 },
   { href: '/admin/logs', label: 'Journal', icon: ScrollText },
 ]
