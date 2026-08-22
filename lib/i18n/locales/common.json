@@ -127,6 +127,22 @@
       "downloadAnswer": "Allez dans l’éditeur, cliquez sur « Terminer » puis sur l’icône de téléchargement.",
       "paymentQuestion": "Quels sont les modes de paiement ?",
       "paymentAnswer": "Nous acceptons les paiements sécurisés via FedaPay."
+    },
+    "dashboard": {
+      "home": "Tableau de bord",
+      "myCvs": "Mes CV",
+      "letters": "Lettres de motivation",
+      "simulator": "Simulateur IA",
+      "blog": "Blog",
+      "support": "Aide & Support",
+      "pricing": "Tarifs",
+      "upgrade": "Passer à Pro",
+      "plan": "Plan",
+      "free": "Gratuit",
+      "user": "Utilisateur",
+      "search": "Rechercher...",
+      "settings": "Paramètres",
+      "logout": "Déconnexion"
     }
   },
   "en": {
@@ -257,6 +273,22 @@
       "downloadAnswer": "Go to the editor, click “Finish”, then click the download icon.",
       "paymentQuestion": "Which payment methods are accepted?",
       "paymentAnswer": "We accept secure payments through FedaPay."
+    },
+    "dashboard": {
+      "home": "Dashboard",
+      "myCvs": "My CVs",
+      "letters": "Cover letters",
+      "simulator": "AI interview simulator",
+      "blog": "Blog",
+      "support": "Help & Support",
+      "pricing": "Pricing",
+      "upgrade": "Upgrade to Pro",
+      "plan": "Plan",
+      "free": "Free",
+      "user": "User",
+      "search": "Search...",
+      "settings": "Settings",
+      "logout": "Log out"
     }
   }
 }

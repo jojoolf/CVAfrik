@@ -36,40 +36,41 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { ModeToggle } from '@/components/layout/mode-toggle'
 import { useState } from 'react'
+import { useLocale } from '@/lib/i18n/locale-provider'
 
 const sidebarLinks = [
   {
-    label: 'Tableau de bord',
+    labelKey: 'dashboard.home',
     href: '/dashboard',
     icon: LayoutDashboard,
   },
   {
-    label: 'Mes CV',
+    labelKey: 'dashboard.myCvs',
     href: '/cv-builder',
     icon: FileText,
   },
   {
-    label: 'Lettres de motivation',
+    labelKey: 'dashboard.letters',
     href: '/dashboard/lettres',
     icon: FileSignature,
   },
   {
-    label: 'Simulateur IA',
+    labelKey: 'dashboard.simulator',
     href: '/dashboard/simulateur',
     icon: MessageSquareCode,
   },
   {
-    label: 'Blog',
+    labelKey: 'dashboard.blog',
     href: '/blog',
     icon: BookOpen,
   },
   {
-    label: 'Aide & Support',
+    labelKey: 'dashboard.support',
     href: '/dashboard/support',
     icon: LifeBuoy,
   },
   {
-    label: 'Tarifs',
+    labelKey: 'dashboard.pricing',
     href: '/tarifs',
     icon: CreditCard,
   },
@@ -97,6 +98,7 @@ export function DashboardShell({
   isFreePlan,
 }: DashboardShellProps) {
   const pathname = usePathname()
+  const { t } = useLocale()
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
@@ -156,7 +158,7 @@ export function DashboardShell({
                   <Crown className="h-3.5 w-3.5 shrink-0" />
                 )}
                 <span className="truncate">
-                  {isFreePlan ? 'Passer à Pro' : `Plan ${planName || 'Gratuit'}`}
+                  {isFreePlan ? t('dashboard.upgrade') : `${t('dashboard.plan')} ${planName || t('dashboard.free')}`}
                 </span>
               </div>
             </Link>
@@ -185,7 +187,7 @@ export function DashboardShell({
                   'transition-opacity duration-200',
                   !sidebarOpen && 'hidden',
                 )}>
-                  {link.label}
+                  {t(link.labelKey)}
                 </span>
                 {isActive && sidebarOpen && (
                   <div className="ml-auto h-1.5 w-1.5 rounded-full bg-primary" />
@@ -207,7 +209,7 @@ export function DashboardShell({
               </Avatar>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-foreground truncate">
-                  {displayName || 'Utilisateur'}
+                  {displayName || t('dashboard.user')}
                 </p>
                 <p className="text-xs text-muted-foreground truncate">
                   {user?.email || ''}
@@ -248,7 +250,7 @@ export function DashboardShell({
           <div className="hidden md:flex relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Rechercher..."
+              placeholder={t('dashboard.search')}
               className="pl-9 h-9 bg-muted/50 border-none rounded-xl text-sm"
             />
           </div>
@@ -278,7 +280,7 @@ export function DashboardShell({
               <DropdownMenuContent className="w-56" align="end">
                 <DropdownMenuLabel>
                   <div className="flex flex-col">
-                    <span>{displayName || 'Utilisateur'}</span>
+                    <span>{displayName || t('dashboard.user')}</span>
                     <span className="text-xs font-normal text-muted-foreground">{user?.email}</span>
                   </div>
                 </DropdownMenuLabel>
@@ -286,13 +288,13 @@ export function DashboardShell({
                 <DropdownMenuItem asChild>
                   <Link href="/profil/modifier" className="cursor-pointer">
                     <Settings className="mr-2 h-4 w-4" />
-                    Paramètres
+                    {t('dashboard.settings')}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem className="text-destructive cursor-pointer">
                   <LogOut className="mr-2 h-4 w-4" />
-                  Déconnexion
+                  {t('dashboard.logout')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
