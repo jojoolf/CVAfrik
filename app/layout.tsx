@@ -7,6 +7,7 @@ import { LocaleProvider } from '@/lib/i18n/locale-provider'
 import './globals.css'
 import Script from 'next/script'
 import { ThemeProvider } from '@/components/theme-provider'
+import { NativeOAuthRedirect } from '@/components/auth/native-oauth-redirect'
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -96,6 +97,7 @@ export default async function RootLayout({
   return (
     <html lang={locale} className={`${inter.variable} ${geistMono.variable} ${syne.variable} ${dmSans.variable} bg-background`} suppressHydrationWarning>
       <body className="font-sans antialiased min-h-screen">
+        <NativeOAuthRedirect />
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"

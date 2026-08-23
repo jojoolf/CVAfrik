@@ -12,6 +12,7 @@ import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { getAuthErrorMessage } from '@/lib/auth/auth-error'
 import { setOAuthReturnCookieClient } from '@/lib/auth/set-oauth-return-cookie'
+import { getOAuthRedirectUrl } from '@/components/auth/native-oauth-redirect'
 
 interface LoginFormProps {
   redirectTo?: string
@@ -66,7 +67,7 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'linkedin_oidc',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: getOAuthRedirectUrl(),
         },
       })
 
@@ -89,7 +90,7 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: getOAuthRedirectUrl(),
         },
       })
 
