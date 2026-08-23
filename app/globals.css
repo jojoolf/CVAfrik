@@ -201,7 +201,11 @@
 @layer base {
   * { border-color: var(--color-border); }
 
-  html { scroll-behavior: smooth; }
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    overscroll-behavior-y: none;
+  }
 
   body {
     background: var(--background);
@@ -209,6 +213,12 @@
     font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  a, button, input, select, textarea {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
 
   h1, h2, h3, h4 {
@@ -219,9 +229,26 @@
   ::selection { background: var(--gold); color: var(--primary-foreground); }
 }
 
-/* Animations et transitions globales pour le changement de thème */
-* {
-  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.1s ease;
+/* Les transitions sont appliquées uniquement aux éléments qui en ont besoin.
+   Éviter une transition sur tous les nœuds garde le toucher et le scroll rapides sur mobile. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .glass {
+    backdrop-filter: none;
+  }
+
+  .mobile-content-visibility {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 720px;
+  }
 }
 
 /* Custom scrollbar for CVAfrik */

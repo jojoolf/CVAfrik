@@ -19,11 +19,11 @@ export default async function HomePage() {
       <Navbar user={user} />
       <main className="flex-1">
         <HeroSection />
-        <MobileMoneySection />
-        <FeaturesSection />
-        <TemplatesSection />
-        <PricingSection />
-        <CTASection />
+        <div className="mobile-content-visibility"><MobileMoneySection /></div>
+        <div className="mobile-content-visibility"><FeaturesSection /></div>
+        <div className="mobile-content-visibility"><TemplatesSection /></div>
+        <div className="mobile-content-visibility"><PricingSection /></div>
+        <div className="mobile-content-visibility"><CTASection /></div>
       </main>
       <Footer />
     </div>
