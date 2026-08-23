@@ -20,7 +20,7 @@ res = root / 'android/app/src/main/res'
 
 for folder, size in sizes.items():
     # Laisser une marge de sécurité afin que le logo reste entier sur les lanceurs Android.
-    inner = round(size * 0.78)
+    inner = round(size * 0.60)
     ratio = min(inner / logo.width, inner / logo.height)
     rendered = logo.resize((round(logo.width * ratio), round(logo.height * ratio)), Image.Resampling.LANCZOS)
     canvas = Image.new('RGBA', (size, size), (255, 255, 255, 255))
