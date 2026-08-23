@@ -179,22 +179,63 @@ export async function parseLinkedInExport(file: File): Promise<LinkedInImportRes
   }
 }
 
+const MAX_PDF_BYTES = 8 * 1024 * 1024
+const MAX_PDF_PAGES = 8
+const MAX_PDF_TEXT_LENGTH = 60_000
+
 export async function parsePdfProfile(file: File): Promise<LinkedInImportResult> {
   if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
     throw new Error('Choisis un CV au format PDF.')
   }
-
-  const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs')
-  const document = await pdfjs.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise
-  const pages: string[] = []
-
-  for (let pageNumber = 1; pageNumber <= document.numPages; pageNumber += 1) {
-    const page = await document.getPage(pageNumber)
-    const text = await page.getTextContent()
-    pages.push(text.items.map((item: any) => item.str).join(' '))
+  if (file.size === 0) {
+    throw new Error('Ce fichier PDF est vide.')
+  }
+  if (file.size > MAX_PDF_BYTES) {
+    throw new Error('Ce PDF est trop lourd pour une lecture sur mobile. Utilise un fichier de 8 Mo maximum, idéalement un PDF texte sans scan ni images, ou colle son contenu dans « Coller mon profil ».')
   }
 
-  return parseProfileText(pages.join('\n'))
+  const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs')
+  let document: any
+
+  try {
+    const bytes = new Uint8Array(await file.arrayBuffer())
+    document = await pdfjs.getDocument({
+      data: bytes,
+      disableAutoFetch: true,
+      disableStream: true,
+      maxImageSize: 1_000_000,
+      stopAtErrors: false,
+    }).promise
+
+    const pages: string[] = []
+    const pageLimit = Math.min(document.numPages, MAX_PDF_PAGES)
+    let extractedLength = 0
+
+    for (let pageNumber = 1; pageNumber <= pageLimit && extractedLength < MAX_PDF_TEXT_LENGTH; pageNumber += 1) {
+      const page = await document.getPage(pageNumber)
+      const text = await page.getTextContent({ includeMarkedContent: false })
+      const pageText = text.items.map((item: any) => item.str || '').join(' ').trim()
+      if (pageText) {
+        const remaining = MAX_PDF_TEXT_LENGTH - extractedLength
+        pages.push(pageText.slice(0, remaining))
+        extractedLength += pageText.length
+      }
+      page.cleanup()
+    }
+
+    if (!pages.length) {
+      throw new Error('Ce PDF ne contient pas de texte sélectionnable. Utilise un PDF texte, ou copie-colle le contenu dans « Coller mon profil ».')
+    }
+
+    return parseProfileText(pages.join('\n'))
+  } catch (cause) {
+    if (cause instanceof Error && /memory|allocation|out of memory/i.test(cause.message)) {
+      throw new Error('Ce PDF demande trop de mémoire pour être lu sur cet appareil. Utilise une version plus légère de 8 Mo maximum ou colle le texte de ton CV.')
+    }
+    throw cause
+  } finally {
+    await document?.destroy()
+  }
 }
 
 export function parseProfileText(text: string): LinkedInImportResult {
