@@ -26,11 +26,9 @@ const countryName = (code: string) => {
 export function WorldActivityMap({ countries, onlineByCountry }: { countries: CountryMetric[]; onlineByCountry: CountryMetric[] }) {
   const maxUsers = Math.max(1, ...countries.map((item) => item.users))
   const usersByCountryId = new Map(countries.map((item) => [COUNTRY_NUMERIC_BY_CODE[item.country], item.users]))
-  const onlineByCountryCode = new Map(onlineByCountry.map((item) => [item.country, item.users]))
-
   const fillForCountry = (id: string) => {
     const users = usersByCountryId.get(id) || 0
-    if (!users) return '#1e293b'
+    if (!users) return 'var(--muted)'
     const strength = users / maxUsers
     if (strength > 0.66) return '#f97316'
     if (strength > 0.33) return '#fb923c'
@@ -38,7 +36,7 @@ export function WorldActivityMap({ countries, onlineByCountry }: { countries: Co
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-white/10 bg-slate-950/70">
+    <div className="overflow-hidden rounded-2xl border border-border bg-muted/55 dark:bg-slate-950/70">
       <ComposableMap projectionConfig={{ scale: 148 }} className="h-auto w-full" aria-label="Carte mondiale de la répartition des comptes CVAfrik">
         <Geographies geography="/maps/countries-110m.json">
           {({ geographies }) => geographies.map((geo) => {
@@ -48,9 +46,9 @@ export function WorldActivityMap({ countries, onlineByCountry }: { countries: Co
                 key={geo.rsmKey}
                 geography={geo}
                 fill={fillForCountry(String(geo.id))}
-                stroke="#334155"
+                stroke="var(--border)"
                 strokeWidth={0.45}
-                style={{ default: { outline: 'none' }, hover: { outline: 'none', fill: users ? '#ea580c' : '#334155' }, pressed: { outline: 'none' } }}
+                style={{ default: { outline: 'none' }, hover: { outline: 'none', fill: users ? '#ea580c' : 'var(--accent)' }, pressed: { outline: 'none' } }}
               >
                 <title>{users ? `${users} compte${users > 1 ? 's' : ''}` : 'Aucun compte enregistré'}</title>
               </Geography>
@@ -58,9 +56,9 @@ export function WorldActivityMap({ countries, onlineByCountry }: { countries: Co
           })}
         </Geographies>
       </ComposableMap>
-      <div className="border-t border-white/10 px-4 py-3">
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-400"><span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-slate-700" />Aucun compte</span><span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-orange-300" />Présence faible</span><span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-primary" />Présence forte</span></div>
-        {onlineByCountry.length > 0 && <p className="mt-3 text-xs leading-5 text-emerald-300">En ligne maintenant : {onlineByCountry.slice(0, 3).map((item) => `${item.users} ${countryName(item.country)}`).join(' · ')}</p>}
+      <div className="border-t border-border px-4 py-3">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground"><span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-muted-foreground/45" />Aucun compte</span><span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-orange-300" />Présence faible</span><span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-primary" />Présence forte</span></div>
+        {onlineByCountry.length > 0 && <p className="mt-3 text-xs leading-5 text-emerald-700 dark:text-emerald-300">En ligne maintenant : {onlineByCountry.slice(0, 3).map((item) => `${item.users} ${countryName(item.country)}`).join(' · ')}</p>}
       </div>
     </div>
   )

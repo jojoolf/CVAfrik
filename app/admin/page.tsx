@@ -35,16 +35,16 @@ export default async function AdminPage() {
   const firstName = user?.user_metadata?.prenom || user?.user_metadata?.first_name || 'Admin'
 
   const metrics = [
-    { label: 'Utilisateurs', value: usersResult.count || 0, detail: 'comptes créés', icon: Users, tone: 'text-sky-300 bg-sky-400/10 ring-sky-400/20' },
-    { label: 'CV créés', value: cvsResult.count || 0, detail: 'documents enregistrés', icon: FileText, tone: 'text-emerald-300 bg-emerald-400/10 ring-emerald-400/20' },
-    { label: 'Contenus', value: postsResult.count || 0, detail: 'articles et opportunités', icon: PenLine, tone: 'text-violet-300 bg-violet-400/10 ring-violet-400/20' },
-    { label: 'Newsletter', value: subscribersResult.count || 0, detail: 'abonnés actifs', icon: Mail, tone: 'text-rose-300 bg-rose-400/10 ring-rose-400/20' },
+    { label: 'Utilisateurs', value: usersResult.count || 0, detail: 'comptes créés', icon: Users, tone: 'bg-sky-500/10 text-sky-700 ring-sky-500/20 dark:text-sky-300' },
+    { label: 'CV créés', value: cvsResult.count || 0, detail: 'documents enregistrés', icon: FileText, tone: 'bg-emerald-500/10 text-emerald-700 ring-emerald-500/20 dark:text-emerald-300' },
+    { label: 'Contenus', value: postsResult.count || 0, detail: 'articles et opportunités', icon: PenLine, tone: 'bg-violet-500/10 text-violet-700 ring-violet-500/20 dark:text-violet-300' },
+    { label: 'Newsletter', value: subscribersResult.count || 0, detail: 'abonnés actifs', icon: Mail, tone: 'bg-rose-500/10 text-rose-700 ring-rose-500/20 dark:text-rose-300' },
   ]
 
   return (
     <div className="min-h-full px-4 py-6 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900 via-slate-900 to-primary/20 p-6 shadow-2xl sm:p-8">
+        <section className="relative overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-card via-card to-primary/15 p-6 shadow-elevated sm:p-8">
           <div className="absolute -right-20 -top-24 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
           <div className="absolute bottom-0 left-1/3 h-32 w-64 rounded-full bg-violet-500/10 blur-3xl" />
           <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
@@ -52,17 +52,17 @@ export default async function AdminPage() {
               <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-black uppercase tracking-[0.16em] text-primary">
                 <Sparkles className="h-3.5 w-3.5" /> Tableau de bord
               </div>
-              <h1 className="text-3xl font-black tracking-tight text-white sm:text-4xl">Bonjour, {firstName}.</h1>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">Gère le contenu, observe la croissance de CVAfrik et garde une vue claire sur l’activité de la plateforme.</p>
+              <h1 className="text-3xl font-black tracking-tight text-foreground sm:text-4xl">Bonjour, {firstName}.</h1>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Gère le contenu, observe la croissance de CVAfrik et garde une vue claire sur l’activité de la plateforme.</p>
             </div>
             <div className="flex flex-wrap gap-3">
               <Button asChild className="rounded-xl bg-primary font-bold text-primary-foreground hover:bg-primary/90">
                 <Link href="/admin/blog/nouveau"><FilePlus2 className="mr-2 h-4 w-4" /> Nouveau contenu</Link>
               </Button>
-              <Button asChild variant="outline" className="rounded-xl border-white/15 bg-white/5 font-bold text-white hover:bg-white/10 hover:text-white">
+              <Button asChild variant="outline" className="rounded-xl border-border bg-card font-bold text-foreground hover:bg-muted hover:text-foreground">
                 <Link href="/admin/notifications"><BellRing className="mr-2 h-4 w-4" /> Publier une annonce</Link>
               </Button>
-              <Button asChild variant="outline" className="rounded-xl border-white/15 bg-white/5 font-bold text-white hover:bg-white/10 hover:text-white">
+              <Button asChild variant="outline" className="rounded-xl border-border bg-card font-bold text-foreground hover:bg-muted hover:text-foreground">
                 <Link href="/admin/statistiques"><BarChart3 className="mr-2 h-4 w-4" /> Voir les statistiques</Link>
               </Button>
             </div>
@@ -71,39 +71,39 @@ export default async function AdminPage() {
 
         <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {metrics.map(({ label, value, detail, icon: Icon, tone }) => (
-            <article key={label} className="rounded-2xl border border-white/10 bg-slate-900/80 p-5 shadow-xl shadow-black/10">
+            <article key={label} className="rounded-2xl border border-border bg-card p-5 shadow-elegant">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-wider text-slate-400">{label}</p>
-                  <p className="mt-3 text-3xl font-black text-white">{value.toLocaleString('fr-FR')}</p>
+                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{label}</p>
+                  <p className="mt-3 text-3xl font-black text-foreground">{value.toLocaleString('fr-FR')}</p>
                 </div>
                 <span className={`rounded-xl p-3 ring-1 ${tone}`}><Icon className="h-5 w-5" /></span>
               </div>
-              <p className="mt-3 text-xs text-slate-500">{detail}</p>
+              <p className="mt-3 text-xs text-muted-foreground">{detail}</p>
             </article>
           ))}
         </section>
 
         <div className="mt-6 grid gap-6 lg:grid-cols-[1.35fr_0.65fr]">
-          <section className="overflow-hidden rounded-2xl border border-white/10 bg-slate-900/80 shadow-xl shadow-black/10">
-            <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
+          <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-elegant">
+            <div className="flex items-center justify-between border-b border-border px-5 py-4">
               <div>
-                <h2 className="font-black text-white">Contenu récent</h2>
-                <p className="mt-1 text-xs text-slate-500">Derniers articles, offres et opportunités publiés.</p>
+                <h2 className="font-black text-foreground">Contenu récent</h2>
+                <p className="mt-1 text-xs text-muted-foreground">Derniers articles, offres et opportunités publiés.</p>
               </div>
               <Button asChild variant="ghost" size="sm" className="text-primary hover:bg-primary/10 hover:text-primary">
                 <Link href="/admin/blog/nouveau">Créer <ArrowUpRight className="ml-1 h-4 w-4" /></Link>
               </Button>
             </div>
-            <div className="divide-y divide-white/10">
+            <div className="divide-y divide-border">
               {posts.map((post) => <AdminPostItem key={post.id} post={post} />)}
-              {posts.length === 0 && <div className="p-10 text-center text-sm text-slate-500">Aucun contenu pour le moment.</div>}
+              {posts.length === 0 && <div className="p-10 text-center text-sm text-muted-foreground">Aucun contenu pour le moment.</div>}
             </div>
           </section>
 
           <aside className="space-y-6">
-            <section className="rounded-2xl border border-white/10 bg-slate-900/80 p-5 shadow-xl shadow-black/10">
-              <div className="flex items-center gap-2"><Activity className="h-5 w-5 text-primary" /><h2 className="font-black text-white">Actions rapides</h2></div>
+            <section className="rounded-2xl border border-border bg-card p-5 shadow-elegant">
+              <div className="flex items-center gap-2"><Activity className="h-5 w-5 text-primary" /><h2 className="font-black text-foreground">Actions rapides</h2></div>
               <div className="mt-4 space-y-2">
                 <AdminAction href="/admin/blog/nouveau" icon={PenLine} title="Publier un contenu" detail="Article, offre ou opportunité" />
                 <AdminAction href="/admin/notifications" icon={BellRing} title="Publier une annonce" detail="Diffuser une notification aux comptes autorisés" />
@@ -112,15 +112,15 @@ export default async function AdminPage() {
               </div>
             </section>
 
-            <section className="rounded-2xl border border-white/10 bg-slate-900/80 p-5 shadow-xl shadow-black/10">
+            <section className="rounded-2xl border border-border bg-card p-5 shadow-elegant">
               <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Activité récente</p>
               <div className="mt-3 space-y-1">
                 {logs.length ? logs.map((log) => (
-                  <div key={`${log.created_at}-${log.action}`} className="flex items-center justify-between gap-3 border-b border-white/5 py-2 last:border-0">
-                    <span className="truncate text-xs text-slate-300">{log.action.replaceAll('_', ' ')}</span>
-                    <span className="shrink-0 text-[11px] text-slate-600">{new Date(log.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}</span>
+                  <div key={`${log.created_at}-${log.action}`} className="flex items-center justify-between gap-3 border-b border-border/60 py-2 last:border-0">
+                    <span className="truncate text-xs text-foreground">{log.action.replaceAll('_', ' ')}</span>
+                    <span className="shrink-0 text-[11px] text-muted-foreground">{new Date(log.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}</span>
                   </div>
-                )) : <p className="py-3 text-sm text-slate-600">Aucune activité enregistrée.</p>}
+                )) : <p className="py-3 text-sm text-muted-foreground">Aucune activité enregistrée.</p>}
               </div>
             </section>
           </aside>
@@ -132,9 +132,9 @@ export default async function AdminPage() {
 
 function AdminAction({ href, icon: Icon, title, detail }: { href: string; icon: typeof Activity; title: string; detail: string }) {
   return (
-    <Link href={href} className="group flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-3 transition hover:border-primary/50 hover:bg-primary/5">
+    <Link href={href} className="group flex items-center gap-3 rounded-xl border border-border bg-muted/40 p-3 transition hover:border-primary/50 hover:bg-primary/5">
       <span className="rounded-lg bg-primary/10 p-2 text-primary"><Icon className="h-4 w-4" /></span>
-      <span className="min-w-0"><span className="block text-sm font-bold text-white">{title}</span><span className="block truncate text-xs text-slate-500">{detail}</span></span>
+      <span className="min-w-0"><span className="block text-sm font-bold text-foreground">{title}</span><span className="block truncate text-xs text-muted-foreground">{detail}</span></span>
       <ArrowRight className="ml-auto h-4 w-4 text-slate-500 transition group-hover:translate-x-0.5 group-hover:text-primary" />
     </Link>
   )

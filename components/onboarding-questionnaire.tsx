@@ -222,15 +222,15 @@ export function OnboardingQuestionnaire({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md transition-opacity" onClick={handleClose} />
+      <div className="fixed inset-0 bg-slate-950/45 dark:bg-slate-950/80 backdrop-blur-md transition-opacity" onClick={handleClose} />
 
       {/* Modal Content */}
-      <Card className="relative w-full max-w-lg bg-slate-900 border border-slate-700/80 shadow-2xl rounded-3xl overflow-hidden text-white z-10 animate-in fade-in zoom-in-95 duration-200">
+      <Card className="relative z-10 w-full max-w-lg overflow-hidden rounded-3xl border border-border bg-card text-card-foreground shadow-elevated animate-in fade-in zoom-in-95 duration-200">
         
         {/* Close Button */}
         <button
           onClick={handleClose}
-          className="absolute top-4 right-4 p-2 rounded-full text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+          className="absolute top-4 right-4 p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
           title="Passer"
         >
           <X className="h-4 w-4" />
@@ -244,19 +244,19 @@ export function OnboardingQuestionnaire({
                 <Sparkles className="h-3.5 w-3.5" />
                 Bienvenue sur CVAfrik
               </span>
-              <span className="text-xs font-mono font-semibold text-slate-400">
+              <span className="text-xs font-mono font-semibold text-muted-foreground">
                 Étape {currentStep + 1} / {stepsInfo.length}
               </span>
             </div>
 
             {/* Progress Bar */}
-            <div className="flex gap-1.5 h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+            <div className="flex h-1.5 w-full gap-1.5 overflow-hidden rounded-full bg-muted">
               {stepsInfo.map((_, i) => (
                 <div
                   key={i}
                   className={cn(
                     'flex-1 h-full transition-all duration-300 rounded-full',
-                    i <= currentStep ? 'bg-primary' : 'bg-slate-700/50'
+                    i <= currentStep ? 'bg-primary' : 'bg-muted-foreground/25'
                   )}
                 />
               ))}
@@ -267,16 +267,16 @@ export function OnboardingQuestionnaire({
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <currentInfo.icon className="h-5 w-5 text-primary shrink-0" />
-              <h2 className="text-xl font-bold tracking-tight text-white">{currentInfo.title}</h2>
+              <h2 className="text-xl font-bold tracking-tight text-foreground">{currentInfo.title}</h2>
             </div>
-            <p className="text-xs text-slate-400 leading-relaxed">{currentInfo.subtitle}</p>
+            <p className="text-xs leading-relaxed text-muted-foreground">{currentInfo.subtitle}</p>
           </div>
 
           {/* ── STEP 0: Nom & Prénom ────────────────────────────────────── */}
           {currentStep === 0 && (
             <div className="space-y-4 py-2">
               <div className="space-y-2">
-                <Label htmlFor="prenom" className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+                <Label htmlFor="prenom" className="text-xs font-bold uppercase tracking-wider text-foreground">
                   Prénom
                 </Label>
                 <Input
@@ -286,12 +286,12 @@ export function OnboardingQuestionnaire({
                   value={prenom}
                   onChange={(e) => setPrenom(e.target.value)}
                   autoFocus
-                  className="bg-slate-800 border-slate-700 text-white placeholder-slate-500 rounded-xl h-11"
+                  className="h-11 rounded-xl border-input bg-background text-foreground placeholder:text-muted-foreground"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="nom" className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+                <Label htmlFor="nom" className="text-xs font-bold uppercase tracking-wider text-foreground">
                   Nom
                 </Label>
                 <Input
@@ -300,7 +300,7 @@ export function OnboardingQuestionnaire({
                   placeholder="Votre nom de famille"
                   value={nom}
                   onChange={(e) => setNom(e.target.value)}
-                  className="bg-slate-800 border-slate-700 text-white placeholder-slate-500 rounded-xl h-11"
+                  className="h-11 rounded-xl border-input bg-background text-foreground placeholder:text-muted-foreground"
                 />
               </div>
             </div>
@@ -318,8 +318,8 @@ export function OnboardingQuestionnaire({
                       className={cn(
                         'w-full flex items-center justify-between p-3.5 rounded-2xl border-2 transition-all text-left text-sm font-semibold',
                         isSelected
-                          ? 'bg-primary/15 border-primary text-white shadow-md shadow-primary/10'
-                          : 'bg-slate-800/40 border-slate-700/50 text-slate-300 hover:bg-slate-800 hover:border-slate-600'
+                          ? 'border-primary bg-primary/10 text-foreground shadow-md shadow-primary/10'
+                          : 'border-border bg-card text-foreground hover:border-primary/40 hover:bg-muted'
                       )}
                     >
                       <span>{item}</span>
@@ -333,7 +333,7 @@ export function OnboardingQuestionnaire({
                         value={customStatut}
                         onChange={(e) => setCustomStatut(e.target.value)}
                         autoFocus
-                        className="bg-slate-800 border-primary text-white placeholder-slate-500 rounded-xl"
+                        className="rounded-xl border-primary bg-background text-foreground placeholder:text-muted-foreground"
                       />
                     )}
                   </div>
@@ -354,8 +354,8 @@ export function OnboardingQuestionnaire({
                       className={cn(
                         'w-full flex items-center justify-between p-3.5 rounded-2xl border-2 transition-all text-left text-sm font-semibold',
                         isSelected
-                          ? 'bg-primary/15 border-primary text-white shadow-md shadow-primary/10'
-                          : 'bg-slate-800/40 border-slate-700/50 text-slate-300 hover:bg-slate-800 hover:border-slate-600'
+                          ? 'border-primary bg-primary/10 text-foreground shadow-md shadow-primary/10'
+                          : 'border-border bg-card text-foreground hover:border-primary/40 hover:bg-muted'
                       )}
                     >
                       <span>{item}</span>
@@ -369,7 +369,7 @@ export function OnboardingQuestionnaire({
                         value={customSecteur}
                         onChange={(e) => setCustomSecteur(e.target.value)}
                         autoFocus
-                        className="bg-slate-800 border-primary text-white placeholder-slate-500 rounded-xl"
+                        className="rounded-xl border-primary bg-background text-foreground placeholder:text-muted-foreground"
                       />
                     )}
                   </div>
@@ -397,8 +397,8 @@ export function OnboardingQuestionnaire({
                       className={cn(
                         'w-full flex items-center justify-between p-3.5 rounded-2xl border-2 transition-all text-left text-sm font-semibold',
                         isSelected
-                          ? 'bg-primary/15 border-primary text-white shadow-md shadow-primary/10'
-                          : 'bg-slate-800/40 border-slate-700/50 text-slate-300 hover:bg-slate-800 hover:border-slate-600'
+                          ? 'border-primary bg-primary/10 text-foreground shadow-md shadow-primary/10'
+                          : 'border-border bg-card text-foreground hover:border-primary/40 hover:bg-muted'
                       )}
                     >
                       <span>{item}</span>
@@ -412,13 +412,13 @@ export function OnboardingQuestionnaire({
                         value={customObjectif}
                         onChange={(e) => setCustomObjectif(e.target.value)}
                         autoFocus
-                        className="bg-slate-800 border-primary text-white placeholder-slate-500 rounded-xl"
+                        className="rounded-xl border-primary bg-background text-foreground placeholder:text-muted-foreground"
                       />
                     )}
                   </div>
                 )
               })}
-              <p className="pt-1 text-xs text-slate-400">Sélectionnez 2 ou 3 objectifs.</p>
+              <p className="pt-1 text-xs text-muted-foreground">Sélectionnez 2 ou 3 objectifs.</p>
             </div>
           )}
 
@@ -434,8 +434,8 @@ export function OnboardingQuestionnaire({
                       className={cn(
                         'w-full flex items-center justify-between p-3.5 rounded-2xl border-2 transition-all text-left text-sm font-semibold',
                         isSelected
-                          ? 'bg-primary/15 border-primary text-white shadow-md shadow-primary/10'
-                          : 'bg-slate-800/40 border-slate-700/50 text-slate-300 hover:bg-slate-800 hover:border-slate-600'
+                          ? 'border-primary bg-primary/10 text-foreground shadow-md shadow-primary/10'
+                          : 'border-border bg-card text-foreground hover:border-primary/40 hover:bg-muted'
                       )}
                     >
                       <span>{item}</span>
@@ -449,7 +449,7 @@ export function OnboardingQuestionnaire({
                         value={customSource}
                         onChange={(e) => setCustomSource(e.target.value)}
                         autoFocus
-                        className="bg-slate-800 border-primary text-white placeholder-slate-500 rounded-xl"
+                        className="rounded-xl border-primary bg-background text-foreground placeholder:text-muted-foreground"
                       />
                     )}
                   </div>
@@ -470,8 +470,8 @@ export function OnboardingQuestionnaire({
                       className={cn(
                         'w-full flex items-center justify-between p-3.5 rounded-2xl border-2 transition-all text-left text-sm font-semibold',
                         isSelected
-                          ? 'bg-primary/15 border-primary text-white shadow-md shadow-primary/10'
-                          : 'bg-slate-800/40 border-slate-700/50 text-slate-300 hover:bg-slate-800 hover:border-slate-600'
+                          ? 'border-primary bg-primary/10 text-foreground shadow-md shadow-primary/10'
+                          : 'border-border bg-card text-foreground hover:border-primary/40 hover:bg-muted'
                       )}
                     >
                       <span>{item}</span>
@@ -485,7 +485,7 @@ export function OnboardingQuestionnaire({
                         value={customPays}
                         onChange={(e) => setCustomPays(e.target.value)}
                         autoFocus
-                        className="bg-slate-800 border-primary text-white placeholder-slate-500 rounded-xl"
+                        className="rounded-xl border-primary bg-background text-foreground placeholder:text-muted-foreground"
                       />
                     )}
                   </div>
@@ -495,13 +495,13 @@ export function OnboardingQuestionnaire({
           )}
 
           {/* Footer Controls */}
-          <div className="flex items-center justify-between pt-4 border-t border-slate-800">
+          <div className="flex items-center justify-between border-t border-border pt-4">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setCurrentStep(prev => Math.max(0, prev - 1))}
               disabled={currentStep === 0 || isSubmitting}
-              className="text-slate-400 hover:text-white rounded-xl"
+              className="rounded-xl text-muted-foreground hover:text-foreground"
             >
               <ChevronLeft className="h-4 w-4 mr-1" />
               Précédent
@@ -510,7 +510,7 @@ export function OnboardingQuestionnaire({
             <Button
               onClick={handleNextStep}
               disabled={!canGoNext() || isSubmitting}
-              className="rounded-xl px-6 bg-primary font-bold text-white shadow-lg shadow-primary/20 hover:bg-primary/90"
+              className="rounded-xl bg-primary px-6 font-bold text-primary-foreground shadow-lg shadow-primary/20 hover:bg-primary/90"
             >
               {isSubmitting ? (
                 <>

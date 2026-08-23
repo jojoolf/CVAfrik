@@ -201,7 +201,7 @@ export function CVBuilderForm({
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-950/5 dark:bg-slate-950 text-foreground selection:bg-primary/20">
+    <div className="flex min-h-screen flex-col bg-background text-foreground selection:bg-primary/20">
       {/* Header Glassmorphic Top Bar */}
       <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-xl transition-all">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
@@ -317,7 +317,7 @@ export function CVBuilderForm({
                     <div
                       className={`flex h-6 w-6 items-center justify-center rounded-lg transition-transform ${
                         isActive
-                          ? 'bg-white/20 text-white'
+                          ? 'bg-primary-foreground/20 text-primary-foreground'
                           : isCompleted
                           ? 'bg-primary/20 text-primary'
                           : 'bg-muted text-muted-foreground group-hover:scale-110'
@@ -451,7 +451,7 @@ export function CVBuilderForm({
                 </div>
 
                 {/* A4 preview container — uses wrapper sizing to prevent cutoff */}
-                <div className="rounded-2xl border border-border/80 bg-slate-900/5 dark:bg-slate-900/40 p-3 shadow-xl overflow-auto custom-scrollbar max-h-[calc(100vh-200px)] flex justify-center items-start">
+                <div className="flex max-h-[calc(100vh-200px)] items-start justify-center overflow-auto rounded-2xl border border-border/80 bg-muted/70 p-3 shadow-xl custom-scrollbar dark:bg-slate-900/40">
                   {/* Outer wrapper shrinks to scaled dimensions → no overflow */}
                   <div
                     style={{
