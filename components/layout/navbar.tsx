@@ -2,177 +2,99 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import type { User } from '@supabase/supabase-js'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-import { Menu, FileText, LayoutDashboard, Sparkles, Star, FileSignature, MessageSquareCode, LifeBuoy } from 'lucide-react'
+import { CircleUserRound, FileSignature, FileText, LayoutDashboard, LifeBuoy, Menu, MoreHorizontal, Sparkles, BriefcaseBusiness, MessageSquareCode } from 'lucide-react'
 import { UserNav } from '@/components/layout/user-nav'
 import { ModeToggle } from '@/components/layout/mode-toggle'
 import { LanguageSwitcher } from '@/components/language-switcher'
-import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import { useTranslation } from '@/lib/i18n/use-translation'
 
-interface NavbarProps {
-  user?: User | null
-}
+interface NavbarProps { user?: User | null }
+type NavItem = { name: string; href: string; icon?: React.ComponentType<{ className?: string }> }
 
 export function Navbar({ user }: NavbarProps) {
   const { t } = useTranslation()
-  const [isOpen, setIsOpen] = useState(false)
-  const [plan, setPlan] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [isMoreOpen, setIsMoreOpen] = useState(false)
 
-  useEffect(() => {
-    async function fetchProfile() {
-      if (!user) {
-        setLoading(false)
-        return
-      }
-      const supabase = createClient()
-      const { data } = await supabase
-        .from('profiles')
-        .select('plan')
-        .eq('id', user.id)
-        .single()
-      
-      if (data) setPlan(data.plan)
-      setLoading(false)
-    }
-    fetchProfile()
-  }, [user])
-
-  const getNavigation = (): { name: string; href: string; icon?: any }[] => {
-    if (!user) {
-      return [
+  const navigation: NavItem[] = user
+    ? [
+        { name: t('nav.dashboard'), href: '/dashboard', icon: LayoutDashboard },
+        { name: t('nav.cv'), href: '/cv-builder', icon: FileText },
+        { name: t('nav.lettres'), href: '/dashboard/lettres', icon: FileSignature },
+        { name: 'Opportunités', href: '/opportunites', icon: BriefcaseBusiness },
+        { name: t('nav.entretien'), href: '/dashboard/simulateur', icon: MessageSquareCode },
+        { name: t('nav.blog'), href: '/blog', icon: Sparkles },
+        { name: t('nav.modeles'), href: '/templates' },
+        { name: t('nav.support'), href: '/dashboard/support', icon: LifeBuoy },
+      ]
+    : [
         { name: t('nav.fonctionnalites'), href: '/#fonctionnalites' },
         { name: t('nav.templates'), href: '/templates' },
         { name: t('nav.tarifs'), href: '/tarifs' },
         { name: t('nav.blogEmploi'), href: '/blog' },
       ]
-    }
 
-    // Menu pour utilisateur connecté
-    const baseMenu = [
-      { name: t('nav.dashboard'), href: '/dashboard', icon: LayoutDashboard },
-      { name: t('nav.cv'), href: '/cv-builder', icon: FileText },
-      { name: t('nav.lettres'), href: '/dashboard/lettres', icon: FileSignature },
-      { name: t('nav.entretien'), href: '/dashboard/simulateur', icon: MessageSquareCode },
-      { name: t('nav.blog'), href: '/blog', icon: Sparkles },
-    ]
-
-    return [
-      ...baseMenu,
-      { name: t('nav.modeles'), href: '/templates', icon: undefined },
-      { name: t('nav.support'), href: '/dashboard/support', icon: LifeBuoy },
-    ]
-  }
-
-  const navigation = getNavigation()
+  const mobilePrimary = user
+    ? navigation.slice(0, 4)
+    : [
+        { name: 'Accueil', href: '/', icon: LayoutDashboard },
+        { name: t('nav.templates'), href: '/templates', icon: FileText },
+        { name: t('nav.tarifs'), href: '/tarifs', icon: Sparkles },
+        { name: t('nav.blogEmploi'), href: '/blog', icon: BriefcaseBusiness },
+      ]
+  const mobileSecondary = user ? navigation.slice(4) : navigation.slice(4)
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/70 bg-background/90 shadow-sm backdrop-blur-xl supports-[backdrop-filter]:bg-background/75">
-      <nav className="container mx-auto flex h-16 items-center justify-between px-4">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 ring-1 ring-primary/20">
-            <Image src="/brand/cvafrik-official-mark.png" alt="" width={36} height={36} className="h-8 w-8 object-contain" priority />
-          </div>
-          <span className="text-xl font-bold text-foreground font-syne">
-            CV<span className="text-primary">Afrik</span>
-          </span>
-        </Link>
-
-        {/* Desktop Navigation */}
-        <div className="hidden items-center gap-1 lg:flex">
-          {navigation.map((item) => (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={cn(
-                "flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground"
-              )}
-            >
-              {item.icon && <item.icon className="h-4 w-4" />}
-              {item.name}
-            </Link>
-          ))}
-        </div>
-
-        {/* Desktop Auth & Theme */}
-        <div className="hidden items-center gap-1 md:flex">
-          <LanguageSwitcher />
-          <ModeToggle />
-          {user ? (
-            <UserNav user={user} />
-          ) : (
-            <>
-              <Button variant="ghost" asChild className="rounded-full">
-                <Link href="/auth/connexion">{t('nav.connexion')}</Link>
-              </Button>
-              <Button asChild className="rounded-full shadow-lg shadow-primary/20">
-                <Link href="/auth/inscription">{t('nav.commencer')}</Link>
-              </Button>
-            </>
-          )}
-        </div>
-
-        {/* Mobile Menu */}
-        <Sheet open={isOpen} onOpenChange={setIsOpen}>
-          <SheetTrigger asChild className="md:hidden">
-            <Button variant="ghost" size="icon" className="rounded-full">
-              <Menu className="h-5 w-5" />
-              <span className="sr-only">{t('nav.menu')}</span>
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="right" className="w-[300px] sm:w-[400px] rounded-l-[2rem]">
-            <div className="flex flex-col gap-8 pt-10">
-              <div className="flex items-center justify-between">
-                <Link href="/" className="flex items-center gap-2" onClick={() => setIsOpen(false)}>
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 ring-1 ring-primary/20">
-                    <Image src="/brand/cvafrik-official-mark.png" alt="" width={36} height={36} className="h-8 w-8 object-contain" />
-                  </div>
-                  <span className="text-xl font-bold font-syne text-foreground">
-                    CV<span className="text-primary">Afrik</span>
-                  </span>
-                </Link>
-                <LanguageSwitcher />
-                <ModeToggle />
-              </div>
-
-              <nav className="flex flex-col gap-2">
-                {navigation.map((item) => (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 text-lg font-medium text-foreground transition-all rounded-2xl hover:bg-secondary"
-                  >
-                    {item.icon && <item.icon className="h-5 w-5 text-primary" />}
-                    {item.name}
-                  </Link>
-                ))}
-              </nav>
-
-              <div className="flex flex-col gap-3 border-t border-border pt-6">
-                {user ? (
-                  <UserNav user={user} variant="stacked" onNavigate={() => setIsOpen(false)} />
-                ) : (
-                  <>
-                    <Button variant="outline" asChild className="rounded-2xl" onClick={() => setIsOpen(false)}>
-                      <Link href="/auth/connexion">{t('nav.connexion')}</Link>
-                    </Button>
-                    <Button asChild className="rounded-2xl shadow-lg shadow-primary/20" onClick={() => setIsOpen(false)}>
-                      <Link href="/auth/inscription">{t('nav.commencer')}</Link>
-                    </Button>
-                  </>
-                )}
-              </div>
+    <>
+      <header className="sticky top-0 z-50 w-full border-b border-border/70 bg-background/90 shadow-sm backdrop-blur-xl supports-[backdrop-filter]:bg-background/75">
+        <nav className="container mx-auto flex h-16 items-center justify-between px-4">
+          <Link href="/" className="flex items-center gap-2">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 ring-1 ring-primary/20">
+              <Image src="/brand/cvafrik-official-mark.png" alt="" width={36} height={36} className="h-8 w-8 object-contain" priority />
             </div>
-          </SheetContent>
-        </Sheet>
+            <span className="text-xl font-bold text-foreground font-syne">CV<span className="text-primary">Afrik</span></span>
+          </Link>
+
+          <div className="hidden items-center gap-1 lg:flex">
+            {navigation.map((item) => (
+              <Link key={item.name} href={item.href} className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground">
+                {item.icon && <item.icon className="h-4 w-4" />}{item.name}
+              </Link>
+            ))}
+          </div>
+
+          <div className="hidden items-center gap-1 md:flex">
+            <LanguageSwitcher /><ModeToggle />
+            {user ? <UserNav user={user} /> : <><Button variant="ghost" asChild className="rounded-full"><Link href="/auth/connexion">{t('nav.connexion')}</Link></Button><Button asChild className="rounded-full shadow-lg shadow-primary/20"><Link href="/auth/inscription">{t('nav.commencer')}</Link></Button></>}
+          </div>
+
+          <div className="flex items-center gap-1 md:hidden"><LanguageSwitcher /><ModeToggle /></div>
+        </nav>
+      </header>
+
+      <nav aria-label="Navigation mobile" className="fixed inset-x-0 bottom-0 z-50 border-t border-border/80 bg-background/95 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 shadow-[0_-10px_30px_rgba(0,0,0,0.10)] backdrop-blur-xl md:hidden">
+        <div className="mx-auto flex max-w-lg items-center justify-around gap-1">
+          {mobilePrimary.map((item) => {
+            const Icon = item.icon || FileText
+            return <Link key={item.name} href={item.href} className="flex min-w-0 flex-1 flex-col items-center gap-1 rounded-xl px-1 py-1.5 text-[10px] font-semibold text-muted-foreground transition hover:bg-primary/10 hover:text-primary"><Icon className="h-5 w-5" /><span className="truncate">{item.name}</span></Link>
+          })}
+          <Sheet open={isMoreOpen} onOpenChange={setIsMoreOpen}>
+            <SheetTrigger asChild><button type="button" className="flex min-w-0 flex-1 flex-col items-center gap-1 rounded-xl px-1 py-1.5 text-[10px] font-semibold text-muted-foreground transition hover:bg-primary/10 hover:text-primary"><MoreHorizontal className="h-5 w-5" /><span>Plus</span></button></SheetTrigger>
+            <SheetContent side="bottom" className="rounded-t-[2rem] px-5 pb-8 pt-3">
+              <div className="mx-auto mb-5 h-1.5 w-12 rounded-full bg-muted" />
+              <div className="mb-5 flex items-center justify-between"><div className="flex items-center gap-2"><Image src="/brand/cvafrik-official-mark.png" alt="" width={32} height={32} className="h-8 w-8 object-contain" /><p className="font-bold text-foreground">Plus d’options</p></div><div className="flex items-center gap-1"><LanguageSwitcher /><ModeToggle /></div></div>
+              <div className="grid grid-cols-2 gap-3">
+                {mobileSecondary.map((item) => { const Icon = item.icon || FileText; return <Link key={item.name} href={item.href} onClick={() => setIsMoreOpen(false)} className="flex min-h-20 flex-col justify-center gap-2 rounded-2xl border border-border bg-card p-4 text-sm font-semibold text-foreground transition hover:border-primary/40 hover:bg-primary/5"><Icon className="h-5 w-5 text-primary" />{item.name}</Link> })}
+                {user ? <Link href="/profil" onClick={() => setIsMoreOpen(false)} className="flex min-h-20 flex-col justify-center gap-2 rounded-2xl border border-border bg-card p-4 text-sm font-semibold text-foreground transition hover:border-primary/40 hover:bg-primary/5"><CircleUserRound className="h-5 w-5 text-primary" />Mon profil</Link> : <><Link href="/auth/connexion" onClick={() => setIsMoreOpen(false)} className="rounded-2xl border border-border p-4 text-sm font-semibold">{t('nav.connexion')}</Link><Link href="/auth/inscription" onClick={() => setIsMoreOpen(false)} className="rounded-2xl bg-primary p-4 text-sm font-semibold text-primary-foreground">{t('nav.commencer')}</Link></>}
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
       </nav>
-    </header>
+    </>
   )
 }
