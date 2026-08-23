@@ -32,7 +32,7 @@ export async function GET() {
     const tomorrowStart = startOfUtcDay(1)
     const dayAfterTomorrowStart = startOfUtcDay(2)
     const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString()
-    const onlineSince = new Date(now.getTime() - 5 * 60 * 1000).toISOString()
+    const onlineSince = new Date(now.getTime() - 75 * 1000).toISOString()
 
     const [
       totalProfilesResult,
@@ -115,7 +115,7 @@ export async function GET() {
 
     return NextResponse.json({
       generatedAt: now.toISOString(),
-      refreshAfterSeconds: 30,
+      refreshAfterSeconds: 15,
       accounts: {
         total: totalProfilesResult.count || 0,
         createdToday: todayProfilesResult.count || 0,

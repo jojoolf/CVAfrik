@@ -6,25 +6,19 @@ import {
   BarChart3,
   BellRing,
   FilePlus2,
-  FileText,
-  Mail,
   PenLine,
   ScrollText,
   Sparkles,
-  Users,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/server'
 import { AdminPostItem } from '@/components/admin/admin-post-item'
+import { AdminOverviewLive } from '@/components/admin/admin-overview-live'
 
 export default async function AdminPage() {
   const supabase = await createClient()
-  const [userResult, usersResult, cvsResult, postsResult, subscribersResult, recentPostsResult, logsResult] = await Promise.all([
+  const [userResult, recentPostsResult, logsResult] = await Promise.all([
     supabase.auth.getUser(),
-    supabase.from('profiles').select('*', { count: 'exact', head: true }),
-    supabase.from('cvs').select('*', { count: 'exact', head: true }),
-    supabase.from('blog_posts').select('*', { count: 'exact', head: true }),
-    supabase.from('newsletter_subscribers').select('*', { count: 'exact', head: true }),
     supabase.from('blog_posts').select('id, titre, categorie, publie, created_at').order('created_at', { ascending: false }).limit(6),
     supabase.from('admin_logs').select('action, admin_email, created_at').order('created_at', { ascending: false }).limit(5),
   ])
@@ -33,13 +27,6 @@ export default async function AdminPage() {
   const posts = recentPostsResult.data || []
   const logs = logsResult.data || []
   const firstName = user?.user_metadata?.prenom || user?.user_metadata?.first_name || 'Admin'
-
-  const metrics = [
-    { label: 'Utilisateurs', value: usersResult.count || 0, detail: 'comptes créés', icon: Users, tone: 'bg-sky-500/10 text-sky-700 ring-sky-500/20 dark:text-sky-300' },
-    { label: 'CV créés', value: cvsResult.count || 0, detail: 'documents enregistrés', icon: FileText, tone: 'bg-emerald-500/10 text-emerald-700 ring-emerald-500/20 dark:text-emerald-300' },
-    { label: 'Contenus', value: postsResult.count || 0, detail: 'articles et opportunités', icon: PenLine, tone: 'bg-violet-500/10 text-violet-700 ring-violet-500/20 dark:text-violet-300' },
-    { label: 'Newsletter', value: subscribersResult.count || 0, detail: 'abonnés actifs', icon: Mail, tone: 'bg-rose-500/10 text-rose-700 ring-rose-500/20 dark:text-rose-300' },
-  ]
 
   return (
     <div className="min-h-full px-4 py-6 sm:px-6 lg:px-8">
@@ -69,20 +56,7 @@ export default async function AdminPage() {
           </div>
         </section>
 
-        <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {metrics.map(({ label, value, detail, icon: Icon, tone }) => (
-            <article key={label} className="rounded-2xl border border-border bg-card p-5 shadow-elegant">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{label}</p>
-                  <p className="mt-3 text-3xl font-black text-foreground">{value.toLocaleString('fr-FR')}</p>
-                </div>
-                <span className={`rounded-xl p-3 ring-1 ${tone}`}><Icon className="h-5 w-5" /></span>
-              </div>
-              <p className="mt-3 text-xs text-muted-foreground">{detail}</p>
-            </article>
-          ))}
-        </section>
+        <AdminOverviewLive />
 
         <div className="mt-6 grid gap-6 lg:grid-cols-[1.35fr_0.65fr]">
           <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-elegant">
@@ -113,7 +87,7 @@ export default async function AdminPage() {
             </section>
 
             <section className="rounded-2xl border border-border bg-card p-5 shadow-elegant">
-              <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Activité récente</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Activité récente</p>
               <div className="mt-3 space-y-1">
                 {logs.length ? logs.map((log) => (
                   <div key={`${log.created_at}-${log.action}`} className="flex items-center justify-between gap-3 border-b border-border/60 py-2 last:border-0">
@@ -135,7 +109,7 @@ function AdminAction({ href, icon: Icon, title, detail }: { href: string; icon: 
     <Link href={href} className="group flex items-center gap-3 rounded-xl border border-border bg-muted/40 p-3 transition hover:border-primary/50 hover:bg-primary/5">
       <span className="rounded-lg bg-primary/10 p-2 text-primary"><Icon className="h-4 w-4" /></span>
       <span className="min-w-0"><span className="block text-sm font-bold text-foreground">{title}</span><span className="block truncate text-xs text-muted-foreground">{detail}</span></span>
-      <ArrowRight className="ml-auto h-4 w-4 text-slate-500 transition group-hover:translate-x-0.5 group-hover:text-primary" />
+      <ArrowRight className="ml-auto h-4 w-4 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-primary" />
     </Link>
   )
 }

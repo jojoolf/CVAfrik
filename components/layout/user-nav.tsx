@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import type { User } from '@supabase/supabase-js'
-import { CreditCard, LayoutDashboard, LogOut, UserRound, LifeBuoy } from 'lucide-react'
+import { CreditCard, LayoutDashboard, LogOut, ShieldCheck, UserRound, LifeBuoy } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
@@ -23,6 +23,8 @@ interface UserNavProps {
   onNavigate?: () => void
   /** Liste verticale pour le drawer mobile */
   variant?: 'dropdown' | 'stacked'
+  /** Autorise l’accès visuel à l’administration ; les routes restent protégées côté serveur. */
+  isAdmin?: boolean
 }
 
 function displayLabel(user: User) {
@@ -33,7 +35,7 @@ function displayLabel(user: User) {
   return user.email?.split('@')[0] ?? 'Compte'
 }
 
-export function UserNav({ user, onNavigate, variant = 'dropdown' }: UserNavProps) {
+export function UserNav({ user, onNavigate, variant = 'dropdown', isAdmin = false }: UserNavProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const label = displayLabel(user)
@@ -70,6 +72,9 @@ export function UserNav({ user, onNavigate, variant = 'dropdown' }: UserNavProps
             Mon espace
           </Link>
         </Button>
+        {isAdmin && <Button variant="outline" asChild className="w-full justify-start border-primary/30 bg-primary/5 text-primary" onClick={onNavigate}>
+          <Link href="/admin"><ShieldCheck className="mr-2 h-4 w-4" />Mon application Admin</Link>
+        </Button>}
         <Button variant="outline" asChild className="w-full justify-start" onClick={onNavigate}>
           <Link href="/profil">
             <UserRound className="mr-2 h-4 w-4" />
@@ -114,6 +119,12 @@ export function UserNav({ user, onNavigate, variant = 'dropdown' }: UserNavProps
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        {isAdmin && <DropdownMenuItem asChild>
+          <Link href="/admin" className="cursor-pointer font-semibold text-primary focus:text-primary">
+            <ShieldCheck className="mr-2 h-4 w-4" />
+            Mon application Admin
+          </Link>
+        </DropdownMenuItem>}
         <DropdownMenuItem asChild>
           <Link href="/dashboard" className="cursor-pointer">
             <LayoutDashboard className="mr-2 h-4 w-4" />

@@ -13,6 +13,7 @@ import { ModeToggle } from '@/components/layout/mode-toggle'
 import { LanguageSwitcher } from '@/components/language-switcher'
 import { cn } from '@/lib/utils'
 import { useTranslation } from '@/lib/i18n/use-translation'
+import { isAdminEmail } from '@/lib/admin/access'
 
 interface NavbarProps { user?: User | null }
 type NavItem = { name: string; href: string; icon?: React.ComponentType<{ className?: string }> }
@@ -21,6 +22,7 @@ export function Navbar({ user }: NavbarProps) {
   const { t } = useTranslation()
   const pathname = usePathname()
   const [isMoreOpen, setIsMoreOpen] = useState(false)
+  const isAdmin = isAdminEmail(user?.email)
 
   const navigation: NavItem[] = user
     ? [
@@ -72,7 +74,7 @@ export function Navbar({ user }: NavbarProps) {
 
           <div className="hidden items-center gap-1 md:flex">
             <LanguageSwitcher /><ModeToggle />
-            {user ? <UserNav user={user} /> : <><Button variant="ghost" asChild className="rounded-full"><Link href="/auth/connexion">{t('nav.connexion')}</Link></Button><Button asChild className="rounded-full shadow-lg shadow-primary/20"><Link href="/auth/inscription">{t('nav.commencer')}</Link></Button></>}
+            {user ? <UserNav user={user} isAdmin={isAdmin} /> : <><Button variant="ghost" asChild className="rounded-full"><Link href="/auth/connexion">{t('nav.connexion')}</Link></Button><Button asChild className="rounded-full shadow-lg shadow-primary/20"><Link href="/auth/inscription">{t('nav.commencer')}</Link></Button></>}
           </div>
 
           <div className="flex items-center gap-1 md:hidden"><LanguageSwitcher /><ModeToggle /></div>
@@ -95,7 +97,7 @@ export function Navbar({ user }: NavbarProps) {
                 {mobileSecondary.map((item) => { const Icon = item.icon || FileText; const active = isItemActive(item.href); return <Link key={item.name} href={item.href} aria-current={active ? 'page' : undefined} onClick={() => setIsMoreOpen(false)} className={cn('flex min-h-20 flex-col justify-center gap-2 rounded-2xl border p-4 text-sm font-semibold transition', active ? 'border-primary bg-primary/10 text-primary shadow-sm' : 'border-border bg-card text-foreground hover:border-primary/40 hover:bg-primary/5')}><Icon className="h-5 w-5 text-primary" />{item.name}</Link> })}
                 {!user && <><Link href="/auth/connexion" onClick={() => setIsMoreOpen(false)} className="rounded-2xl border border-border p-4 text-sm font-semibold">{t('nav.connexion')}</Link><Link href="/auth/inscription" onClick={() => setIsMoreOpen(false)} className="rounded-2xl bg-primary p-4 text-sm font-semibold text-primary-foreground">{t('nav.commencer')}</Link></>}
               </div>
-              {user && <div className="mt-5 border-t border-border pt-4"><p className="mb-2 px-1 text-xs font-bold uppercase tracking-wider text-muted-foreground">Mon compte</p><UserNav user={user} variant="stacked" onNavigate={() => setIsMoreOpen(false)} /></div>}
+              {user && <div className="mt-5 border-t border-border pt-4"><p className="mb-2 px-1 text-xs font-bold uppercase tracking-wider text-muted-foreground">Mon compte</p><UserNav user={user} isAdmin={isAdmin} variant="stacked" onNavigate={() => setIsMoreOpen(false)} /></div>}
             </SheetContent>
           </Sheet>
         </div>

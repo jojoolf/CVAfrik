@@ -79,7 +79,7 @@ export default function AdminStatsPage() {
 
   useEffect(() => {
     void load()
-    const refresh = window.setInterval(() => void load(true), 30_000)
+    const refresh = window.setInterval(() => void load(true), 15_000)
     return () => window.clearInterval(refresh)
   }, [])
 
@@ -104,7 +104,7 @@ export default function AdminStatsPage() {
             <div>
               <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-black uppercase tracking-[0.15em] text-primary"><Sparkles className="h-3.5 w-3.5" /> Pilotage en direct</div>
               <h1 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">La santé de CVAfrik, en un regard.</h1>
-              <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">Les chiffres proviennent directement des comptes, paiements, abonnements et activités CVAfrik. La page se rafraîchit automatiquement toutes les 30 secondes.</p>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">Les chiffres proviennent directement des comptes, paiements, abonnements et activités CVAfrik. La page se rafraîchit automatiquement toutes les 15 secondes.</p>
             </div>
             <div className="flex flex-wrap items-center gap-3">
               <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3"><p className="flex items-center gap-2 text-sm font-bold text-emerald-700 dark:text-emerald-200"><span className="h-2 w-2 rounded-full bg-emerald-500" /> Données en direct</p><p className="mt-1 text-xs text-emerald-700/70 dark:text-emerald-100/60">Actualisées à {lastUpdate}</p></div>
@@ -115,7 +115,7 @@ export default function AdminStatsPage() {
 
         <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <MetricCard label="Comptes créés" value={analytics.accounts.total.toLocaleString('fr-FR')} detail={`+${analytics.accounts.createdToday} aujourd’hui · +${analytics.accounts.createdYesterday} hier`} icon={Users} tone="sky" />
-          <MetricCard label="Connectés maintenant" value={analytics.accounts.online.toLocaleString('fr-FR')} detail="Actifs au cours des 5 dernières minutes" icon={UserCheck} tone="emerald" />
+          <MetricCard label="Connectés maintenant" value={analytics.accounts.online.toLocaleString('fr-FR')} detail="Actifs au cours des 75 dernières secondes" icon={UserCheck} tone="emerald" />
           <MetricCard label="Abonnés actifs" value={analytics.accounts.paidActive.toLocaleString('fr-FR')} detail={`${analytics.subscriptions.expiringTomorrow} échéance(s) demain`} icon={CheckCircle2} tone="violet" />
           <MetricCard label="CA aujourd’hui" value={currency(analytics.revenue.today)} detail={`${analytics.subscriptions.today} souscription(s) validée(s)`} icon={CircleDollarSign} tone="primary" />
         </section>

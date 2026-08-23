@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import { Capacitor } from '@capacitor/core'
 
-const HEARTBEAT_INTERVAL_MS = 60_000
+const HEARTBEAT_INTERVAL_MS = 30_000
 
 export function LivePresence() {
   useEffect(() => {
@@ -26,12 +26,17 @@ export function LivePresence() {
     void heartbeat()
     const interval = window.setInterval(() => void heartbeat(), HEARTBEAT_INTERVAL_MS)
     const onFocus = () => void heartbeat()
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') void heartbeat()
+    }
     window.addEventListener('focus', onFocus)
+    document.addEventListener('visibilitychange', onVisibilityChange)
 
     return () => {
       active = false
       window.clearInterval(interval)
       window.removeEventListener('focus', onFocus)
+      document.removeEventListener('visibilitychange', onVisibilityChange)
     }
   }, [])
 
