@@ -9,6 +9,7 @@ import Script from 'next/script'
 import { ThemeProvider } from '@/components/theme-provider'
 import { NativeOAuthRedirect } from '@/components/auth/native-oauth-redirect'
 import { NativePushNotifications } from '@/components/notifications/native-push-notifications'
+import { LivePresence } from '@/components/analytics/live-presence'
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -100,6 +101,7 @@ export default async function RootLayout({
       <body className="font-sans antialiased min-h-screen">
         <NativeOAuthRedirect />
         <NativePushNotifications />
+        <LivePresence />
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"

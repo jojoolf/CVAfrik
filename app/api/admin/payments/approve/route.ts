@@ -24,9 +24,10 @@ export async function POST(req: Request) {
     );
 
     // 1. Update the manual payment status
+    const now = new Date();
     const { error: payError } = await supabaseAdmin
       .from("manual_payments")
-      .update({ statut: "valide" })
+      .update({ statut: "valide", validated_at: now.toISOString() })
       .eq("id", paymentId);
 
     if (payError) throw payError;
@@ -39,7 +40,6 @@ export async function POST(req: Request) {
       .maybeSingle();
 
     // Calculate new expiry: extend from now or from remaining days
-    const now = new Date();
     const currentExpiry = currentProfile?.plan_expiry ? new Date(currentProfile.plan_expiry) : null;
     const baseDate = (currentExpiry && currentExpiry > now) ? currentExpiry : now;
     const expiryDate = new Date(baseDate);
