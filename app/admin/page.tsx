@@ -4,6 +4,7 @@ import {
   ArrowRight,
   ArrowUpRight,
   BarChart3,
+  BellRing,
   FilePlus2,
   FileText,
   Mail,
@@ -59,6 +60,9 @@ export default async function AdminPage() {
                 <Link href="/admin/blog/nouveau"><FilePlus2 className="mr-2 h-4 w-4" /> Nouveau contenu</Link>
               </Button>
               <Button asChild variant="outline" className="rounded-xl border-white/15 bg-white/5 font-bold text-white hover:bg-white/10 hover:text-white">
+                <Link href="/admin/notifications"><BellRing className="mr-2 h-4 w-4" /> Publier une annonce</Link>
+              </Button>
+              <Button asChild variant="outline" className="rounded-xl border-white/15 bg-white/5 font-bold text-white hover:bg-white/10 hover:text-white">
                 <Link href="/admin/statistiques"><BarChart3 className="mr-2 h-4 w-4" /> Voir les statistiques</Link>
               </Button>
             </div>
@@ -102,6 +106,7 @@ export default async function AdminPage() {
               <div className="flex items-center gap-2"><Activity className="h-5 w-5 text-primary" /><h2 className="font-black text-white">Actions rapides</h2></div>
               <div className="mt-4 space-y-2">
                 <AdminAction href="/admin/blog/nouveau" icon={PenLine} title="Publier un contenu" detail="Article, offre ou opportunité" />
+                <AdminAction href="/admin/notifications" icon={BellRing} title="Publier une annonce" detail="Diffuser une notification aux comptes autorisés" />
                 <AdminAction href="/admin/statistiques" icon={BarChart3} title="Consulter les statistiques" detail="Suivre les indicateurs de la plateforme" />
                 <AdminAction href="/admin/logs" icon={ScrollText} title="Voir le journal" detail="Contrôler les actions administratives" />
               </div>
