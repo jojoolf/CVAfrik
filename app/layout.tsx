@@ -62,13 +62,13 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: '/icon.svg', type: 'image/svg+xml' },
-      { url: '/apple-icon.png', sizes: '180x180', type: 'image/png' },
+      { url: '/brand/cvafrik-official-app-512.png?v=20260823', sizes: '512x512', type: 'image/png' },
+      { url: '/brand/cvafrik-official-app-192.png?v=20260823', sizes: '192x192', type: 'image/png' },
     ],
-    shortcut: '/icon.svg',
-    apple: '/apple-icon.png',
+    shortcut: '/brand/cvafrik-official-app-192.png?v=20260823',
+    apple: '/brand/cvafrik-official-apple-180.png?v=20260823',
   },
-  manifest: '/manifest.json',
+  manifest: '/manifest.json?v=20260823',
   appleWebApp: {
     capable: true,
     title: 'CVAfrik',
