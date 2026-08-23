@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import type { User } from '@supabase/supabase-js'
-import { LayoutDashboard, LogOut, UserRound, LifeBuoy } from 'lucide-react'
+import { CreditCard, LayoutDashboard, LogOut, UserRound, LifeBuoy } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
@@ -46,8 +46,9 @@ export function UserNav({ user, onNavigate, variant = 'dropdown' }: UserNavProps
     onNavigate?.()
     try {
       const supabase = createClient()
-      await supabase.auth.signOut()
-      router.push('/')
+      const { error } = await supabase.auth.signOut({ scope: 'local' })
+      if (error) throw error
+      router.replace('/')
       router.refresh()
     } finally {
       setLoading(false)
@@ -57,7 +58,12 @@ export function UserNav({ user, onNavigate, variant = 'dropdown' }: UserNavProps
   if (variant === 'stacked') {
     return (
       <div className="flex flex-col gap-2 pt-2">
-        <p className="truncate px-1 text-sm text-muted-foreground">{email}</p>
+        <div className="mb-1 rounded-2xl border border-border bg-card p-3">
+          <div className="flex items-center gap-3">
+            <Avatar className="h-10 w-10 shrink-0"><AvatarImage src={avatarUrl} alt="Photo de profil" /><AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">{initials}</AvatarFallback></Avatar>
+            <div className="min-w-0"><p className="truncate text-sm font-bold text-foreground">{label}</p><p className="truncate text-xs text-muted-foreground">{email}</p></div>
+          </div>
+        </div>
         <Button variant="outline" asChild className="w-full justify-start" onClick={onNavigate}>
           <Link href="/dashboard">
             <LayoutDashboard className="mr-2 h-4 w-4" />
@@ -69,6 +75,12 @@ export function UserNav({ user, onNavigate, variant = 'dropdown' }: UserNavProps
             <UserRound className="mr-2 h-4 w-4" />
             Mon profil
           </Link>
+        </Button>
+        <Button variant="outline" asChild className="w-full justify-start" onClick={onNavigate}>
+          <Link href="/dashboard/factures"><CreditCard className="mr-2 h-4 w-4" />Mon abonnement</Link>
+        </Button>
+        <Button variant="outline" asChild className="w-full justify-start" onClick={onNavigate}>
+          <Link href="/dashboard/support"><LifeBuoy className="mr-2 h-4 w-4" />Aide & Support</Link>
         </Button>
         <Button
           variant="destructive"
@@ -112,6 +124,12 @@ export function UserNav({ user, onNavigate, variant = 'dropdown' }: UserNavProps
           <Link href="/profil" className="cursor-pointer">
             <UserRound className="mr-2 h-4 w-4" />
             Mon profil
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/dashboard/factures" className="cursor-pointer">
+            <CreditCard className="mr-2 h-4 w-4" />
+            Mon abonnement
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>

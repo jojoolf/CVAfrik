@@ -7,7 +7,7 @@ import { usePathname } from 'next/navigation'
 import type { User } from '@supabase/supabase-js'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-import { CircleUserRound, FileSignature, FileText, LayoutDashboard, LifeBuoy, Menu, MoreHorizontal, Sparkles, BriefcaseBusiness, MessageSquareCode } from 'lucide-react'
+import { FileSignature, FileText, LayoutDashboard, Menu, MoreHorizontal, Sparkles, BriefcaseBusiness, MessageSquareCode } from 'lucide-react'
 import { UserNav } from '@/components/layout/user-nav'
 import { ModeToggle } from '@/components/layout/mode-toggle'
 import { LanguageSwitcher } from '@/components/language-switcher'
@@ -31,7 +31,6 @@ export function Navbar({ user }: NavbarProps) {
         { name: t('nav.entretien'), href: '/dashboard/simulateur', icon: MessageSquareCode },
         { name: t('nav.blog'), href: '/blog', icon: Sparkles },
         { name: t('nav.modeles'), href: '/templates' },
-        { name: t('nav.support'), href: '/dashboard/support', icon: LifeBuoy },
       ]
     : [
         { name: t('nav.fonctionnalites'), href: '/#fonctionnalites' },
@@ -93,9 +92,10 @@ export function Navbar({ user }: NavbarProps) {
               <div className="mx-auto mb-5 h-1.5 w-12 rounded-full bg-muted" />
               <div className="mb-5 flex items-center justify-between"><div className="flex items-center gap-2"><Image src="/brand/cvafrik-official-mark.png" alt="" width={32} height={32} className="h-8 w-8 object-contain" /><p className="font-bold text-foreground">Plus d’options</p></div><div className="flex items-center gap-1"><LanguageSwitcher /><ModeToggle /></div></div>
               <div className="grid grid-cols-2 gap-3">
-                {mobileSecondary.map((item) => { const Icon = item.icon || FileText; const active = isItemActive(item.href); return <Link key={item.name} href={item.href} aria-current={active ? 'page' : undefined} onClick={() => setIsMoreOpen(false)} className={cn('flex min-h-20 flex-col justify-center gap-2 rounded-2xl border p-4 text-sm font-semibold transition', active ? 'border-primary bg-primary/10 text-primary shadow-sm' : 'border-border bg-card text-foreground hover:border-primary/40 hover:bg-primary/5')}><Icon className={cn('h-5 w-5', active ? 'text-primary' : 'text-primary')} />{item.name}</Link> })}
-                {user ? <Link href="/profil" onClick={() => setIsMoreOpen(false)} className="flex min-h-20 flex-col justify-center gap-2 rounded-2xl border border-border bg-card p-4 text-sm font-semibold text-foreground transition hover:border-primary/40 hover:bg-primary/5"><CircleUserRound className="h-5 w-5 text-primary" />Mon profil</Link> : <><Link href="/auth/connexion" onClick={() => setIsMoreOpen(false)} className="rounded-2xl border border-border p-4 text-sm font-semibold">{t('nav.connexion')}</Link><Link href="/auth/inscription" onClick={() => setIsMoreOpen(false)} className="rounded-2xl bg-primary p-4 text-sm font-semibold text-primary-foreground">{t('nav.commencer')}</Link></>}
+                {mobileSecondary.map((item) => { const Icon = item.icon || FileText; const active = isItemActive(item.href); return <Link key={item.name} href={item.href} aria-current={active ? 'page' : undefined} onClick={() => setIsMoreOpen(false)} className={cn('flex min-h-20 flex-col justify-center gap-2 rounded-2xl border p-4 text-sm font-semibold transition', active ? 'border-primary bg-primary/10 text-primary shadow-sm' : 'border-border bg-card text-foreground hover:border-primary/40 hover:bg-primary/5')}><Icon className="h-5 w-5 text-primary" />{item.name}</Link> })}
+                {!user && <><Link href="/auth/connexion" onClick={() => setIsMoreOpen(false)} className="rounded-2xl border border-border p-4 text-sm font-semibold">{t('nav.connexion')}</Link><Link href="/auth/inscription" onClick={() => setIsMoreOpen(false)} className="rounded-2xl bg-primary p-4 text-sm font-semibold text-primary-foreground">{t('nav.commencer')}</Link></>}
               </div>
+              {user && <div className="mt-5 border-t border-border pt-4"><p className="mb-2 px-1 text-xs font-bold uppercase tracking-wider text-muted-foreground">Mon compte</p><UserNav user={user} variant="stacked" onNavigate={() => setIsMoreOpen(false)} /></div>}
             </SheetContent>
           </Sheet>
         </div>
