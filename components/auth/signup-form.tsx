@@ -10,7 +10,7 @@ import { Separator } from '@/components/ui/separator'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
+import { createClient, createOAuthClient } from '@/lib/supabase/client'
 import { getAuthErrorMessage } from '@/lib/auth/auth-error'
 import { setOAuthReturnCookieClient } from '@/lib/auth/set-oauth-return-cookie'
 import { getOAuthRedirectUrl } from '@/components/auth/native-oauth-redirect'
@@ -88,7 +88,7 @@ export function SignupForm() {
 
     try {
       setOAuthReturnCookieClient('/dashboard')
-      const supabase = createClient()
+      const supabase = createOAuthClient()
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'linkedin_oidc',
         options: {
@@ -111,7 +111,7 @@ export function SignupForm() {
 
     try {
       setOAuthReturnCookieClient('/dashboard')
-      const supabase = createClient()
+      const supabase = createOAuthClient()
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
