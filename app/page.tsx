@@ -6,6 +6,7 @@ import { FeaturesSection } from '@/components/landing/features-section'
 import { TemplatesSection } from '@/components/landing/templates-section'
 import { PricingSection } from '@/components/landing/pricing-section'
 import { CTASection } from '@/components/landing/cta-section'
+import { LogoIntro } from '@/components/landing/logo-intro'
 import { createClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
@@ -16,6 +17,7 @@ export default async function HomePage() {
 
   return (
     <div className="flex min-h-screen flex-col">
+      <LogoIntro />
       <Navbar user={user} />
       <main className="flex-1">
         <HeroSection />
