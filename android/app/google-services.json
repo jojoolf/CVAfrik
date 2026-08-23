@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "577909932331",
+    "project_id": "cvafrik-notifications",
+    "storage_bucket": "cvafrik-notifications.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:577909932331:android:026f196b0aad669a3dc56e",
+        "android_client_info": {
+          "package_name": "com.cvafrik.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBb_gCQSml753jte59ZbQnHn_yB2djbDHI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

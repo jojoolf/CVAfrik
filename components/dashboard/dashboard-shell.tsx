@@ -13,7 +13,6 @@ import {
   LifeBuoy,
   ChevronLeft,
   ChevronRight,
-  Bell,
   Search,
   Menu,
   X,
@@ -38,6 +37,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { ModeToggle } from '@/components/layout/mode-toggle'
+import { NotificationBell } from '@/components/notifications/notification-bell'
 import { useState } from 'react'
 import { useLocale } from '@/lib/i18n/locale-provider'
 
@@ -270,10 +270,7 @@ export function DashboardShell({
 
           <div className="flex items-center gap-2 ml-auto">
             {/* Notifications */}
-            <Button variant="ghost" size="icon" className="relative rounded-full">
-              <Bell className="h-4 w-4" />
-              <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-primary" />
-            </Button>
+            <NotificationBell />
 
             {/* Theme toggle */}
             <ModeToggle />

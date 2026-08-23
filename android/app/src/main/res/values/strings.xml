@@ -4,4 +4,5 @@
     <string name="title_activity_main">CVAfrik</string>
     <string name="package_name">com.cvafrik.app</string>
     <string name="custom_url_scheme">com.cvafrik.app</string>
+    <string name="default_notification_channel_id">cvafrik_general</string>
 </resources>

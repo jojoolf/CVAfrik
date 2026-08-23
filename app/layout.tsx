@@ -8,6 +8,7 @@ import './globals.css'
 import Script from 'next/script'
 import { ThemeProvider } from '@/components/theme-provider'
 import { NativeOAuthRedirect } from '@/components/auth/native-oauth-redirect'
+import { NativePushNotifications } from '@/components/notifications/native-push-notifications'
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -98,6 +99,7 @@ export default async function RootLayout({
     <html lang={locale} className={`${inter.variable} ${geistMono.variable} ${syne.variable} ${dmSans.variable} bg-background`} suppressHydrationWarning>
       <body className="font-sans antialiased min-h-screen">
         <NativeOAuthRedirect />
+        <NativePushNotifications />
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"

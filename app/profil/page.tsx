@@ -6,6 +6,7 @@ import { Footer } from '@/components/layout/footer'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { NotificationPreferences } from '@/components/notifications/notification-preferences'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { createClient } from '@/lib/supabase/server'
 import { checkAndGetProfile } from '@/lib/supabase/profile'
@@ -105,6 +106,8 @@ export default async function ProfilPage() {
               </Button>
             </CardContent>
           </Card>
+
+          <NotificationPreferences />
 
           <div className="flex flex-wrap gap-3">
             <Button asChild>
