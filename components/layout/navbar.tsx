@@ -16,6 +16,7 @@ import { LanguageSwitcher } from '@/components/language-switcher'
 import { cn } from '@/lib/utils'
 import { useTranslation } from '@/lib/i18n/use-translation'
 import { isAdminEmail } from '@/lib/admin/access'
+import { NotificationBell } from '@/components/notifications/notification-bell'
 
 interface NavbarProps { user?: User | null }
 type NavItem = { name: string; href: string; icon?: React.ComponentType<{ className?: string }> }
@@ -123,11 +124,12 @@ export function Navbar({ user }: NavbarProps) {
           </div>
 
           <div className="hidden items-center gap-1 md:flex">
+            {user && <NotificationBell />}
             <LanguageSwitcher /><ModeToggle />
             {user ? <UserNav user={user} isAdmin={isAdmin} /> : <><Button variant="ghost" asChild className="rounded-full"><Link href="/auth/connexion">{t('nav.connexion')}</Link></Button><Button asChild className="rounded-full shadow-lg shadow-primary/20"><Link href="/auth/inscription">{t('nav.commencer')}</Link></Button></>}
           </div>
 
-          <div className="flex items-center gap-1 md:hidden"><LanguageSwitcher /><ModeToggle /></div>
+          <div className="flex items-center gap-1 md:hidden">{user && <NotificationBell />}<LanguageSwitcher /><ModeToggle /></div>
         </nav>
       </header>
 
