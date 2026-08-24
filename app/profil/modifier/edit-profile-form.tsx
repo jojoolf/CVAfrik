@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { AlertCircle, Camera, CheckCircle2, Globe, Loader2, MapPin, Phone, Save, User, Calendar, X } from 'lucide-react'
 import { Profile, PAYS_AFRIQUE } from '@/lib/types'
 import { ACCEPTED_IMAGE_ACCEPT, imageExtensionFromMimeType, validateImageFile } from '@/lib/images/client-validation'
+import { AvatarCropDialog } from '@/components/profile/avatar-crop-dialog'
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024
 
@@ -27,6 +28,7 @@ export function EditProfileForm({ initialProfile, userId }: EditProfileFormProps
   const [avatarUrl, setAvatarUrl] = useState(initialProfile?.avatar_url || '')
   const [avatarPreview, setAvatarPreview] = useState(initialProfile?.avatar_url || '')
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
+  const [pendingCropFile, setPendingCropFile] = useState<File | null>(null)
 
   const [formData, setFormData] = useState({
     prenom: initialProfile?.prenom || '',
@@ -52,8 +54,7 @@ export function EditProfileForm({ initialProfile, userId }: EditProfileFormProps
     }
 
     setError(null)
-    setAvatarFile(file)
-    setAvatarPreview(URL.createObjectURL(file))
+    setPendingCropFile(file)
   }
 
   const removeAvatar = () => {
@@ -102,28 +103,29 @@ export function EditProfileForm({ initialProfile, userId }: EditProfileFormProps
           updated_at: new Date().toISOString(),
         })
         .eq('id', userId)
-        .select('id')
+        .select('id, avatar_url, updated_at')
         .maybeSingle()
 
       if (updateError) throw updateError
       if (!updatedProfile) throw new Error('Profil introuvable. Réessaie après avoir rechargé la page.')
 
-      const { error: authError } = await supabase.auth.updateUser({
+      // Les métadonnées Auth ne sont qu’un miroir : la photo durable est celle du profil.
+      await supabase.auth.updateUser({
         data: {
-          avatar_url: nextAvatarUrl,
+          avatar_url: updatedProfile.avatar_url,
           prenom: formData.prenom,
           nom: formData.nom,
           full_name: `${formData.prenom} ${formData.nom}`.trim(),
         },
       })
-      if (authError) throw authError
 
-      setAvatarUrl(nextAvatarUrl || '')
-      setAvatarPreview(nextAvatarUrl || '')
+      const persistedAvatarUrl = updatedProfile.avatar_url || ''
+      setAvatarUrl(persistedAvatarUrl)
+      setAvatarPreview(persistedAvatarUrl)
       setAvatarFile(null)
       setSuccess(true)
       router.refresh()
-      setTimeout(() => setSuccess(false), 3000)
+      window.setTimeout(() => router.replace(`/profil?updated=${encodeURIComponent(updatedProfile.updated_at || Date.now().toString())}`), 650)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Une erreur est survenue lors de la mise à jour.')
     } finally {
@@ -227,6 +229,8 @@ export function EditProfileForm({ initialProfile, userId }: EditProfileFormProps
           </div>
         </CardContent>
       </Card>
+
+      {pendingCropFile && <AvatarCropDialog file={pendingCropFile} onCancel={() => setPendingCropFile(null)} onConfirm={(croppedFile, previewUrl) => { setAvatarFile(croppedFile); setAvatarPreview(previewUrl); setPendingCropFile(null) }} />}
 
       {error && <div className="flex items-center gap-3 rounded-xl bg-destructive/10 p-4 text-sm text-destructive"><AlertCircle className="h-5 w-5 shrink-0" />{error}</div>}
       {success && <div className="flex items-center gap-3 rounded-xl bg-emerald-500/10 p-4 text-sm font-medium text-emerald-600"><CheckCircle2 className="h-5 w-5 shrink-0" />Profil mis à jour avec succès !</div>}

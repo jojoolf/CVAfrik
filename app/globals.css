@@ -386,8 +386,8 @@
 .native-mobile-only { display: none; }
 
 @media (max-width: 767px) {
-  .native-app .native-mobile-only { display: block; }
-  .native-app .native-web-hidden { display: none; }
+  .native-mobile-only { display: block; }
+  .native-web-hidden { display: none; }
   .native-app body { min-height: 100dvh; }
   .native-app .native-snap-row {
     scrollbar-width: none;
