@@ -2,19 +2,27 @@ import Link from 'next/link'
 import { ArrowRight, BriefcaseBusiness, CheckCircle2, FileSignature, FileText, MessageSquareCode, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { SocialFollowCard } from '@/components/profile/social-follow-card'
+import { NativePromoCarousel } from '@/components/dashboard/native-promo-carousel'
 
 export function MobileDashboardOverview({
   displayName,
   totalCVs,
   totalLetters,
   completion,
+  missingFields,
 }: {
   displayName: string
   totalCVs: number
   totalLetters: number
   completion: number
+  missingFields: string[]
 }) {
   const firstName = displayName.split(' ')[0] || 'vous'
+  const completionMessage = missingFields.length === 0
+    ? 'Votre profil est complet.'
+    : missingFields.length === 1
+      ? `À ajouter : ${missingFields[0]}.`
+      : `À ajouter : ${missingFields.slice(0, 2).join(' et ')}${missingFields.length > 2 ? ` (+${missingFields.length - 2})` : ''}.`
   const quickActions = [
     { title: 'Mon CV', description: `${totalCVs} CV enregistré${totalCVs > 1 ? 's' : ''}`, href: '/cv-builder', icon: FileText, color: 'bg-orange-500/10 text-orange-600 dark:text-orange-300' },
     { title: 'Lettre', description: `${totalLetters} lettre${totalLetters > 1 ? 's' : ''}`, href: '/dashboard/lettres?new=true', icon: FileSignature, color: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-300' },
@@ -35,14 +43,16 @@ export function MobileDashboardOverview({
         </div>
         <div className="min-w-0 flex-1">
           <p className="font-bold text-foreground">Votre profil</p>
-          <p className="mt-1 text-sm leading-5 text-muted-foreground">Complétez votre profil pour mieux valoriser votre parcours.</p>
-          <Link href="/profil/modifier" className="mt-2 inline-flex items-center text-sm font-bold text-primary">Compléter <ArrowRight className="ml-1 h-3.5 w-3.5" /></Link>
+          <p className="mt-1 text-sm leading-5 text-muted-foreground">{completionMessage}</p>
+          <Link href="/profil/modifier" className="mt-2 inline-flex items-center text-sm font-bold text-primary">{missingFields.length === 0 ? 'Modifier' : 'Compléter'} <ArrowRight className="ml-1 h-3.5 w-3.5" /></Link>
         </div>
       </section>
 
       <Button asChild className="h-14 w-full rounded-2xl text-base font-black shadow-lg shadow-primary/20 active:scale-[0.98]">
         <Link href="/cv-builder"><FileText className="mr-2 h-5 w-5" />Créer mon CV</Link>
       </Button>
+
+      <NativePromoCarousel />
 
       <section>
         <h2 className="mb-3 text-lg font-black tracking-tight text-foreground">Actions rapides</h2>

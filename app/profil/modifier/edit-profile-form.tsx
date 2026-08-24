@@ -194,12 +194,12 @@ export function EditProfileForm({ initialProfile, userId }: EditProfileFormProps
       {error && <div className="flex items-center gap-3 rounded-xl bg-destructive/10 p-4 text-sm text-destructive"><AlertCircle className="h-5 w-5 shrink-0" />{error}</div>}
       {success && <div className="flex items-center gap-3 rounded-xl bg-emerald-500/10 p-4 text-sm font-medium text-emerald-600"><CheckCircle2 className="h-5 w-5 shrink-0" />Profil mis à jour avec succès !</div>}
 
-      <div className="flex gap-4">
-        <Button type="submit" className="flex-1 py-6 text-lg font-bold shadow-xl shadow-primary/20" disabled={loading}>
-          {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Save className="mr-2 h-5 w-5" />}
-          {loading ? 'Enregistrement...' : 'Enregistrer les modifications'}
+      <div className="flex w-full gap-2 sm:gap-4">
+        <Button type="submit" className="min-w-0 flex-1 px-3 py-5 text-base font-bold shadow-xl shadow-primary/20 sm:px-5 sm:py-6 sm:text-lg" disabled={loading}>
+          {loading ? <Loader2 className="mr-2 h-5 w-5 shrink-0 animate-spin" /> : <Save className="mr-2 h-5 w-5 shrink-0" />}
+          {loading ? 'Enregistrement...' : <><span className="sm:hidden">Enregistrer</span><span className="hidden sm:inline">Enregistrer les modifications</span></>}
         </Button>
-        <Button type="button" variant="outline" className="px-8 py-6" onClick={() => router.push('/profil')} disabled={loading}>Annuler</Button>
+        <Button type="button" variant="outline" className="shrink-0 px-4 py-5 sm:px-8 sm:py-6" onClick={() => router.push('/profil')} disabled={loading}>Annuler</Button>
       </div>
     </form>
   )

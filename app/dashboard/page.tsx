@@ -84,6 +84,19 @@ export default async function DashboardPage() {
     user!.email ||
     'Utilisateur'
 
+  const profileFields = [
+    { label: 'la photo de profil', completed: Boolean(profile?.avatar_url) },
+    { label: 'le prénom', completed: Boolean(profile?.prenom?.trim()) },
+    { label: 'le nom', completed: Boolean(profile?.nom?.trim()) },
+    { label: 'la date de naissance', completed: Boolean(profile?.date_naissance) },
+    { label: 'le téléphone', completed: Boolean(profile?.telephone?.trim()) },
+    { label: 'le pays', completed: Boolean(profile?.pays?.trim()) },
+    { label: 'l’adresse', completed: Boolean(profile?.adresse?.trim()) },
+    { label: 'le profil LinkedIn', completed: Boolean(profile?.linkedin?.trim()) },
+  ]
+  const missingProfileFields = profileFields.filter((field) => !field.completed).map((field) => field.label)
+  const profileCompletion = Math.round(((profileFields.length - missingProfileFields.length) / profileFields.length) * 100)
+
   const subscription = await getEffectivePlan(supabase, user!.id)
   const planId = subscription.planId
   const isFreePlan = planId === 'gratuit'
@@ -113,10 +126,10 @@ export default async function DashboardPage() {
     },
     {
       label: 'Taux de complétion',
-      value: `${Math.min(totalCVs * 15, 85)}%`,
+      value: `${profileCompletion}%`,
       icon: Users,
       gradient: 'bg-gradient-amber',
-      trend: `${totalCVs > 0 ? 'En progression' : 'Commencez par créer un CV'}`,
+      trend: missingProfileFields.length === 0 ? 'Profil complet' : `${missingProfileFields.length} information${missingProfileFields.length > 1 ? 's' : ''} à ajouter`,
     },
   ]
 
@@ -144,11 +157,9 @@ export default async function DashboardPage() {
     },
   ]
 
-  const mobileCompletion = profile?.onboarding_completed ? 100 : Math.max(totalCVs > 0 ? 65 : 40, 25)
-
   return (
     <>
-      <MobileDashboardOverview displayName={displayName} totalCVs={totalCVs} totalLetters={totalLetters} completion={mobileCompletion} />
+      <MobileDashboardOverview displayName={displayName} totalCVs={totalCVs} totalLetters={totalLetters} completion={profileCompletion} missingFields={missingProfileFields} />
       <div className="native-web-hidden p-4 lg:p-6 space-y-6">
       {/* Welcome header */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-background border border-primary/10 p-6 lg:p-8">
