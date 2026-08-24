@@ -68,7 +68,6 @@ export function NotificationBell() {
 
   const open = (item: InboxNotification) => {
     if (!item.read_at) void markRead([item.id])
-    window.sessionStorage.setItem('cvafrik:open-notification', item.id)
     router.push('/notifications')
   }
 

@@ -66,12 +66,8 @@ export function NativePushNotifications() {
         const href = notification.data?.href ?? notification.data?.path
         if (!isSafeInternalPath(href)) return
 
-        // Mémorise l’élément à ouvrir et navigue sans URL complexe : cela évite
-        // l’erreur de chargement de la WebView Android après un clic push.
-        const notificationId = notification.data?.notificationId ?? new URL(href, window.location.origin).searchParams.get('open')
-        if (typeof notificationId === 'string' && /^[0-9a-f-]{36}$/i.test(notificationId)) {
-          window.sessionStorage.setItem('cvafrik:open-notification', notificationId)
-        }
+        // Ouvre simplement la liste : le détail sera réintroduit plus tard,
+        // avec un parcours mobile dédié et sans risque de navigation en erreur.
         window.setTimeout(() => router.push('/notifications'), 120)
       }),
     ]

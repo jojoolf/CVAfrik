@@ -1,9 +1,8 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { AlertTriangle, Bell, BriefcaseBusiness, CheckCheck, ChevronRight, CreditCard, FileText, Loader2, Megaphone, RotateCcw } from 'lucide-react'
+import { AlertTriangle, Bell, BriefcaseBusiness, CheckCheck, CreditCard, FileText, Loader2, Megaphone, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { NotificationDetailClient } from '@/components/notifications/notification-detail-client'
 
 type InboxNotification = {
   id: string
@@ -35,9 +34,7 @@ export function NotificationsInboxClient() {
   const [items, setItems] = useState<InboxNotification[]>([])
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState(false)
-  const [selectedId, setSelectedId] = useState<string | null>(null)
   const unread = useMemo(() => items.filter((item) => !item.read_at), [items])
-  const selectedNotification = selectedId ? items.find((item) => item.id === selectedId) : null
 
   const refresh = useCallback(async () => {
     setLoading(true)
@@ -62,13 +59,6 @@ export function NotificationsInboxClient() {
     return () => window.removeEventListener('cvafrik:push-received', listener)
   }, [refresh])
 
-  useEffect(() => {
-    const pendingId = window.sessionStorage.getItem('cvafrik:open-notification')
-    if (!pendingId) return
-    window.sessionStorage.removeItem('cvafrik:open-notification')
-    setSelectedId(pendingId)
-  }, [])
-
   const markRead = async (ids: string[]) => {
     if (!ids.length) return
     setItems((current) => current.map((item) => ids.includes(item.id) ? { ...item, read_at: new Date().toISOString() } : item))
@@ -80,17 +70,8 @@ export function NotificationsInboxClient() {
         body: JSON.stringify({ ids }),
       })
     } catch {
-      // La liste reste utilisable même si le marquage lu est momentanément indisponible.
+      // La liste reste disponible, même si le marquage lu est temporairement indisponible.
     }
-  }
-
-  const open = (item: InboxNotification) => {
-    if (!item.read_at) void markRead([item.id])
-    setSelectedId(item.id)
-  }
-
-  if (selectedId && selectedNotification) {
-    return <NotificationDetailClient notification={selectedNotification} onBack={() => setSelectedId(null)} />
   }
 
   return (
@@ -99,8 +80,8 @@ export function NotificationsInboxClient() {
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="flex items-center gap-2 text-sm font-semibold text-primary"><Bell className="h-4 w-4" /> Centre de notifications</p>
-            <h1 className="mt-2 text-2xl font-black tracking-tight text-foreground sm:text-3xl">Toutes vos notifications</h1>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">Suivez vos candidatures, opportunités, paiements et annonces importantes.</p>
+            <h1 className="mt-2 text-2xl font-black tracking-tight text-foreground sm:text-3xl">Vos notifications</h1>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">Vos annonces, opportunités, paiements et rappels récents apparaissent ici.</p>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={() => void refresh()} disabled={loading} className="rounded-xl">
@@ -123,13 +104,6 @@ export function NotificationsInboxClient() {
           <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-muted-foreground">Vérifiez votre connexion puis réessayez. Vos notifications ne sont pas perdues.</p>
           <Button className="mt-6 rounded-xl" onClick={() => void refresh()}><RotateCcw className="mr-2 h-4 w-4" />Réessayer</Button>
         </section>
-      ) : selectedId && !selectedNotification ? (
-        <section className="rounded-3xl border border-border bg-card px-6 py-12 text-center shadow-sm">
-          <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary"><Bell className="h-6 w-6" /></span>
-          <h2 className="mt-4 text-lg font-bold text-foreground">Notification introuvable</h2>
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">Elle a peut-être expiré après trois jours ou n’est plus accessible depuis ce compte.</p>
-          <Button className="mt-6 rounded-xl" onClick={() => setSelectedId(null)}>Retour aux notifications</Button>
-        </section>
       ) : items.length === 0 ? (
         <section className="rounded-3xl border border-dashed border-border bg-card px-6 py-16 text-center">
           <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary"><Bell className="h-6 w-6" /></span>
@@ -142,15 +116,14 @@ export function NotificationsInboxClient() {
             const meta = categoryMeta[item.category]
             const Icon = meta.icon
             return (
-              <button key={item.id} type="button" onClick={() => open(item)} className={`flex w-full items-start gap-3 px-4 py-4 text-left transition hover:bg-muted/55 sm:px-5 ${index > 0 ? 'border-t border-border/70' : ''} ${item.read_at ? '' : 'bg-primary/[0.035]'}`}>
+              <article key={item.id} className={`flex w-full items-start gap-3 px-4 py-4 sm:px-5 ${index > 0 ? 'border-t border-border/70' : ''} ${item.read_at ? '' : 'bg-primary/[0.035]'}`}>
                 <span className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${meta.color}`}><Icon className="h-4.5 w-4.5" /></span>
                 <span className="min-w-0 flex-1">
                   <span className="flex items-start justify-between gap-3"><span className="line-clamp-1 text-sm font-bold text-foreground">{item.title}</span><span className="whitespace-nowrap text-xs text-muted-foreground">{relativeDate(item.created_at)}</span></span>
-                  <span className="mt-1 line-clamp-2 block text-sm leading-5 text-muted-foreground">{item.body}</span>
-                  <span className="mt-2 flex items-center gap-2 text-xs font-semibold text-primary"><span className={`h-1.5 w-1.5 rounded-full ${item.read_at ? 'bg-muted-foreground/35' : 'bg-primary'}`} />{meta.label}{item.href ? ' · Voir le détail' : ' · Lire le détail'}</span>
+                  <span className="mt-1 block text-sm leading-5 text-muted-foreground">{item.body}</span>
+                  <span className="mt-2 flex items-center gap-2 text-xs font-semibold text-primary"><span className={`h-1.5 w-1.5 rounded-full ${item.read_at ? 'bg-muted-foreground/35' : 'bg-primary'}`} />{meta.label}{item.read_at ? ' · Lu' : ' · Non lu'}</span>
                 </span>
-                <ChevronRight className="mt-3 h-4 w-4 shrink-0 text-muted-foreground" />
-              </button>
+              </article>
             )
           })}
         </section>
