@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 
 type Point = { x: number; y: number }
 
-const VIEW_SIZE = 280
+const VIEW_SIZE = 232
 const OUTPUT_SIZE = 512
 
 function clamp(value: number, min: number, max: number) {
@@ -77,27 +77,28 @@ export function AvatarCropDialog({ file, onCancel, onConfirm }: { file: File; on
 
   return (
     <div className="fixed inset-0 z-[100] flex items-end bg-black/55 p-0 backdrop-blur-sm sm:items-center sm:justify-center sm:p-6" role="dialog" aria-modal="true" aria-labelledby="crop-title">
-      <section className="w-full max-w-md rounded-t-[2rem] border border-border bg-background p-5 shadow-2xl sm:rounded-[2rem]">
+      <section className="w-full max-w-sm rounded-t-[2rem] border border-border bg-background p-4 shadow-2xl sm:max-w-md sm:rounded-[2rem] sm:p-5">
         <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-muted sm:hidden" />
-        <h2 id="crop-title" className="text-xl font-black tracking-tight text-foreground">Ajuster votre photo</h2>
-        <p className="mt-1 text-sm leading-5 text-muted-foreground">Faites glisser la photo et zoomez pour choisir le cadrage carré.</p>
+        <h2 id="crop-title" className="text-lg font-black tracking-tight text-foreground sm:text-xl">Ajuster votre photo</h2>
+        <p className="mt-1 text-xs leading-5 text-muted-foreground sm:text-sm">Faites glisser la photo et zoomez pour choisir le cadrage carré.</p>
 
-        <div className="mt-5 flex justify-center">
+        <div className="mt-4 flex justify-center">
           <div
-            className="relative h-[280px] w-[280px] touch-none overflow-hidden rounded-[2rem] border-4 border-primary/20 bg-muted shadow-inner"
+            className="relative touch-none overflow-hidden rounded-[1.75rem] border-4 border-primary/20 bg-muted shadow-inner"
+            style={{ width: VIEW_SIZE, height: VIEW_SIZE }}
             onPointerDown={(event) => { event.currentTarget.setPointerCapture(event.pointerId); drag.current = { start: { x: event.clientX, y: event.clientY }, base: offset } }}
             onPointerMove={(event) => { if (!drag.current) return; setOffset(safeOffset({ x: drag.current.base.x + event.clientX - drag.current.start.x, y: drag.current.base.y + event.clientY - drag.current.start.y })) }}
             onPointerUp={() => { drag.current = null }}
             onPointerCancel={() => { drag.current = null }}
           >
             {sourceUrl && <img src={sourceUrl} alt="Aperçu de recadrage" draggable={false} onLoad={(event) => setDimensions({ width: event.currentTarget.naturalWidth, height: event.currentTarget.naturalHeight })} className="pointer-events-none absolute left-1/2 top-1/2 max-w-none select-none" style={{ width: geometry.width, height: geometry.height, transform: `translate(calc(-50% + ${offset.x}px), calc(-50% + ${offset.y}px))` }} />}
-            <div className="pointer-events-none absolute inset-0 rounded-[1.6rem] ring-1 ring-inset ring-white/80" />
+            <div className="pointer-events-none absolute inset-0 rounded-[1.35rem] ring-1 ring-inset ring-white/80" />
             <span className="pointer-events-none absolute bottom-3 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-full bg-black/55 px-3 py-1.5 text-xs font-bold text-white"><Move className="h-3.5 w-3.5" />Déplacer</span>
           </div>
         </div>
 
-        <div className="mt-5 flex items-center gap-3"><ZoomOut className="h-4 w-4 text-muted-foreground" /><input aria-label="Niveau de zoom" type="range" min="1" max="2.5" step="0.01" value={zoom} onChange={(event) => updateZoom(Number(event.target.value))} className="h-2 flex-1 accent-primary" /><ZoomIn className="h-4 w-4 text-muted-foreground" /><Button type="button" variant="ghost" size="icon" onClick={reset} aria-label="Réinitialiser le recadrage"><RotateCcw className="h-4 w-4" /></Button></div>
-        <div className="mt-6 flex gap-3"><Button type="button" variant="outline" className="h-12 flex-1 rounded-xl" onClick={onCancel}>Annuler</Button><Button type="button" className="h-12 flex-1 rounded-xl font-black" onClick={() => void confirm()}><Check className="mr-2 h-4 w-4" />Utiliser cette photo</Button></div>
+        <div className="mt-4 flex items-center gap-3"><ZoomOut className="h-4 w-4 text-muted-foreground" /><input aria-label="Niveau de zoom" type="range" min="1" max="2.5" step="0.01" value={zoom} onChange={(event) => updateZoom(Number(event.target.value))} className="h-2 flex-1 accent-primary" /><ZoomIn className="h-4 w-4 text-muted-foreground" /><Button type="button" variant="ghost" size="icon" onClick={reset} aria-label="Réinitialiser le recadrage"><RotateCcw className="h-4 w-4" /></Button></div>
+        <div className="mt-5 flex gap-3"><Button type="button" variant="outline" className="h-11 flex-1 rounded-xl" onClick={onCancel}>Annuler</Button><Button type="button" className="h-11 flex-1 rounded-xl font-black" onClick={() => void confirm()}><Check className="mr-2 h-4 w-4" />Utiliser cette photo</Button></div>
       </section>
     </div>
   )
