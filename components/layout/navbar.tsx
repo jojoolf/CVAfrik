@@ -79,6 +79,14 @@ export function Navbar({ user }: NavbarProps) {
     let listener: { remove: () => Promise<void> } | undefined
     void CapacitorApp.addListener('backButton', ({ canGoBack }) => {
       if (isMoreOpen) {
+        if (moreView === 'information') {
+          setMoreView('account')
+          return
+        }
+        if (moreView === 'account') {
+          setMoreView('menu')
+          return
+        }
         closeMoreMenu()
         return
       }
@@ -90,7 +98,7 @@ export function Navbar({ user }: NavbarProps) {
     }).then((handle) => { listener = handle })
 
     return () => { void listener?.remove() }
-  }, [closeMoreMenu, isMoreOpen])
+  }, [closeMoreMenu, isMoreOpen, moreView])
 
   const moreTitle = moreView === 'account' ? 'Mon compte' : moreView === 'information' ? 'Informations' : 'Plus'
   const goBackInMore = () => setMoreView(moreView === 'information' ? 'account' : 'menu')
