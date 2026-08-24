@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Capacitor } from '@capacitor/core'
 import { PushNotifications } from '@capacitor/push-notifications'
 
@@ -46,6 +47,8 @@ export async function requestNativePushPermission() {
 }
 
 export function NativePushNotifications() {
+  const router = useRouter()
+
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return
 
@@ -61,14 +64,18 @@ export function NativePushNotifications() {
       }),
       PushNotifications.addListener('pushNotificationActionPerformed', ({ notification }) => {
         const href = notification.data?.href ?? notification.data?.path
-        if (isSafeInternalPath(href)) window.location.assign(href)
+        if (!isSafeInternalPath(href)) return
+
+        // Une navigation interne évite de recharger toute la WebView Android,
+        // qui pouvait afficher « This page couldn't load » après un clic push.
+        window.setTimeout(() => router.push(href), 120)
       }),
     ]
 
     return () => {
       void Promise.all(listeners.map(async (listener) => (await listener).remove()))
     }
-  }, [])
+  }, [router])
 
   return null
 }
