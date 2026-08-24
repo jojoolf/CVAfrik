@@ -76,12 +76,13 @@
       "freeFeature4": "Export PDF (avec filigrane)",
       "freeFeature5": "Accès aux offres de stages",
       "proFeature1": "CV et lettres illimités",
-      "proFeature2": "45+ templates premium",
+      "proFeature2": "12 modèles premium",
       "proFeature3": "Export PDF sans filigrane",
       "proFeature4": "Score ATS détaillé et conseils IA",
       "proFeature5": "Simulateur d'entretien illimité",
-      "proFeature6": "Matching CV ↔ offre d'emploi",
-      "proFeature7": "Lettres de motivation IA"
+      "proFeature6": "Analyse CV ↔ offre d'emploi",
+      "proFeature7": "Lettres de motivation IA",
+      "proFeature8": "Suivi de candidatures"
     },
     "payment": {
       "title": "Moyens de paiement acceptés",
@@ -252,12 +253,13 @@
       "freeFeature4": "PDF export (with watermark)",
       "freeFeature5": "Access to internship listings",
       "proFeature1": "Unlimited CVs and cover letters",
-      "proFeature2": "45+ premium templates",
+      "proFeature2": "12 premium templates",
       "proFeature3": "Watermark-free PDF export",
       "proFeature4": "Detailed ATS score and AI advice",
       "proFeature5": "Unlimited interview simulator",
-      "proFeature6": "CV ↔ job matching",
-      "proFeature7": "AI cover letters"
+      "proFeature6": "CV ↔ job analysis",
+      "proFeature7": "AI cover letters",
+      "proFeature8": "Application tracking"
     },
     "payment": {
       "title": "Accepted payment methods",
