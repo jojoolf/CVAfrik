@@ -12,6 +12,7 @@ import { fr } from 'date-fns/locale'
 import { PLANS } from '@/lib/types'
 import { getEffectivePlan } from '@/lib/subscription'
 import { getLetterType } from '@/lib/letters/types'
+import { MobileLettersHub } from '@/components/dashboard/mobile-letters-hub'
 
 export default async function LettresPage({
   searchParams,
@@ -68,7 +69,9 @@ export default async function LettresPage({
   ]
 
   return (
-    <div className="p-4 lg:p-6 space-y-6">
+    <>
+      {!isCreating && <MobileLettersHub letters={(lettres || []).map((lettre) => ({ id: lettre.id, titre: lettre.titre || '', created_at: lettre.created_at }))} />}
+      <div className={`${isCreating ? '' : 'native-web-hidden '}p-4 lg:p-6 space-y-6`}>
       {/* Header */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-background border border-emerald-500/10 p-6 lg:p-8">
         <div className="absolute inset-0 bg-mesh opacity-50" />
@@ -193,6 +196,7 @@ export default async function LettresPage({
           )}
         </div>
       )}
-    </div>
+      </div>
+    </>
   )
 }

@@ -47,7 +47,12 @@ export function Navbar({ user }: NavbarProps) {
       ]
 
   const mobilePrimary = user
-    ? navigation.slice(0, 4)
+    ? [
+        { name: t('nav.dashboard'), href: '/dashboard', icon: LayoutDashboard },
+        { name: t('nav.cv'), href: '/dashboard/cv', icon: FileText },
+        { name: t('nav.lettres'), href: '/dashboard/lettres', icon: FileSignature },
+        { name: 'Opportunités', href: '/opportunites', icon: BriefcaseBusiness },
+      ]
     : [
         { name: 'Accueil', href: '/', icon: LayoutDashboard },
         { name: t('nav.templates'), href: '/templates', icon: FileText },

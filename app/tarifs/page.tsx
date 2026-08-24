@@ -4,6 +4,7 @@ import { Footer } from '@/components/layout/footer'
 import { PricingCards } from '@/components/pricing/pricing-cards'
 import { PaymentMethods } from '@/components/pricing/payment-methods'
 import { FAQ } from '@/components/pricing/faq'
+import { MobilePricingCarousel } from '@/components/pricing/mobile-pricing-carousel'
 import { createClient } from '@/lib/supabase/server'
 import { createTranslator } from '@/lib/i18n/server'
 
@@ -40,6 +41,8 @@ export default async function TarifsPage({
     <div className="flex min-h-screen flex-col">
       <Navbar user={user} />
       <main className="flex-1">
+        <MobilePricingCarousel />
+        <div className="native-web-hidden">
         {lockedMessage && (
           <div className="bg-amber-100/50 dark:bg-amber-900/30 border-b border-amber-200 dark:border-amber-800/50 py-3">
             <div className={cn(
@@ -72,6 +75,7 @@ export default async function TarifsPage({
 
         {/* FAQ */}
         <FAQ />
+        </div>
       </main>
       <Footer />
     </div>

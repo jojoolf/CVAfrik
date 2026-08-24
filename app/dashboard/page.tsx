@@ -10,6 +10,7 @@ import { CVAnalyzeButton } from '@/components/dashboard/cv-analyze-button'
 import { CVActions } from '@/components/dashboard/cv-actions'
 import { DashboardChart } from './dashboard-chart'
 import { OnboardingQuestionnaire } from '@/components/onboarding-questionnaire'
+import { MobileDashboardOverview } from '@/components/dashboard/mobile-dashboard-overview'
 import { getEffectivePlan } from '@/lib/subscription'
 
 export const metadata: Metadata = {
@@ -143,8 +144,12 @@ export default async function DashboardPage() {
     },
   ]
 
+  const mobileCompletion = profile?.onboarding_completed ? 100 : Math.max(totalCVs > 0 ? 65 : 40, 25)
+
   return (
-    <div className="p-4 lg:p-6 space-y-6">
+    <>
+      <MobileDashboardOverview displayName={displayName} totalCVs={totalCVs} totalLetters={totalLetters} completion={mobileCompletion} />
+      <div className="native-web-hidden p-4 lg:p-6 space-y-6">
       {/* Welcome header */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-background border border-primary/10 p-6 lg:p-8">
         <div className="absolute inset-0 bg-mesh opacity-50" />
@@ -380,12 +385,13 @@ export default async function DashboardPage() {
       </section>
 
       {/* Onboarding Questionnaire Modal */}
-      <OnboardingQuestionnaire
-        userId={user!.id}
-        initialCompleted={profile?.onboarding_completed ?? false}
-        initialNom={profile?.nom}
-        initialPrenom={profile?.prenom}
-      />
-    </div>
+        <OnboardingQuestionnaire
+          userId={user!.id}
+          initialCompleted={profile?.onboarding_completed ?? false}
+          initialNom={profile?.nom}
+          initialPrenom={profile?.prenom}
+        />
+      </div>
+    </>
   )
 }

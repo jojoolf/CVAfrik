@@ -381,3 +381,22 @@
     transform: translateY(0);
   }
 }
+
+/* Expérience dédiée à l’APK : la version web détaillée reste inchangée. */
+.native-mobile-only { display: none; }
+
+@media (max-width: 767px) {
+  .native-app .native-mobile-only { display: block; }
+  .native-app .native-web-hidden { display: none; }
+  .native-app body { min-height: 100dvh; }
+  .native-app .native-snap-row {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .native-app .native-snap-row::-webkit-scrollbar { display: none; }
+}
+
+@media (max-width: 767px) {
+  .native-app main { padding-bottom: calc(5.5rem + env(safe-area-inset-bottom)); }
+  .native-app .native-mobile-only { padding-bottom: calc(5.5rem + env(safe-area-inset-bottom)); }
+}

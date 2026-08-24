@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { Navbar } from '@/components/layout/navbar'
+import { MobileOpportunitiesList } from '@/components/opportunities/mobile-opportunities-list'
 
 interface OpportunitiesPageProps {
   searchParams: Promise<{ type?: string; pays?: string; q?: string }>
@@ -22,6 +24,7 @@ export default async function OpportunitiesPage({ searchParams }: OpportunitiesP
   const query = params.q?.trim() || ''
   const country = params.pays?.trim() || ''
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
 
   let request = supabase
     .from('opportunites')
@@ -39,6 +42,9 @@ export default async function OpportunitiesPage({ searchParams }: OpportunitiesP
 
   return (
     <div className="min-h-screen bg-background">
+      <Navbar user={user} />
+      <MobileOpportunitiesList opportunities={opportunities} />
+      <div className="native-web-hidden">
       <section className="border-b border-border/70 bg-gradient-to-br from-primary/10 via-background to-emerald-500/10">
         <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8 lg:py-20">
           <Badge className="mb-4 rounded-full bg-primary/10 px-3 py-1 text-primary hover:bg-primary/10" variant="outline">
@@ -125,6 +131,7 @@ export default async function OpportunitiesPage({ searchParams }: OpportunitiesP
           </Card>
         )}
       </main>
+      </div>
     </div>
   )
 }

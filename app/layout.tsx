@@ -10,6 +10,7 @@ import { ThemeProvider } from '@/components/theme-provider'
 import { NativeOAuthRedirect } from '@/components/auth/native-oauth-redirect'
 import { NativePushNotifications } from '@/components/notifications/native-push-notifications'
 import { LivePresence } from '@/components/analytics/live-presence'
+import { NativeAppExperience } from '@/components/layout/native-app-experience'
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -110,6 +111,7 @@ export default async function RootLayout({
           disableTransitionOnChange
         >
           <LocaleProvider serverLocale={locale}>
+            <NativeAppExperience />
             {children}
             <Toaster richColors position="top-center" />
             <Script

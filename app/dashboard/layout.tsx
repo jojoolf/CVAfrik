@@ -36,7 +36,7 @@ export default async function DashboardLayout({
 
       {/* Expired banner */}
       {subscription.isExpired && (
-        <div className="bg-red-500/10 border-b border-red-500/30 py-2.5">
+        <div className="native-web-hidden bg-red-500/10 border-b border-red-500/30 py-2.5">
           <div className="container mx-auto px-4 flex items-center justify-center gap-2 text-red-600 dark:text-red-400 text-sm font-medium">
             <Clock className="h-4 w-4 shrink-0" />
             <span>Votre abonnement Pro a expiré. Renouvelez pour continuer à profiter des fonctionnalités premium.</span>
@@ -49,7 +49,7 @@ export default async function DashboardLayout({
 
       {/* Warning banner when expiry is close (7 days or less) */}
       {!subscription.isExpired && subscription.daysRemaining !== null && subscription.daysRemaining <= 7 && (
-        <div className="bg-amber-500/10 border-b border-amber-500/30 py-2.5">
+        <div className="native-web-hidden bg-amber-500/10 border-b border-amber-500/30 py-2.5">
           <div className="container mx-auto px-4 flex items-center justify-center gap-2 text-amber-600 dark:text-amber-400 text-sm font-medium">
             <Clock className="h-4 w-4 shrink-0" />
             <span>Votre abonnement expire dans {subscription.daysRemaining} jour{subscription.daysRemaining > 1 ? 's' : ''}. Renouvelez maintenant pour ne pas perdre l'accès.</span>
@@ -61,7 +61,7 @@ export default async function DashboardLayout({
       )}
 
       {/* Plan strip */}
-      <div className="border-b border-border/40 bg-gradient-to-r from-primary/[0.04] to-background">
+      <div className="native-web-hidden border-b border-border/40 bg-gradient-to-r from-primary/[0.04] to-background">
         <div className="container mx-auto flex items-center justify-between px-4 py-2">
           <div className="flex items-center gap-2">
             {isFreePlan ? (

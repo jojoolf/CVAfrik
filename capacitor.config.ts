@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: 'CVAfrik',
   webDir: 'public',
   server: {
-    url: 'https://cv-afrik.vercel.app',
+    url: 'https://cv-afrik.vercel.app/dashboard',
     cleartext: false,
     androidScheme: 'https',
   },
