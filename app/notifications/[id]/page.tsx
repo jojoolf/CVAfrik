@@ -11,5 +11,6 @@ interface NotificationDetailPageProps {
  */
 export default async function NotificationDetailPage({ params }: NotificationDetailPageProps) {
   const { id } = await params
-  redirect(`/notifications?open=${encodeURIComponent(id)}`)
+  void id
+  redirect('/notifications')
 }

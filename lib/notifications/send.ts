@@ -144,7 +144,8 @@ export async function sendUserNotification(input: NotificationInput) {
               notification: { title, body },
               data: {
                 category: input.category,
-                href: `/notifications?open=${notification.id}`,
+                href: '/notifications',
+                notificationId: notification.id,
               },
               android: {
                 priority: 'high',

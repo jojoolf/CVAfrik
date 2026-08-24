@@ -66,9 +66,13 @@ export function NativePushNotifications() {
         const href = notification.data?.href ?? notification.data?.path
         if (!isSafeInternalPath(href)) return
 
-        // Une navigation interne évite de recharger toute la WebView Android,
-        // qui pouvait afficher « This page couldn't load » après un clic push.
-        window.setTimeout(() => router.push(href), 120)
+        // Mémorise l’élément à ouvrir et navigue sans URL complexe : cela évite
+        // l’erreur de chargement de la WebView Android après un clic push.
+        const notificationId = notification.data?.notificationId ?? new URL(href, window.location.origin).searchParams.get('open')
+        if (typeof notificationId === 'string' && /^[0-9a-f-]{36}$/i.test(notificationId)) {
+          window.sessionStorage.setItem('cvafrik:open-notification', notificationId)
+        }
+        window.setTimeout(() => router.push('/notifications'), 120)
       }),
     ]
 

@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { Bell, BriefcaseBusiness, CheckCheck, ChevronRight, CreditCard, FileText, Loader2, Megaphone } from 'lucide-react'
-import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { NotificationDetailClient } from '@/components/notifications/notification-detail-client'
 
@@ -33,12 +32,10 @@ function relativeDate(value: string) {
 }
 
 export function NotificationsInboxClient({ initialNotifications }: { initialNotifications: InboxNotification[] }) {
-  const router = useRouter()
-  const searchParams = useSearchParams()
   const [items, setItems] = useState(initialNotifications)
   const [loading, setLoading] = useState(false)
+  const [selectedId, setSelectedId] = useState<string | null>(null)
   const unread = useMemo(() => items.filter((item) => !item.read_at), [items])
-  const selectedId = searchParams.get('open')
   const selectedNotification = selectedId ? items.find((item) => item.id === selectedId) : null
 
   const refresh = async () => {
@@ -59,6 +56,13 @@ export function NotificationsInboxClient({ initialNotifications }: { initialNoti
     return () => window.removeEventListener('cvafrik:push-received', listener)
   }, [])
 
+  useEffect(() => {
+    const pendingId = window.sessionStorage.getItem('cvafrik:open-notification')
+    if (!pendingId) return
+    window.sessionStorage.removeItem('cvafrik:open-notification')
+    setSelectedId(pendingId)
+  }, [])
+
   const markRead = async (ids: string[]) => {
     if (!ids.length) return
     setItems((current) => current.map((item) => ids.includes(item.id) ? { ...item, read_at: new Date().toISOString() } : item))
@@ -72,10 +76,10 @@ export function NotificationsInboxClient({ initialNotifications }: { initialNoti
 
   const open = (item: InboxNotification) => {
     if (!item.read_at) void markRead([item.id])
-    router.push(`/notifications?open=${encodeURIComponent(item.id)}`)
+    setSelectedId(item.id)
   }
 
-  const closeDetail = () => router.replace('/notifications', { scroll: false })
+  const closeDetail = () => setSelectedId(null)
 
   if (selectedId && selectedNotification) {
     return <NotificationDetailClient notification={selectedNotification} onBack={closeDetail} />

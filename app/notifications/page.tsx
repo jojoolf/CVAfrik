@@ -13,10 +13,12 @@ export default async function NotificationsPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/connexion?redirect=/notifications')
 
+  const retentionCutoff = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
   const { data } = await supabase
     .from('user_notifications')
     .select('id,category,title,body,href,read_at,created_at')
     .eq('user_id', user.id)
+    .gte('created_at', retentionCutoff)
     .order('created_at', { ascending: false })
     .limit(100)
 
