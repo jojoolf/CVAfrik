@@ -251,6 +251,9 @@ export async function POST(req: NextRequest) {
       plan_achete: plan.id,
       operateur: 'FedaPay',
       statut: 'en_attente',
+      billing_cycle: selectedBilling,
+      duration_id: durationId || null,
+      duration_label: durationLabel || null,
     })
 
     return NextResponse.json({

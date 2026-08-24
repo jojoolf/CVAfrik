@@ -1,3 +1,5 @@
+import 'server-only'
+
 import { Resend } from 'resend'
 
 function getResend() {
@@ -14,6 +16,8 @@ interface SendReceiptParams {
   billing: 'monthly' | 'annual'
   transactionId: string
   paymentMethod: string
+  receiptPdf: Buffer
+  receiptFileName: string
 }
 
 export async function sendPaymentReceipt({
@@ -24,76 +28,41 @@ export async function sendPaymentReceipt({
   billing,
   transactionId,
   paymentMethod,
+  receiptPdf,
+  receiptFileName,
 }: SendReceiptParams) {
   const periodText = billing === 'annual' ? 'abonnement annuel' : 'abonnement mensuel'
-  const fromEmail = process.env.RESEND_FROM_EMAIL || 'factures@cvafrik.com' // Doit etre un domaine verifie dans Resend
+  const fromEmail = process.env.RESEND_FROM_EMAIL || 'factures@cvafrik.com'
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://cv-afrik.vercel.app').replace(/\/$/, '')
+  const logoUrl = `${appUrl}/brand/cvafrik-invoice-wordmark.jpg`
 
   const html = `
 <!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <style>
-    body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; background: #f5f5f5; }
-    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-    .header { background: linear-gradient(135deg, #d97706, #f59e0b); color: white; padding: 30px; text-align: center; border-radius: 12px 12px 0 0; }
-    .header h1 { margin: 0; font-size: 24px; }
-    .header p { margin: 5px 0 0; opacity: 0.9; }
-    .body { background: white; padding: 30px; border-radius: 0 0 12px 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-    .details { background: #f9fafb; border-radius: 8px; padding: 20px; margin: 20px 0; }
-    .details table { width: 100%; }
-    .details td { padding: 8px 0; font-size: 14px; }
-    .details td:last-child { text-align: right; font-weight: 600; }
-    .total td { border-top: 2px solid #d97706; padding-top: 12px; font-size: 16px; }
-    .total td:last-child { color: #d97706; font-size: 20px; }
-    .footer { text-align: center; padding: 20px; color: #9ca3af; font-size: 12px; }
-    .badge { display: inline-block; background: #d97706; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; }
-    .status { text-align: center; margin: 20px 0; }
-    .status .check { width: 60px; height: 60px; background: #22c55e; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1>Paiement confirme !</h1>
-      <p>Merci pour votre abonnement CVAfrik</p>
-    </div>
-    <div class="body">
-      <div class="status">
-        <div class="check">
-          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
-            <polyline points="20 6 9 17 4 12"/>
-          </svg>
+<html lang="fr">
+<head><meta charset="utf-8"></head>
+<body style="margin:0;padding:0;background:#f5f7fb;font-family:Arial,Helvetica,sans-serif;color:#0c2348;">
+  <div style="max-width:620px;margin:0 auto;padding:28px 16px;">
+    <div style="overflow:hidden;border-radius:20px;background:#ffffff;box-shadow:0 10px 30px rgba(12,35,72,.09);">
+      <div style="padding:28px 30px 18px;border-bottom:3px solid #eb7600;">
+        <img src="${logoUrl}" alt="CVAfrik" width="165" style="display:block;width:165px;height:auto;max-width:100%;" />
+      </div>
+      <div style="padding:30px;">
+        <div style="display:inline-block;border-radius:999px;background:#eaf8ef;color:#16803c;padding:7px 12px;font-size:12px;font-weight:700;">✓ PAIEMENT CONFIRMÉ</div>
+        <h1 style="margin:16px 0 8px;font-size:25px;line-height:1.2;color:#0c2348;">Merci pour votre abonnement, ${userName}.</h1>
+        <p style="margin:0;color:#657084;font-size:15px;line-height:1.6;">Votre paiement est confirmé et votre plan <strong>${planName}</strong> est maintenant actif.</p>
+        <div style="margin:24px 0;border:1px solid #e4e8ef;border-radius:14px;background:#f9fbfd;padding:18px;">
+          <table role="presentation" style="width:100%;border-collapse:collapse;font-size:14px;">
+            <tr><td style="padding:7px 0;color:#657084;">Plan</td><td style="padding:7px 0;text-align:right;font-weight:700;color:#0c2348;">${planName}</td></tr>
+            <tr><td style="padding:7px 0;color:#657084;">Période</td><td style="padding:7px 0;text-align:right;font-weight:700;color:#0c2348;">${periodText}</td></tr>
+            <tr><td style="padding:7px 0;color:#657084;">Paiement</td><td style="padding:7px 0;text-align:right;font-weight:700;color:#0c2348;">${paymentMethod}</td></tr>
+            <tr><td style="padding:7px 0;color:#657084;">Référence</td><td style="padding:7px 0;text-align:right;font-family:monospace;font-size:12px;font-weight:700;color:#0c2348;">${transactionId}</td></tr>
+            <tr><td style="border-top:2px solid #eb7600;padding:14px 0 2px;color:#0c2348;font-size:16px;font-weight:800;">TOTAL PAYÉ</td><td style="border-top:2px solid #eb7600;padding:14px 0 2px;text-align:right;color:#eb7600;font-size:19px;font-weight:800;">${amount}</td></tr>
+          </table>
         </div>
+        <p style="margin:0;color:#657084;font-size:14px;line-height:1.6;">Votre facture PDF officielle est jointe à cet e-mail. Vous pourrez aussi la télécharger à tout moment depuis <strong>Mon abonnement</strong> dans CVAfrik.</p>
+        <div style="margin-top:25px;text-align:center;"><a href="${appUrl}/dashboard/factures" style="display:inline-block;border-radius:10px;background:#eb7600;color:#ffffff;padding:13px 22px;text-decoration:none;font-size:14px;font-weight:700;">Voir mes factures</a></div>
       </div>
-
-      <p style="text-align:center;font-size:16px;">Bonjour <strong>${userName}</strong>,</p>
-      <p style="text-align:center;color:#6b7280;">Votre paiement a ete confirme avec succes. Voici les details de votre transaction :</p>
-
-      <div class="details">
-        <table>
-          <tr><td>Plan</td><td><span class="badge">${planName}</span></td></tr>
-          <tr><td>Type</td><td>${periodText}</td></tr>
-          <tr><td>Montant</td><td>${amount}</td></tr>
-          <tr><td>Mode de paiement</td><td>${paymentMethod}</td></tr>
-          <tr><td>Transaction</td><td style="font-family:monospace;font-size:12px;">${transactionId}</td></tr>
-          <tr class="total"><td><strong>Total paye</strong></td><td><strong>${amount}</strong></td></tr>
-        </table>
-      </div>
-
-      <p style="color:#6b7280;font-size:14px;">
-        Votre abonnement est maintenant actif. Vous pouvez des a present profiter de toutes les fonctionnalites de votre plan.
-      </p>
-
-      <div style="text-align:center;margin-top:24px;">
-        <a href="https://cvafrik.com/dashboard" style="display:inline-block;background:#d97706;color:white;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:bold;">
-          Acceder au tableau de bord
-        </a>
-      </div>
-    </div>
-    <div class="footer">
-      <p>CVAfrik - Creer des CV professionnels pour l'Afrique</p>
-      <p>contact@cvafrik.com</p>
+      <div style="padding:19px 30px;background:#f8fafc;color:#8993a4;text-align:center;font-size:12px;">CVAfrik · Votre carrière mérite le meilleur.</div>
     </div>
   </div>
 </body>
@@ -102,21 +71,22 @@ export async function sendPaymentReceipt({
   try {
     const resend = getResend()
     if (!resend) {
-      console.log('RESEND_API_KEY not configured, skipping email')
+      console.log('RESEND_API_KEY not configured, skipping receipt email')
       return { success: false, error: 'Email service not configured' }
     }
 
     const result = await resend.emails.send({
       from: `CVAfrik <${fromEmail}>`,
       to,
-      subject: `Facture CVAfrik - Paiement confirme pour ${planName}`,
+      subject: `Votre facture CVAfrik — ${planName}`,
       html,
+      attachments: [{ filename: receiptFileName, content: receiptPdf }],
     })
 
-    console.log('Email sent successfully:', result)
+    console.log('Payment receipt email sent:', result)
     return { success: true, data: result }
   } catch (error) {
-    console.error('Error sending email:', error)
+    console.error('Payment receipt email error:', error)
     return { success: false, error }
   }
 }

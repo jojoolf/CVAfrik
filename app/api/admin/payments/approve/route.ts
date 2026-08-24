@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { sendPaymentReceipt } from "@/lib/email";
 import { PLANS } from "@/lib/types";
+import { createPaymentReceiptPdf, receiptFileName } from "@/lib/payment/receipt-pdf";
 
 const ADMIN_EMAILS = ["nokejoel@gmail.com", "jojoolf@gmail.com"];
 
@@ -69,6 +70,19 @@ export async function POST(req: Request) {
         : `${(planInfo?.prix_fcfa || 0).toLocaleString()} FCFA /mois`;
 
       if (userEmail) {
+        const receiptData = {
+          paymentId,
+          transactionId: `MANUAL-${paymentId}`,
+          customerName: userName,
+          customerEmail: userEmail,
+          planName,
+          amountFcfa: isAnnual ? (planInfo?.prix_annuel_fcfa || 0) : (planInfo?.prix_fcfa || 0),
+          paymentMethod: 'Transfert manuel',
+          issuedAt: now,
+          expiryAt: expiryDate,
+          durationLabel: isAnnual ? '1 an' : '1 mois',
+        };
+        const receiptPdf = await createPaymentReceiptPdf(receiptData);
         await sendPaymentReceipt({
           to: userEmail,
           userName,
@@ -77,6 +91,8 @@ export async function POST(req: Request) {
           billing: isAnnual ? 'annual' : 'monthly',
           transactionId: `MANUAL-${paymentId}`,
           paymentMethod: 'Transfert manuel',
+          receiptPdf,
+          receiptFileName: receiptFileName(receiptData),
         });
       }
     } catch (emailError) {

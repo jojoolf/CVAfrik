@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { CheckCircle2, ArrowRight, FileText, Sparkles } from 'lucide-react'
+import { CheckCircle2, ArrowRight, Download, FileText, Sparkles } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { fetchFedaPayTransaction, getFedaPaySecretKey, getPlanExpiryDateFromDuration, parseFedaPayTransactionId } from '@/lib/payment/fedapay'
 
@@ -71,6 +71,9 @@ export default async function PaymentSuccessPage({ searchParams }: PageProps) {
             plan_achete: planId,
             operateur: 'FedaPay',
             statut: approved ? 'accepte' : 'en_attente',
+            billing_cycle: billing,
+            duration_id: durationId,
+            duration_label: metadata?.duration_label || metadata?.durationLabel || null,
             created_at: new Date().toISOString(),
           })
           .select('*')
@@ -86,6 +89,9 @@ export default async function PaymentSuccessPage({ searchParams }: PageProps) {
             operateur: 'FedaPay',
             montant_fcfa: amount || payment.montant_fcfa,
             plan_achete: planId,
+            billing_cycle: billing,
+            duration_id: durationId,
+            duration_label: metadata?.duration_label || metadata?.durationLabel || null,
           })
           .eq('cinetpay_transaction_id', transactionId)
         paymentApproved = true
@@ -168,6 +174,12 @@ export default async function PaymentSuccessPage({ searchParams }: PageProps) {
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
+          {payment?.id && <Button variant="outline" className="w-full" asChild>
+            <a href={`/api/invoices/${payment.id}`}>
+              <Download className="mr-2 h-4 w-4" />
+              Télécharger ma facture
+            </a>
+          </Button>}
           <Button variant="outline" className="w-full" asChild>
             <Link href="/dashboard">
               Aller au tableau de bord
