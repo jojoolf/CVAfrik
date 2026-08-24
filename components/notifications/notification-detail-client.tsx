@@ -27,7 +27,7 @@ function formatDate(value: string) {
   return new Intl.DateTimeFormat('fr-FR', { dateStyle: 'full', hour: '2-digit', minute: '2-digit' }).format(new Date(value))
 }
 
-export function NotificationDetailClient({ notification }: { notification: Notification }) {
+export function NotificationDetailClient({ notification, onBack }: { notification: Notification; onBack?: () => void }) {
   const router = useRouter()
   const meta = categoryMeta[notification.category]
   const Icon = meta.icon
@@ -45,7 +45,7 @@ export function NotificationDetailClient({ notification }: { notification: Notif
 
   return (
     <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-2xl flex-col px-4 pb-8 pt-5 sm:px-6 sm:pt-8">
-      <Button variant="ghost" size="sm" className="w-fit rounded-xl px-2 text-muted-foreground" onClick={() => router.back()}>
+      <Button variant="ghost" size="sm" className="w-fit rounded-xl px-2 text-muted-foreground" onClick={() => onBack ? onBack() : router.push('/notifications')}>
         <ArrowLeft className="mr-2 h-4 w-4" /> Retour aux notifications
       </Button>
 

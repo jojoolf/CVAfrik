@@ -68,7 +68,7 @@ export function NotificationBell() {
 
   const open = (item: InboxNotification) => {
     if (!item.read_at) void markRead([item.id])
-    router.push(`/notifications/${item.id}`)
+    router.push(`/notifications?open=${encodeURIComponent(item.id)}`)
   }
 
   return (

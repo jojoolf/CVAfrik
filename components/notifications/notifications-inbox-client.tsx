@@ -2,8 +2,9 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { Bell, BriefcaseBusiness, CheckCheck, ChevronRight, CreditCard, FileText, Loader2, Megaphone } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+import { NotificationDetailClient } from '@/components/notifications/notification-detail-client'
 
 type InboxNotification = {
   id: string
@@ -33,9 +34,12 @@ function relativeDate(value: string) {
 
 export function NotificationsInboxClient({ initialNotifications }: { initialNotifications: InboxNotification[] }) {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [items, setItems] = useState(initialNotifications)
   const [loading, setLoading] = useState(false)
   const unread = useMemo(() => items.filter((item) => !item.read_at), [items])
+  const selectedId = searchParams.get('open')
+  const selectedNotification = selectedId ? items.find((item) => item.id === selectedId) : null
 
   const refresh = async () => {
     setLoading(true)
@@ -68,7 +72,24 @@ export function NotificationsInboxClient({ initialNotifications }: { initialNoti
 
   const open = (item: InboxNotification) => {
     if (!item.read_at) void markRead([item.id])
-    router.push(`/notifications/${item.id}`)
+    router.push(`/notifications?open=${encodeURIComponent(item.id)}`)
+  }
+
+  const closeDetail = () => router.replace('/notifications', { scroll: false })
+
+  if (selectedId && selectedNotification) {
+    return <NotificationDetailClient notification={selectedNotification} onBack={closeDetail} />
+  }
+
+  if (selectedId && !selectedNotification) {
+    return (
+      <section className="mx-auto max-w-xl rounded-3xl border border-border bg-card px-6 py-12 text-center shadow-sm">
+        <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary"><Bell className="h-6 w-6" /></span>
+        <h1 className="mt-4 text-xl font-black text-foreground">Notification introuvable</h1>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">Elle a peut-être été supprimée ou n’est plus accessible depuis ce compte.</p>
+        <Button className="mt-6 rounded-xl" onClick={closeDetail}>Retour aux notifications</Button>
+      </section>
+    )
   }
 
   return (
