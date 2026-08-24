@@ -6,6 +6,7 @@ import { FeaturesSection } from '@/components/landing/features-section'
 import { TemplatesSection } from '@/components/landing/templates-section'
 import { PricingSection } from '@/components/landing/pricing-section'
 import { CTASection } from '@/components/landing/cta-section'
+import { SocialFollowCard } from '@/components/profile/social-follow-card'
 import { createClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
@@ -24,6 +25,7 @@ export default async function HomePage() {
         <div className="mobile-content-visibility"><TemplatesSection /></div>
         <div className="mobile-content-visibility"><PricingSection /></div>
         <div className="mobile-content-visibility"><CTASection /></div>
+        <section className="container mx-auto px-4 pb-14 pt-2 sm:pb-20"><SocialFollowCard className="mx-auto max-w-xl" /></section>
       </main>
       <Footer />
     </div>

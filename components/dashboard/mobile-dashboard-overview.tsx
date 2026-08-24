@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { ArrowRight, BriefcaseBusiness, CheckCircle2, FileSignature, FileText, MessageSquareCode, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { SocialFollowCard } from '@/components/profile/social-follow-card'
 
 export function MobileDashboardOverview({
   displayName,
@@ -69,6 +70,8 @@ export function MobileDashboardOverview({
         <span className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-300"><BriefcaseBusiness className="h-5 w-5" /></span><span><span className="block text-sm font-bold text-foreground">Découvrir les opportunités</span><span className="mt-0.5 block text-xs text-muted-foreground">Emplois, stages et bourses</span></span></span>
         <ArrowRight className="h-5 w-5 text-primary" />
       </Link>
+
+      <SocialFollowCard mobileOnly />
     </div>
   )
 }

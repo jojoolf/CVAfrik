@@ -11,6 +11,7 @@ import { NativeOAuthRedirect } from '@/components/auth/native-oauth-redirect'
 import { NativePushNotifications } from '@/components/notifications/native-push-notifications'
 import { LivePresence } from '@/components/analytics/live-presence'
 import { NativeAppExperience } from '@/components/layout/native-app-experience'
+import { InAppCampaignModal } from '@/components/campaigns/in-app-campaign-modal'
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -112,6 +113,7 @@ export default async function RootLayout({
         >
           <LocaleProvider serverLocale={locale}>
             <NativeAppExperience />
+            <InAppCampaignModal />
             {children}
             <Toaster richColors position="top-center" />
             <Script
