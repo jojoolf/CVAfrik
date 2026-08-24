@@ -36,6 +36,7 @@ import { StepExperience } from './steps/step-experience'
 import { StepCompetences } from './steps/step-competences'
 import { StepPreview } from './steps/step-preview'
 import { ProfileImportDialog } from './profile-import-dialog'
+import { ComingSoonCard } from '@/components/coming-soon-card'
 
 const steps = [
   { id: 'personal', title: 'Informations', icon: User, description: 'Coordonnées & profil' },
@@ -241,6 +242,12 @@ export function CVBuilderForm({
           </div>
 
           <div className="flex items-center gap-3">
+            <Button variant="outline" size="sm" asChild className="hidden rounded-xl border-primary/25 bg-primary/5 text-primary hover:bg-primary/10 sm:inline-flex">
+              <Link href="/dashboard/ats">
+                <Sparkles className="mr-2 h-4 w-4" />
+                Optimiser mon CV
+              </Link>
+            </Button>
             {!existingCV && (
               <div className="hidden sm:block">
                 <ProfileImportDialog currentData={cvData} onApply={applyImportedData} />
@@ -351,6 +358,13 @@ export function CVBuilderForm({
           </div>
         </div>
       </header>
+
+      <div className="mx-auto max-w-7xl px-4 pb-3 pt-2 sm:px-6">
+        <ComingSoonCard
+          title="Matching automatique CV ↔ opportunités"
+          description="Nous préparerons bientôt des suggestions d’offres adaptées à ton profil, sans créer un nouveau menu."
+        />
+      </div>
 
       {/* Main Content Area - Split Screen Layout */}
           <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">

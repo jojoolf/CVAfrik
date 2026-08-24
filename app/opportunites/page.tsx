@@ -50,7 +50,12 @@ export default async function OpportunitiesPage({ searchParams }: OpportunitiesP
               <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">Opportunités pour accélérer votre carrière</h1>
               <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">Des emplois, stages, bourses et programmes sélectionnés pour les talents africains. Trouvez une opportunité, adaptez votre CV et préparez votre candidature au même endroit.</p>
             </div>
-            <div className="flex items-center gap-2 text-sm font-medium text-emerald-700 dark:text-emerald-300"><CheckCircle2 className="h-4 w-4" /> Publications vérifiées par CVAfrik</div>
+            <div className="flex flex-col items-start gap-3 lg:items-end">
+              <div className="flex items-center gap-2 text-sm font-medium text-emerald-700 dark:text-emerald-300"><CheckCircle2 className="h-4 w-4" /> Publications vérifiées par CVAfrik</div>
+              <Button asChild variant="outline" className="rounded-xl border-primary/25 bg-background/70 text-primary hover:bg-primary/10">
+                <Link href="/dashboard/candidatures">Suivre mes candidatures <ChevronRight className="ml-1.5 h-4 w-4" /></Link>
+              </Button>
+            </div>
           </div>
         </div>
       </section>
