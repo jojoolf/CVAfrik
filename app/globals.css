@@ -52,6 +52,7 @@
                    linear-gradient(180deg, oklch(0.995 0.004 85), oklch(0.955 0.018 75));
   --gradient-gold: linear-gradient(135deg, oklch(0.76 0.16 72), oklch(0.64 0.17 52));
   --gradient-text: linear-gradient(135deg, oklch(0.70 0.16 65), oklch(0.60 0.18 45));
+  --hero-contrast: radial-gradient(ellipse at center, transparent 24%, oklch(0.92 0.030 78 / 0.34) 76%, oklch(0.97 0.010 84 / 0.58) 100%);
 
   --shadow-glow: 0 0 54px -12px oklch(0.72 0.16 72 / 0.28);
   --shadow-card: 0 18px 44px -24px oklch(0.24 0.03 52 / 0.18);
@@ -122,6 +123,7 @@
                    linear-gradient(180deg, oklch(0.13 0.015 60), oklch(0.1 0.012 60));
   --gradient-gold: linear-gradient(135deg, oklch(0.82 0.16 75), oklch(0.7 0.18 55));
   --gradient-text: linear-gradient(135deg, oklch(0.88 0.18 80), oklch(0.7 0.18 45));
+  --hero-contrast: radial-gradient(ellipse at center, transparent 30%, oklch(0.13 0.015 60 / 0.74) 75%, oklch(0.10 0.012 60 / 0.92) 100%);
 
   --shadow-glow: 0 0 60px -10px oklch(0.82 0.16 75 / 0.5);
   --shadow-card: 0 20px 60px -20px oklch(0.05 0 0 / 0.6);
@@ -312,6 +314,7 @@
     color: transparent;
   }
   .bg-gradient-hero { background: var(--gradient-hero); }
+  .hero-contrast { background: var(--hero-contrast); }
   .bg-gradient-gold { background: var(--gradient-gold); }
   .shadow-glow { box-shadow: var(--shadow-glow); }
   .shadow-card { box-shadow: var(--shadow-card); }

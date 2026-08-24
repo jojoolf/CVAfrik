@@ -2,7 +2,8 @@
 
 import { Canvas, useFrame } from '@react-three/fiber'
 import { OrbitControls, Sphere, Stars } from '@react-three/drei'
-import { useRef, useMemo, Suspense } from 'react'
+import { useEffect, useMemo, useRef, useState, Suspense } from 'react'
+import { useTheme } from 'next-themes'
 import * as THREE from 'three'
 
 const CITIES = [
@@ -26,98 +27,122 @@ const CITIES = [
   { name: 'Kigali', lat: -1.9, lon: 30.1 },
 ]
 
+type GlobePalette = {
+  halo: string
+  surface: string
+  wire: string
+  points: string
+  city: string
+  keyLight: string
+  rimLight: string
+  haloOpacity: number
+  wireOpacity: number
+  pointsOpacity: number
+  ambientIntensity: number
+  keyIntensity: number
+  rimIntensity: number
+}
+
+const DARK_PALETTE: GlobePalette = {
+  halo: '#f5b942',
+  surface: '#1a1410',
+  wire: '#f5b942',
+  points: '#f5b942',
+  city: '#ffd97a',
+  keyLight: '#ffd97a',
+  rimLight: '#ff8a4c',
+  haloOpacity: 0.04,
+  wireOpacity: 0.18,
+  pointsOpacity: 0.7,
+  ambientIntensity: 0.25,
+  keyIntensity: 0.8,
+  rimIntensity: 0.2,
+}
+
+const LIGHT_PALETTE: GlobePalette = {
+  halo: '#f59e0b',
+  surface: '#fff8e8',
+  wire: '#d97706',
+  points: '#ea580c',
+  city: '#b45309',
+  keyLight: '#f59e0b',
+  rimLight: '#f97316',
+  haloOpacity: 0.24,
+  wireOpacity: 0.3,
+  pointsOpacity: 0.62,
+  ambientIntensity: 1.05,
+  keyIntensity: 1.05,
+  rimIntensity: 0.34,
+}
+
 function latLonToVec3(lat: number, lon: number, r: number) {
   const phi = (90 - lat) * (Math.PI / 180)
   const theta = (lon + 180) * (Math.PI / 180)
   return new THREE.Vector3(
     -r * Math.sin(phi) * Math.cos(theta),
     r * Math.cos(phi),
-    r * Math.sin(phi) * Math.sin(theta),
+    r * Math.sin(theta) * Math.sin(phi),
   )
 }
 
-function Globe() {
+function Globe({ palette }: { palette: GlobePalette }) {
   const group = useRef<THREE.Group>(null)
 
   const dots = useMemo(() => {
     const positions: number[] = []
-    const r = 2
-    const N = 4000
-    for (let i = 0; i < N; i++) {
-      const phi = Math.acos(-1 + (2 * i) / N)
-      const theta = Math.sqrt(N * Math.PI) * phi
+    const radius = 2
+    const count = 4000
+    for (let i = 0; i < count; i++) {
+      const phi = Math.acos(-1 + (2 * i) / count)
+      const theta = Math.sqrt(count * Math.PI) * phi
       positions.push(
-        r * Math.cos(theta) * Math.sin(phi),
-        r * Math.sin(theta) * Math.sin(phi),
-        r * Math.cos(phi),
+        radius * Math.cos(theta) * Math.sin(phi),
+        radius * Math.sin(theta) * Math.sin(phi),
+        radius * Math.cos(phi),
       )
     }
     return new Float32Array(positions)
   }, [])
 
   const cityPoints = useMemo(
-    () => CITIES.map((c) => latLonToVec3(c.lat, c.lon, 2.04)),
+    () => CITIES.map((city) => latLonToVec3(city.lat, city.lon, 2.04)),
     [],
   )
 
-  useFrame((_, dt) => {
-    if (group.current) group.current.rotation.y += dt * 0.12
+  useFrame((_, delta) => {
+    if (group.current) group.current.rotation.y += delta * 0.12
   })
 
   return (
     <group ref={group} rotation={[0.2, -0.3, 0]}>
       <Sphere args={[2.15, 64, 64]}>
-        <meshBasicMaterial
-          color="#f5b942"
-          transparent
-          opacity={0.04}
-          side={THREE.BackSide}
-        />
+        <meshBasicMaterial color={palette.halo} transparent opacity={palette.haloOpacity} side={THREE.BackSide} />
       </Sphere>
 
       <Sphere args={[2, 64, 64]}>
-        <meshStandardMaterial
-          color="#1a1410"
-          roughness={0.9}
-          metalness={0.2}
-        />
+        <meshStandardMaterial color={palette.surface} roughness={0.9} metalness={0.2} />
       </Sphere>
 
       <Sphere args={[2.005, 32, 16]}>
-        <meshBasicMaterial
-          color="#f5b942"
-          wireframe
-          transparent
-          opacity={0.18}
-        />
+        <meshBasicMaterial color={palette.wire} wireframe transparent opacity={palette.wireOpacity} />
       </Sphere>
 
       <points>
         <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            args={[dots, 3]}
-            count={dots.length / 3}
-          />
+          <bufferAttribute attach="attributes-position" args={[dots, 3]} count={dots.length / 3} />
         </bufferGeometry>
-        <pointsMaterial
-          color="#f5b942"
-          size={0.018}
-          sizeAttenuation
-          transparent
-          opacity={0.7}
-        />
+        <pointsMaterial color={palette.points} size={0.018} sizeAttenuation transparent opacity={palette.pointsOpacity} />
       </points>
 
-      {cityPoints.map((p, i) => (
-        <group key={i} position={p}>
+      {cityPoints.map((point, index) => (
+        <group key={index} position={point}>
           <mesh>
             <sphereGeometry args={[0.04, 16, 16]} />
-            <meshBasicMaterial color="#ffd97a" />
+            <meshBasicMaterial color={palette.city} />
           </mesh>
           <mesh>
             <sphereGeometry args={[0.09, 16, 16]} />
-            <meshBasicMaterial color="#ffd97a" transparent opacity={0.25} />
+            <meshBasicMaterial color={palette.city} transparent opacity={0.25} />
           </mesh>
         </group>
       ))}
@@ -126,25 +151,28 @@ function Globe() {
 }
 
 export function AfricaGlobe() {
+  const { resolvedTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => setMounted(true), [])
+
+  const isDark = mounted && resolvedTheme === 'dark'
+  const palette = isDark ? DARK_PALETTE : LIGHT_PALETTE
+
   return (
-    <div className="absolute inset-0">
+    <div className="absolute inset-0" aria-hidden="true">
       <Canvas
         camera={{ position: [0, 0, 5.5], fov: 45 }}
         dpr={[1, 2]}
         gl={{ antialias: true, alpha: true }}
       >
         <Suspense fallback={null}>
-          <ambientLight intensity={0.25} />
-          <directionalLight position={[5, 3, 5]} intensity={0.8} color="#ffd97a" />
-          <directionalLight position={[-5, -2, -3]} intensity={0.2} color="#ff8a4c" />
-          <Stars radius={50} depth={20} count={1500} factor={2} fade speed={0.5} />
-          <Globe />
-          <OrbitControls
-            enableZoom={false}
-            enablePan={false}
-            autoRotate={false}
-            rotateSpeed={0.4}
-          />
+          <ambientLight intensity={palette.ambientIntensity} />
+          <directionalLight position={[5, 3, 5]} intensity={palette.keyIntensity} color={palette.keyLight} />
+          <directionalLight position={[-5, -2, -3]} intensity={palette.rimIntensity} color={palette.rimLight} />
+          {isDark && <Stars radius={50} depth={20} count={1500} factor={2} fade speed={0.5} />}
+          <Globe palette={palette} />
+          <OrbitControls enableZoom={false} enablePan={false} autoRotate={false} rotateSpeed={0.4} />
         </Suspense>
       </Canvas>
     </div>
