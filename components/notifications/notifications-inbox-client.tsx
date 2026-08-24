@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
-import { Bell, BriefcaseBusiness, CheckCheck, ChevronRight, CreditCard, FileText, Loader2, Megaphone } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { AlertTriangle, Bell, BriefcaseBusiness, CheckCheck, ChevronRight, CreditCard, FileText, Loader2, Megaphone, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { NotificationDetailClient } from '@/components/notifications/notification-detail-client'
 
@@ -31,30 +31,36 @@ function relativeDate(value: string) {
   return new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(value))
 }
 
-export function NotificationsInboxClient({ initialNotifications }: { initialNotifications: InboxNotification[] }) {
-  const [items, setItems] = useState(initialNotifications)
-  const [loading, setLoading] = useState(false)
+export function NotificationsInboxClient() {
+  const [items, setItems] = useState<InboxNotification[]>([])
+  const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const unread = useMemo(() => items.filter((item) => !item.read_at), [items])
   const selectedNotification = selectedId ? items.find((item) => item.id === selectedId) : null
 
-  const refresh = async () => {
+  const refresh = useCallback(async () => {
     setLoading(true)
+    setLoadError(false)
     try {
-      const response = await fetch('/api/notifications/inbox', { credentials: 'include' })
-      if (!response.ok) return
+      const response = await fetch('/api/notifications/inbox', { credentials: 'include', cache: 'no-store' })
+      if (!response.ok) throw new Error(`Inbox unavailable (${response.status})`)
       const data = await response.json()
-      setItems(data.notifications ?? [])
+      setItems(Array.isArray(data.notifications) ? data.notifications : [])
+    } catch (error) {
+      console.error('[notifications/inbox/client]', error)
+      setLoadError(true)
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
+    void refresh()
     const listener = () => void refresh()
     window.addEventListener('cvafrik:push-received', listener)
     return () => window.removeEventListener('cvafrik:push-received', listener)
-  }, [])
+  }, [refresh])
 
   useEffect(() => {
     const pendingId = window.sessionStorage.getItem('cvafrik:open-notification')
@@ -66,12 +72,16 @@ export function NotificationsInboxClient({ initialNotifications }: { initialNoti
   const markRead = async (ids: string[]) => {
     if (!ids.length) return
     setItems((current) => current.map((item) => ids.includes(item.id) ? { ...item, read_at: new Date().toISOString() } : item))
-    await fetch('/api/notifications/inbox', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ ids }),
-    })
+    try {
+      await fetch('/api/notifications/inbox', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ ids }),
+      })
+    } catch {
+      // La liste reste utilisable même si le marquage lu est momentanément indisponible.
+    }
   }
 
   const open = (item: InboxNotification) => {
@@ -79,21 +89,8 @@ export function NotificationsInboxClient({ initialNotifications }: { initialNoti
     setSelectedId(item.id)
   }
 
-  const closeDetail = () => setSelectedId(null)
-
   if (selectedId && selectedNotification) {
-    return <NotificationDetailClient notification={selectedNotification} onBack={closeDetail} />
-  }
-
-  if (selectedId && !selectedNotification) {
-    return (
-      <section className="mx-auto max-w-xl rounded-3xl border border-border bg-card px-6 py-12 text-center shadow-sm">
-        <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary"><Bell className="h-6 w-6" /></span>
-        <h1 className="mt-4 text-xl font-black text-foreground">Notification introuvable</h1>
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">Elle a peut-être été supprimée ou n’est plus accessible depuis ce compte.</p>
-        <Button className="mt-6 rounded-xl" onClick={closeDetail}>Retour aux notifications</Button>
-      </section>
-    )
+    return <NotificationDetailClient notification={selectedNotification} onBack={() => setSelectedId(null)} />
   }
 
   return (
@@ -107,14 +104,33 @@ export function NotificationsInboxClient({ initialNotifications }: { initialNoti
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={() => void refresh()} disabled={loading} className="rounded-xl">
-              {loading ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : null}Actualiser
+              {loading ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <RotateCcw className="mr-1.5 h-3.5 w-3.5" />}Actualiser
             </Button>
             {unread.length > 0 && <Button variant="secondary" size="sm" onClick={() => void markRead(unread.map((item) => item.id))} className="rounded-xl"><CheckCheck className="mr-1.5 h-3.5 w-3.5" />Tout lire</Button>}
           </div>
         </div>
       </section>
 
-      {items.length === 0 ? (
+      {loading ? (
+        <section className="rounded-3xl border border-border bg-card px-6 py-16 text-center shadow-sm">
+          <Loader2 className="mx-auto h-7 w-7 animate-spin text-primary" />
+          <p className="mt-4 text-sm font-medium text-muted-foreground">Chargement de vos notifications…</p>
+        </section>
+      ) : loadError ? (
+        <section className="rounded-3xl border border-border bg-card px-6 py-12 text-center shadow-sm">
+          <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary"><AlertTriangle className="h-6 w-6" /></span>
+          <h2 className="mt-4 text-lg font-bold text-foreground">Impossible de charger les notifications</h2>
+          <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-muted-foreground">Vérifiez votre connexion puis réessayez. Vos notifications ne sont pas perdues.</p>
+          <Button className="mt-6 rounded-xl" onClick={() => void refresh()}><RotateCcw className="mr-2 h-4 w-4" />Réessayer</Button>
+        </section>
+      ) : selectedId && !selectedNotification ? (
+        <section className="rounded-3xl border border-border bg-card px-6 py-12 text-center shadow-sm">
+          <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary"><Bell className="h-6 w-6" /></span>
+          <h2 className="mt-4 text-lg font-bold text-foreground">Notification introuvable</h2>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">Elle a peut-être expiré après trois jours ou n’est plus accessible depuis ce compte.</p>
+          <Button className="mt-6 rounded-xl" onClick={() => setSelectedId(null)}>Retour aux notifications</Button>
+        </section>
+      ) : items.length === 0 ? (
         <section className="rounded-3xl border border-dashed border-border bg-card px-6 py-16 text-center">
           <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary"><Bell className="h-6 w-6" /></span>
           <h2 className="mt-4 text-lg font-bold text-foreground">Aucune notification pour le moment</h2>
