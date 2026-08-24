@@ -25,6 +25,7 @@ import {
 import { toast } from 'sonner'
 import Image from 'next/image'
 import { ProfileImportDialog } from '../profile-import-dialog'
+import { ACCEPTED_IMAGE_ACCEPT, validateImageFile } from '@/lib/images/client-validation'
 
 interface StepPersonalInfoProps {
   data: CVDonnees
@@ -55,8 +56,10 @@ export function StepPersonalInfo({ data, onUpdate, plan, onImport }: StepPersona
       return
     }
 
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error('La photo ne doit pas dépasser 2 Mo')
+    const validationError = validateImageFile(file, 2 * 1024 * 1024)
+    if (validationError) {
+      toast.error(validationError)
+      e.target.value = ''
       return
     }
 
@@ -173,7 +176,7 @@ export function StepPersonalInfo({ data, onUpdate, plan, onImport }: StepPersona
                 <Input
                   id="photo"
                   type="file"
-                  accept="image/*"
+                  accept={ACCEPTED_IMAGE_ACCEPT}
                   onChange={handlePhotoUpload}
                   disabled={isFreePlan}
                   className="max-w-[280px] text-xs cursor-pointer file:rounded-lg file:bg-primary/10 file:text-primary file:border-0 file:font-semibold file:px-3 file:py-1 hover:file:bg-primary/20"

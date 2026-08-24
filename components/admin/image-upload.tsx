@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Upload, X, Loader2, ImageIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { ACCEPTED_IMAGE_ACCEPT, imageExtensionFromMimeType, validateImageFile } from '@/lib/images/client-validation'
 import { toast } from 'sonner'
 
 interface ImageUploadProps {
@@ -22,25 +23,27 @@ export function ImageUpload({ value, onChange, bucket = 'blog-images' }: ImageUp
     const file = e.target.files?.[0]
     if (!file) return
 
-    if (!file.type.startsWith('image/')) {
-      toast.error('Veuillez selectionner une image')
-      return
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('L\'image ne doit pas depasser 5 Mo')
+    const validationError = validateImageFile(file, 5 * 1024 * 1024)
+    if (validationError) {
+      toast.error(validationError)
+      e.target.value = ''
       return
     }
 
     setUploading(true)
     try {
       const supabase = createClient()
-      const ext = file.name.split('.').pop()
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${ext}`
+      const extension = imageExtensionFromMimeType(file.type)
+      const randomId = globalThis.crypto?.randomUUID?.() || Math.random().toString(36).slice(2)
+      const fileName = `covers/${Date.now()}-${randomId}.${extension}`
 
       const { error: uploadError } = await supabase.storage
         .from(bucket)
-        .upload(fileName, file)
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          contentType: file.type,
+          upsert: false,
+        })
 
       if (uploadError) throw uploadError
 
@@ -71,7 +74,7 @@ export function ImageUpload({ value, onChange, bucket = 'blog-images' }: ImageUp
         <input
           ref={inputRef}
           type="file"
-          accept="image/*"
+          accept={ACCEPTED_IMAGE_ACCEPT}
           onChange={handleFileSelect}
           className="hidden"
         />

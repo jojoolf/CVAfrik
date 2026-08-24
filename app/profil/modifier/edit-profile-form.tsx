@@ -10,8 +10,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { AlertCircle, Camera, CheckCircle2, Globe, Loader2, MapPin, Phone, Save, User, Calendar, X } from 'lucide-react'
 import { Profile, PAYS_AFRIQUE } from '@/lib/types'
+import { ACCEPTED_IMAGE_ACCEPT, imageExtensionFromMimeType, validateImageFile } from '@/lib/images/client-validation'
 
-const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024
 
 interface EditProfileFormProps {
@@ -44,14 +44,9 @@ export function EditProfileForm({ initialProfile, userId }: EditProfileFormProps
     const file = event.target.files?.[0]
     if (!file) return
 
-    if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
-      setError('Choisissez une image JPG, PNG ou WEBP.')
-      event.target.value = ''
-      return
-    }
-
-    if (file.size > MAX_IMAGE_SIZE) {
-      setError('La photo ne doit pas dépasser 5 Mo.')
+    const validationError = validateImageFile(file, MAX_IMAGE_SIZE)
+    if (validationError) {
+      setError(validationError)
       event.target.value = ''
       return
     }
@@ -70,11 +65,7 @@ export function EditProfileForm({ initialProfile, userId }: EditProfileFormProps
   const uploadAvatar = async (supabase: ReturnType<typeof createClient>) => {
     if (!avatarFile) return avatarUrl || null
 
-    const extension = avatarFile.type === 'image/png'
-      ? 'png'
-      : avatarFile.type === 'image/webp'
-        ? 'webp'
-        : 'jpg'
+    const extension = imageExtensionFromMimeType(avatarFile.type)
     const filePath = `${userId}/profile.${extension}`
 
     const { error: uploadError } = await supabase.storage
@@ -168,7 +159,7 @@ export function EditProfileForm({ initialProfile, userId }: EditProfileFormProps
                 Choisir une photo
                 <input
                   type="file"
-                  accept="image/jpeg,image/png,image/webp"
+                  accept={ACCEPTED_IMAGE_ACCEPT}
                   onChange={handleAvatarChange}
                   className="absolute inset-0 cursor-pointer opacity-0"
                   aria-label="Choisir une photo de profil"
