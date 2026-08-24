@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import type { User } from '@supabase/supabase-js'
-import { BookOpen, CreditCard, FileText, LayoutDashboard, LifeBuoy, LogOut, ShieldCheck, UserRound } from 'lucide-react'
+import { BookOpen, ChevronRight, CreditCard, FileText, LayoutDashboard, LifeBuoy, LogOut, ShieldCheck, UserRound } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
@@ -23,6 +23,8 @@ interface UserNavProps {
   onNavigate?: () => void
   /** Liste verticale pour le drawer mobile */
   variant?: 'dropdown' | 'stacked'
+  /** Ouvre les informations dans un sous-menu mobile dédié. */
+  onShowInformation?: () => void
   /** Autorise l’accès visuel à l’administration ; les routes restent protégées côté serveur. */
   isAdmin?: boolean
 }
@@ -35,7 +37,7 @@ function displayLabel(user: User) {
   return user.email?.split('@')[0] ?? 'Compte'
 }
 
-export function UserNav({ user, onNavigate, variant = 'dropdown', isAdmin = false }: UserNavProps) {
+export function UserNav({ user, onNavigate, onShowInformation, variant = 'dropdown', isAdmin = false }: UserNavProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const label = displayLabel(user)
@@ -87,15 +89,22 @@ export function UserNav({ user, onNavigate, variant = 'dropdown', isAdmin = fals
         <Button variant="outline" asChild className="w-full justify-start" onClick={onNavigate}>
           <Link href="/dashboard/support"><LifeBuoy className="mr-2 h-4 w-4" />Aide & Support</Link>
         </Button>
-        <div className="mt-2 border-t border-border pt-3">
-          <p className="mb-2 px-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Informations</p>
-          <div className="grid gap-2">
-            <Button variant="ghost" asChild className="w-full justify-start" onClick={onNavigate}><Link href="/blog"><BookOpen className="mr-2 h-4 w-4" />Ressources CVAfrik</Link></Button>
-            <Button variant="ghost" asChild className="w-full justify-start" onClick={onNavigate}><Link href="/legal/confidentialite"><ShieldCheck className="mr-2 h-4 w-4" />Confidentialité</Link></Button>
-            <Button variant="ghost" asChild className="w-full justify-start" onClick={onNavigate}><Link href="/legal/conditions"><FileText className="mr-2 h-4 w-4" />Conditions d’utilisation</Link></Button>
-            <Button variant="ghost" asChild className="w-full justify-start" onClick={onNavigate}><Link href="/legal/mentions"><FileText className="mr-2 h-4 w-4" />Mentions légales</Link></Button>
+        {onShowInformation ? (
+          <Button variant="outline" type="button" className="w-full justify-between" onClick={onShowInformation}>
+            <span className="flex items-center"><BookOpen className="mr-2 h-4 w-4" />Informations</span>
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+          </Button>
+        ) : (
+          <div className="mt-2 border-t border-border pt-3">
+            <p className="mb-2 px-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Informations</p>
+            <div className="grid gap-2">
+              <Button variant="ghost" asChild className="w-full justify-start" onClick={onNavigate}><Link href="/blog"><BookOpen className="mr-2 h-4 w-4" />Ressources CVAfrik</Link></Button>
+              <Button variant="ghost" asChild className="w-full justify-start" onClick={onNavigate}><Link href="/legal/confidentialite"><ShieldCheck className="mr-2 h-4 w-4" />Confidentialité</Link></Button>
+              <Button variant="ghost" asChild className="w-full justify-start" onClick={onNavigate}><Link href="/legal/conditions"><FileText className="mr-2 h-4 w-4" />Conditions d’utilisation</Link></Button>
+              <Button variant="ghost" asChild className="w-full justify-start" onClick={onNavigate}><Link href="/legal/mentions"><FileText className="mr-2 h-4 w-4" />Mentions légales</Link></Button>
+            </div>
           </div>
-        </div>
+        )}
         <Button
           variant="destructive"
           className="w-full justify-start"
