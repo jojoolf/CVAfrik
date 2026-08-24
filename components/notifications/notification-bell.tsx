@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Bell, CheckCheck, Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -67,7 +68,7 @@ export function NotificationBell() {
 
   const open = (item: InboxNotification) => {
     if (!item.read_at) void markRead([item.id])
-    if (item.href?.startsWith('/') && !item.href.startsWith('//')) router.push(item.href)
+    router.push(`/notifications/${item.id}`)
   }
 
   return (
@@ -92,6 +93,12 @@ export function NotificationBell() {
               <div className="flex items-start gap-2"><span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${item.read_at ? 'bg-muted-foreground/30' : 'bg-primary'}`} /><div className="min-w-0"><p className="truncate text-sm font-medium">{item.title}</p><p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{item.body}</p><p className="mt-1.5 text-[11px] text-muted-foreground">{relativeDate(item.created_at)}</p></div></div>
             </button>
           ))}
+        </div>
+        <DropdownMenuSeparator className="m-0" />
+        <div className="p-2">
+          <Button asChild variant="ghost" className="h-9 w-full justify-center text-sm text-primary hover:bg-primary/10 hover:text-primary">
+            <Link href="/notifications">Voir toutes les notifications</Link>
+          </Button>
         </div>
       </DropdownMenuContent>
     </DropdownMenu>
