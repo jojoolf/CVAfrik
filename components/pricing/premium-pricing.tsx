@@ -2,9 +2,10 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Check, Zap, Crown, ChevronRight, Smartphone, CreditCard, ShieldCheck, Tag, X, Loader2 } from 'lucide-react'
+import { Check, Zap, Crown, ChevronRight, Smartphone, ShieldCheck, Tag, X, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
+import { PaymentOperatorMarquee } from '@/components/payments/payment-operator-marquee'
 
 const DURATIONS = [
   {
@@ -52,34 +53,8 @@ const FEATURES = [
   'Toutes les offres de stages',
 ]
 
-const PAYMENT_METHODS = [
-  {
-    id: 'fedapay_mobile',
-    label: 'Mobile Money (FedaPay)',
-    icon: Smartphone,
-    badges: [
-      { name: 'Celltiis Cash', color: 'bg-emerald-600 text-white' },
-      { name: 'Coris Money', color: 'bg-red-700 text-white' },
-      { name: 'Moov Money', color: 'bg-blue-600 text-white' },
-      { name: 'TMoney', color: 'bg-amber-400 text-black' },
-      { name: 'Mixx by Yas', color: 'bg-sky-700 text-white' },
-      { name: 'Wave', color: 'bg-sky-400 text-slate-950' },
-    ],
-  },
-  {
-    id: 'fedapay_card',
-    label: 'Carte Bancaire (FedaPay)',
-    icon: CreditCard,
-    badges: [
-      { name: 'Visa', color: 'bg-blue-700 text-white' },
-      { name: 'Mastercard', color: 'bg-red-600 text-white' },
-    ],
-  },
-]
-
 export function PremiumPricingFlow({ currentPlan }: { currentPlan?: string | null }) {
   const [selectedDuration, setSelectedDuration] = useState(DURATIONS[1])
-  const [selectedPayment, setSelectedPayment] = useState(PAYMENT_METHODS[0])
   const [promoCode, setPromoCode] = useState('')
   const [showPromo, setShowPromo] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -219,37 +194,15 @@ export function PremiumPricingFlow({ currentPlan }: { currentPlan?: string | nul
           </div>
         </div>
 
-        <div className="bg-slate-800/50 border border-slate-700/60 rounded-3xl p-5 mb-4">
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Comment veux-tu payer ? (FedaPay)</p>
-          <div className="grid grid-cols-2 gap-3">
-            {PAYMENT_METHODS.map((method) => {
-              const Icon = method.icon
-              const isSelected = selectedPayment.id === method.id
-              return (
-                <button
-                  key={method.id}
-                  onClick={() => setSelectedPayment(method)}
-                  className={cn(
-                    'p-4 rounded-2xl border-2 transition-all duration-200 text-left',
-                    isSelected
-                      ? 'bg-primary/10 border-primary'
-                      : 'bg-slate-800/40 border-slate-700/40 hover:border-slate-600',
-                  )}
-                >
-                  <Icon className={cn('h-6 w-6 mb-2', isSelected ? 'text-primary' : 'text-slate-400')} />
-                  <p className={cn('text-xs font-bold mb-2', isSelected ? 'text-white' : 'text-slate-300')}>
-                    {method.label}
-                  </p>
-                  <div className="flex flex-wrap gap-1">
-                    {method.badges.map((b) => (
-                      <span key={b.name} className={cn('text-[9px] font-black px-1.5 py-0.5 rounded-md', b.color)}>
-                        {b.name}
-                      </span>
-                    ))}
-                  </div>
-                </button>
-              )
-            })}
+        <PaymentOperatorMarquee className="mb-4" />
+
+        <div className="mb-4 flex items-start gap-3 rounded-3xl border border-slate-700/60 bg-slate-800/50 p-4">
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary" aria-hidden="true">
+            <Smartphone className="h-5 w-5" />
+          </span>
+          <div>
+            <p className="text-sm font-bold text-white">Choisis ton moyen de paiement chez FedaPay</p>
+            <p className="mt-1 text-xs leading-5 text-slate-400">Après la redirection sécurisée, FedaPay affiche les opérateurs réellement disponibles pour ton pays. Tu choisis directement celui qui te convient.</p>
           </div>
         </div>
 

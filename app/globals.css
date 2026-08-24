@@ -400,3 +400,16 @@
   .native-app main { padding-bottom: calc(5.5rem + env(safe-area-inset-bottom)); }
   .native-app .native-mobile-only { padding-bottom: calc(5.5rem + env(safe-area-inset-bottom)); }
 }
+
+/* Bandeau des moyens de paiement : défilement automatique, sans interaction requise. */
+.payment-marquee { overflow: hidden; mask-image: linear-gradient(to right, transparent, black 7%, black 93%, transparent); -webkit-mask-image: linear-gradient(to right, transparent, black 7%, black 93%, transparent); }
+.payment-marquee-track { display: flex; width: max-content; gap: 0.65rem; animation: cvafrik-payment-marquee 28s linear infinite; }
+@keyframes cvafrik-payment-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .payment-marquee-track { animation: none; } }
+
+.payment-marquee:hover .payment-marquee-track,
+.payment-marquee:focus-within .payment-marquee-track { animation-play-state: paused; }
+.payment-operator-logo-card { display: grid; height: 3.25rem; width: 7.5rem; flex: 0 0 auto; place-items: center; overflow: hidden; border: 1px solid var(--border); border-radius: 0.85rem; background: var(--background); padding: 0.45rem 0.65rem; box-shadow: 0 1px 2px rgb(15 23 42 / 0.06); }
+.payment-operator-logo { display: block; max-height: 2.25rem; max-width: 100%; width: auto; height: auto; object-fit: contain; }
+.dark .payment-operator-logo-card { background: rgb(255 255 255 / 0.96); border-color: rgb(255 255 255 / 0.12); }
+@media (prefers-reduced-motion: reduce) { .payment-marquee { overflow-x: auto; mask-image: none; -webkit-mask-image: none; scrollbar-width: thin; } .payment-marquee-track { padding-right: 0.65rem; } }
