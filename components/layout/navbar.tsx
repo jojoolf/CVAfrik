@@ -82,7 +82,11 @@ export function Navbar({ user }: NavbarProps) {
         closeMoreMenu()
         return
       }
-      if (canGoBack) window.history.back()
+      if (canGoBack) {
+        window.history.back()
+        return
+      }
+      void CapacitorApp.exitApp()
     }).then((handle) => { listener = handle })
 
     return () => { void listener?.remove() }
