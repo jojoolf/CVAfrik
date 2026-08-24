@@ -3,12 +3,11 @@
 import { useEffect } from 'react'
 import { ArrowLeft, BriefcaseBusiness, CreditCard, ExternalLink, FileText, Megaphone } from 'lucide-react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 
 type Notification = {
   id: string
-  category: 'application' | 'opportunity' | 'payment' | 'announcement'
+  category: string
   title: string
   body: string
   href: string | null
@@ -24,14 +23,15 @@ const categoryMeta = {
 }
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat('fr-FR', { dateStyle: 'full', hour: '2-digit', minute: '2-digit' }).format(new Date(value))
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return 'Date non disponible'
+  return new Intl.DateTimeFormat('fr-FR', { dateStyle: 'full', hour: '2-digit', minute: '2-digit' }).format(date)
 }
 
-export function NotificationDetailClient({ notification, onBack }: { notification: Notification; onBack?: () => void }) {
-  const router = useRouter()
-  const meta = categoryMeta[notification.category]
+export function NotificationDetailClient({ notification, onBack }: { notification: Notification; onBack: () => void }) {
+  const meta = categoryMeta[notification.category as keyof typeof categoryMeta] ?? categoryMeta.announcement
   const Icon = meta.icon
-  const internalHref = notification.href?.startsWith('/') && !notification.href.startsWith('//') ? notification.href : null
+  const internalHref = typeof notification.href === 'string' && notification.href.startsWith('/') && !notification.href.startsWith('//') ? notification.href : null
 
   useEffect(() => {
     if (notification.read_at) return
@@ -40,12 +40,12 @@ export function NotificationDetailClient({ notification, onBack }: { notificatio
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
       body: JSON.stringify({ ids: [notification.id] }),
-    })
+    }).catch(() => undefined)
   }, [notification.id, notification.read_at])
 
   return (
     <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-2xl flex-col px-4 pb-8 pt-5 sm:px-6 sm:pt-8">
-      <Button variant="ghost" size="sm" className="w-fit rounded-xl px-2 text-muted-foreground" onClick={() => onBack ? onBack() : router.push('/notifications')}>
+      <Button variant="ghost" size="sm" className="w-fit rounded-xl px-2 text-muted-foreground" onClick={onBack}>
         <ArrowLeft className="mr-2 h-4 w-4" /> Retour aux notifications
       </Button>
 
@@ -59,9 +59,9 @@ export function NotificationDetailClient({ notification, onBack }: { notificatio
         </div>
 
         <div className="mt-8 flex-1">
-          <h1 className="text-2xl font-black tracking-tight text-foreground sm:text-3xl">{notification.title}</h1>
+          <h1 className="text-2xl font-black tracking-tight text-foreground sm:text-3xl">{notification.title || 'Notification CVAfrik'}</h1>
           <div className="mt-6 border-t border-border pt-6">
-            <p className="whitespace-pre-wrap text-[1.05rem] leading-8 text-foreground/90">{notification.body}</p>
+            <p className="whitespace-pre-wrap text-[1.05rem] leading-8 text-foreground/90">{notification.body || 'Aucun détail supplémentaire.'}</p>
           </div>
         </div>
 

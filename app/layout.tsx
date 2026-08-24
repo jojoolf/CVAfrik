@@ -104,8 +104,9 @@ export default async function RootLayout({
         <LivePresence />
         <ThemeProvider
           attribute="class"
-          defaultTheme="dark"
-          enableSystem
+          storageKey="cvafrik-theme-v2"
+          defaultTheme="light"
+          enableSystem={false}
           disableTransitionOnChange
         >
           <LocaleProvider serverLocale={locale}>
