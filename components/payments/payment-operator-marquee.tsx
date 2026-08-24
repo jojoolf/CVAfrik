@@ -33,7 +33,7 @@ export function PaymentOperatorMarquee({ className }: { className?: string }) {
           </span>
           <div>
             <h2 id="payment-operators-title" className="text-sm font-black text-foreground">Paiement 100 % sécurisé</h2>
-            <p className="mt-0.5 max-w-sm text-xs leading-5 text-muted-foreground">Paiement traité de façon sécurisée par FedaPay. Les opérateurs acceptés défilent automatiquement.</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">Paiement traité de façon sécurisée par FedaPay.</p>
           </div>
         </div>
         <span className="w-fit rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-300">Sécurisé</span>
