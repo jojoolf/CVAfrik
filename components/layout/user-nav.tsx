@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import type { User } from '@supabase/supabase-js'
-import { CreditCard, LayoutDashboard, LogOut, ShieldCheck, UserRound, LifeBuoy } from 'lucide-react'
+import { BookOpen, CreditCard, FileText, LayoutDashboard, LifeBuoy, LogOut, ShieldCheck, UserRound } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
@@ -87,6 +87,15 @@ export function UserNav({ user, onNavigate, variant = 'dropdown', isAdmin = fals
         <Button variant="outline" asChild className="w-full justify-start" onClick={onNavigate}>
           <Link href="/dashboard/support"><LifeBuoy className="mr-2 h-4 w-4" />Aide & Support</Link>
         </Button>
+        <div className="mt-2 border-t border-border pt-3">
+          <p className="mb-2 px-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Informations</p>
+          <div className="grid gap-2">
+            <Button variant="ghost" asChild className="w-full justify-start" onClick={onNavigate}><Link href="/blog"><BookOpen className="mr-2 h-4 w-4" />Ressources CVAfrik</Link></Button>
+            <Button variant="ghost" asChild className="w-full justify-start" onClick={onNavigate}><Link href="/legal/confidentialite"><ShieldCheck className="mr-2 h-4 w-4" />Confidentialité</Link></Button>
+            <Button variant="ghost" asChild className="w-full justify-start" onClick={onNavigate}><Link href="/legal/conditions"><FileText className="mr-2 h-4 w-4" />Conditions d’utilisation</Link></Button>
+            <Button variant="ghost" asChild className="w-full justify-start" onClick={onNavigate}><Link href="/legal/mentions"><FileText className="mr-2 h-4 w-4" />Mentions légales</Link></Button>
+          </div>
+        </div>
         <Button
           variant="destructive"
           className="w-full justify-start"
@@ -149,6 +158,12 @@ export function UserNav({ user, onNavigate, variant = 'dropdown', isAdmin = fals
             Aide & Support
           </Link>
         </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuLabel className="px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Informations</DropdownMenuLabel>
+        <DropdownMenuItem asChild><Link href="/blog" className="cursor-pointer"><BookOpen className="mr-2 h-4 w-4" />Ressources CVAfrik</Link></DropdownMenuItem>
+        <DropdownMenuItem asChild><Link href="/legal/confidentialite" className="cursor-pointer"><ShieldCheck className="mr-2 h-4 w-4" />Confidentialité</Link></DropdownMenuItem>
+        <DropdownMenuItem asChild><Link href="/legal/conditions" className="cursor-pointer"><FileText className="mr-2 h-4 w-4" />Conditions d’utilisation</Link></DropdownMenuItem>
+        <DropdownMenuItem asChild><Link href="/legal/mentions" className="cursor-pointer"><FileText className="mr-2 h-4 w-4" />Mentions légales</Link></DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           className="cursor-pointer text-destructive focus:text-destructive"

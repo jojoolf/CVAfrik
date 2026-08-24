@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { FileText, Mail, CreditCard } from 'lucide-react'
 import { useTranslation } from '@/lib/i18n/use-translation'
+import { Capacitor } from '@capacitor/core'
 
 const footerLinks = {
   product: [
@@ -25,6 +26,9 @@ const footerLinks = {
 
 export function Footer() {
   const { t } = useTranslation()
+
+  // L’APK utilise une navigation applicative avec barre basse : le pied de page web n’y est pas utile.
+  if (Capacitor.isNativePlatform()) return null
   const paymentMethods = [
     { name: t('footer.card'), color: 'bg-blue-600', icon: CreditCard },
     { name: 'Celltiis Cash', color: 'bg-emerald-600' },
