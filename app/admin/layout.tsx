@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { Navbar } from '@/components/layout/navbar'
 import { isAdminEmail } from '@/lib/admin/access'
 import { AdminNavigation } from '@/components/admin/admin-navigation'
+import { AdminNativeSectionMenu } from '@/components/admin/admin-native-section-menu'
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -16,7 +17,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <Navbar user={user} />
-      <section className="border-b border-border bg-background/95">
+      <AdminNativeSectionMenu />
+      <section className="admin-native-header border-b border-border bg-background/95">
         <div className="container mx-auto flex flex-col gap-3 px-4 py-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/15 text-primary ring-1 ring-primary/30">

@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/server'
 import { AdminPostItem } from '@/components/admin/admin-post-item'
 import { AdminOverviewLive } from '@/components/admin/admin-overview-live'
+import { AdminMobileOverview } from '@/components/admin/admin-mobile-overview'
 
 export default async function AdminPage() {
   const supabase = await createClient()
@@ -29,7 +30,9 @@ export default async function AdminPage() {
   const firstName = user?.user_metadata?.prenom || user?.user_metadata?.first_name || 'Admin'
 
   return (
-    <div className="min-h-full px-4 py-6 sm:px-6 lg:px-8">
+    <>
+      <AdminMobileOverview firstName={firstName} />
+      <div className="admin-native-web min-h-full px-4 py-6 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <section className="relative overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-card via-card to-primary/15 p-6 shadow-elevated sm:p-8">
           <div className="absolute -right-20 -top-24 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
@@ -100,7 +103,8 @@ export default async function AdminPage() {
           </aside>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   )
 }
 

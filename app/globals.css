@@ -413,3 +413,11 @@
 .payment-operator-logo { display: block; max-height: 2.25rem; max-width: 100%; width: auto; height: auto; object-fit: contain; }
 .dark .payment-operator-logo-card { background: rgb(255 255 255 / 0.96); border-color: rgb(255 255 255 / 0.12); }
 @media (prefers-reduced-motion: reduce) { .payment-marquee { overflow-x: auto; mask-image: none; -webkit-mask-image: none; scrollbar-width: thin; } .payment-marquee-track { padding-right: 0.65rem; } }
+
+/* Administration : vue mobile native distincte de l’interface web détaillée. */
+.admin-native-mobile { display: none; }
+@media (max-width: 767px) {
+  .native-app .admin-native-mobile { display: block; }
+  .native-app .admin-native-web,
+  .native-app .admin-native-header { display: none; }
+}
