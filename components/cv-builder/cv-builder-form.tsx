@@ -83,6 +83,7 @@ export function CVBuilderForm({
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState(existingCV ? steps.length - 1 : 0)
   const [isSaving, setIsSaving] = useState(false)
+  const [savedCvId, setSavedCvId] = useState<string | null>(existingCV?.id ?? null)
   const [lastSavedTime, setLastSavedTime] = useState<string | null>(null)
   const [cvTitle, setCvTitle] = useState(existingCV?.titre || 'Mon CV Professionnel')
   const [template, setTemplate] = useState(existingCV?.template || selectedTemplate)
@@ -128,7 +129,7 @@ export function CVBuilderForm({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          cvId: existingCV?.id ?? null,
+          cvId: savedCvId,
           titre: cvTitle,
           donnees: cvData,
           template,
@@ -150,11 +151,12 @@ export function CVBuilderForm({
         throw new Error(result.error || 'La sauvegarde a échoué.')
       }
 
-      toast.success(existingCV ? 'CV mis à jour avec succès !' : 'CV créé avec succès !')
+      setSavedCvId(result.id)
+      toast.success(savedCvId ? 'CV mis à jour avec succès !' : 'CV créé avec succès !')
       setLastSavedTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))
 
       if (redirect) {
-        router.push('/dashboard')
+        router.push(`/cv-editor?edit=${encodeURIComponent(result.id)}`)
         router.refresh()
       }
     } catch (error) {

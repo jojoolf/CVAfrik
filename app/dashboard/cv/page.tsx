@@ -30,7 +30,7 @@ export default async function MyCvsPage() {
 
       <section className="mt-6 space-y-3">
         {cvs?.length ? cvs.map((cv) => (
-          <Link key={cv.id} href={`/cv-builder?edit=${cv.id}`} className="block rounded-2xl border border-border bg-card p-4 shadow-sm transition hover:border-primary/30 active:scale-[0.99]">
+          <Link key={cv.id} href={`/cv-editor?edit=${cv.id}`} className="block rounded-2xl border border-border bg-card p-4 shadow-sm transition hover:border-primary/30 active:scale-[0.99]">
             <div className="flex items-center gap-3">
               <span className="grid h-12 w-10 place-items-center rounded-xl bg-primary/10 text-primary"><FileText className="h-5 w-5" /></span>
               <span className="min-w-0 flex-1"><span className="block truncate font-black text-foreground">{cv.titre || 'CV sans titre'}</span><span className="mt-1 block text-xs text-muted-foreground">Modèle {cv.template || 'moderne'} · Modifié {cv.updated_at ? new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'short' }).format(new Date(cv.updated_at)) : 'récemment'}</span></span>

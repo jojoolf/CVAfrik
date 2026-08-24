@@ -1,6 +1,7 @@
 import JSZip from 'jszip'
 import Papa from 'papaparse'
 import type { CVDonnees, Certification, Competence, Experience, Formation, Langue } from '@/lib/types'
+import { parseCvText } from '@/lib/cv-text-import'
 
 export interface LinkedInImportResult {
   data: Partial<CVDonnees>
@@ -199,24 +200,5 @@ export async function parsePdfProfile(file: File): Promise<LinkedInImportResult>
 }
 
 export function parseProfileText(text: string): LinkedInImportResult {
-  const lines = text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
-  const fullName = lines[0] || ''
-  const title = lines[1] || ''
-  const { prenom, nom } = splitName(fullName)
-  const summaryStart = lines.findIndex((line) => /^about|résumé|profil|summary$/i.test(line))
-  const resume = summaryStart >= 0 ? lines.slice(summaryStart + 1, summaryStart + 5).join(' ') : lines.slice(2, 6).join(' ')
-
-  return {
-    data: {
-      informations_personnelles: { prenom, nom, email: '', telephone: '', adresse: '', linkedin: '' },
-      titre_professionnel: title,
-      resume,
-      experiences: [],
-      formations: [],
-      competences: [],
-      langues: [],
-      certifications: [],
-    },
-    summary: emptySummary(),
-  }
+  return parseCvText(text)
 }

@@ -8,6 +8,30 @@ const MAX_PDF_BYTES = 8 * 1024 * 1024
 const MAX_PDF_PAGES = 8
 const MAX_PDF_TEXT_LENGTH = 60_000
 
+function pageTextWithLines(items: Array<{ str?: string; hasEOL?: boolean; transform?: number[] }>) {
+  const lines: string[] = []
+  let currentLine = ''
+  let previousY: number | null = null
+
+  const flush = () => {
+    const cleaned = currentLine.replace(/\s+/g, ' ').trim()
+    if (cleaned) lines.push(cleaned)
+    currentLine = ''
+  }
+
+  for (const item of items) {
+    const text = item.str?.trim()
+    if (!text) continue
+    const y = typeof item.transform?.[5] === 'number' ? Math.round(item.transform[5]) : null
+    if (currentLine && y !== null && previousY !== null && Math.abs(y - previousY) > 3) flush()
+    currentLine += `${currentLine ? ' ' : ''}${text}`
+    if (item.hasEOL) flush()
+    previousY = y
+  }
+  flush()
+  return lines.join('\n')
+}
+
 export async function POST(request: Request) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -36,7 +60,7 @@ export async function POST(request: Request) {
       for (let pageNumber = 1; pageNumber <= Math.min(document.numPages, MAX_PDF_PAGES) && extractedLength < MAX_PDF_TEXT_LENGTH; pageNumber += 1) {
         const page = await document.getPage(pageNumber)
         const text = await page.getTextContent({ includeMarkedContent: false })
-        const pageText = text.items.map((item: any) => item.str || '').join(' ').trim()
+        const pageText = pageTextWithLines(text.items as Array<{ str?: string; hasEOL?: boolean; transform?: number[] }>)
         if (pageText) {
           pages.push(pageText.slice(0, MAX_PDF_TEXT_LENGTH - extractedLength))
           extractedLength += pageText.length
