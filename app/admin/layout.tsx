@@ -1,20 +1,9 @@
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
-import { BarChart3, BellRing, BriefcaseBusiness, FilePlus2, LayoutDashboard, Megaphone, PanelsTopLeft, ScrollText, ShieldCheck } from 'lucide-react'
+import { ShieldCheck } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { Navbar } from '@/components/layout/navbar'
 import { isAdminEmail } from '@/lib/admin/access'
-
-const adminLinks = [
-  { href: '/admin', label: 'Vue d’ensemble', icon: LayoutDashboard },
-  { href: '/admin/blog/nouveau', label: 'Nouveau contenu', icon: FilePlus2 },
-  { href: '/admin/opportunites', label: 'Opportunités', icon: BriefcaseBusiness },
-  { href: '/admin/notifications', label: 'Notifications', icon: BellRing },
-  { href: '/admin/campagnes', label: 'Campagnes in-app', icon: Megaphone },
-  { href: '/admin/bannieres', label: 'Bannières APK', icon: PanelsTopLeft },
-  { href: '/admin/statistiques', label: 'Statistiques', icon: BarChart3 },
-  { href: '/admin/logs', label: 'Journal', icon: ScrollText },
-]
+import { AdminNavigation } from '@/components/admin/admin-navigation'
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -35,21 +24,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             </div>
             <div>
               <p className="text-sm font-black tracking-tight text-foreground">Administration CVAfrik</p>
-              <p className="text-xs text-muted-foreground">Espace de pilotage sécurisé</p>
+              <p className="text-xs text-muted-foreground">Pilotage sécurisé de l’application</p>
             </div>
           </div>
-          <nav className="flex max-w-full gap-1 overflow-x-auto pb-1 lg:pb-0" aria-label="Navigation administrateur">
-            {adminLinks.map(({ href, label, icon: Icon }) => (
-              <Link
-                key={href}
-                href={href}
-                className="flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
-              >
-                <Icon className="h-3.5 w-3.5 text-primary" />
-                {label}
-              </Link>
-            ))}
-          </nav>
+          <div className="w-full lg:w-auto"><AdminNavigation /></div>
         </div>
       </section>
       <main className="flex-1 bg-background">{children}</main>
