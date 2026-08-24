@@ -2,83 +2,92 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import type { UseEmblaCarouselType } from 'embla-carousel-react'
 import { Capacitor } from '@capacitor/core'
-import { ArrowRight, BriefcaseBusiness, Crown, MessageSquareCode } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
+import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel'
 import { cn } from '@/lib/utils'
 
-const promotions = [
-  {
-    title: 'Opportunités à la une',
-    description: 'Découvrez des emplois, stages et bourses adaptés à votre parcours.',
-    action: 'Explorer les opportunités',
-    href: '/opportunites',
-    icon: BriefcaseBusiness,
-    className: 'from-emerald-600 via-teal-600 to-cyan-600',
-    accentClassName: 'bg-white/15',
-  },
-  {
-    title: 'Passez au niveau Pro',
-    description: 'Créez sans limite, exportez en PDF et améliorez votre score ATS.',
-    action: 'Découvrir Career Pro',
-    href: '/paiement/abonnement',
-    icon: Crown,
-    className: 'from-primary via-orange-500 to-amber-500',
-    accentClassName: 'bg-white/15',
-  },
-  {
-    title: 'Préparez votre entretien',
-    description: 'Entraînez-vous avec le simulateur IA avant votre prochain rendez-vous.',
-    action: 'Commencer un entretien',
-    href: '/dashboard/simulateur',
-    icon: MessageSquareCode,
-    className: 'from-violet-700 via-violet-600 to-fuchsia-600',
-    accentClassName: 'bg-white/15',
-  },
-] as const
+type PromoBanner = {
+  id: string
+  title: string
+  body: string
+  image_url: string
+  action_label: string
+  action_href: string
+}
+
+type CarouselApi = UseEmblaCarouselType[1]
+
+const fallbackBanners: PromoBanner[] = [
+  { id: 'opportunities', title: 'Opportunités à la une', body: 'Découvrez des emplois, stages et bourses adaptés à votre parcours.', image_url: '/banners/native-opportunities.png', action_label: 'Explorer les opportunités', action_href: '/opportunites' },
+  { id: 'career-pro', title: 'Passez au niveau Pro', body: 'Créez sans limite, exportez en PDF et améliorez votre score ATS.', image_url: '/banners/native-career-pro.png', action_label: 'Découvrir Career Pro', action_href: '/paiement/abonnement' },
+  { id: 'interview', title: 'Préparez votre entretien', body: 'Entraînez-vous avec le simulateur IA avant votre prochain rendez-vous.', image_url: '/banners/native-interview-ai.png', action_label: 'Commencer un entretien', action_href: '/dashboard/simulateur' },
+]
 
 export function NativePromoCarousel() {
-  const [activeIndex, setActiveIndex] = useState(0)
   const [isNative, setIsNative] = useState(false)
+  const [banners, setBanners] = useState<PromoBanner[]>(fallbackBanners)
+  const [api, setApi] = useState<CarouselApi>()
+  const [activeIndex, setActiveIndex] = useState(0)
 
   useEffect(() => {
     setIsNative(Capacitor.isNativePlatform())
   }, [])
 
   useEffect(() => {
-    if (!isNative || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-    const interval = window.setInterval(() => {
-      setActiveIndex((current) => (current + 1) % promotions.length)
-    }, 5500)
-    return () => window.clearInterval(interval)
+    if (!isNative) return
+    let active = true
+    void fetch('/api/promo-banners', { cache: 'no-store' })
+      .then(async (response) => ({ response, data: await response.json() as { banners?: PromoBanner[] } }))
+      .then(({ response, data }) => {
+        if (active && response.ok && data.banners?.length) setBanners(data.banners)
+      })
+      .catch(() => undefined)
+    return () => { active = false }
   }, [isNative])
+
+  useEffect(() => {
+    if (!api) return
+    const sync = () => setActiveIndex(api.selectedScrollSnap())
+    sync()
+    api.on('select', sync)
+    api.on('reInit', sync)
+    return () => {
+      api.off('select', sync)
+      api.off('reInit', sync)
+    }
+  }, [api, banners.length])
+
+  useEffect(() => {
+    if (!api || banners.length < 2 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const interval = window.setInterval(() => api.scrollNext(), 5500)
+    return () => window.clearInterval(interval)
+  }, [api, banners.length])
 
   if (!isNative) return null
 
   return (
     <section aria-label="À la une sur CVAfrik">
-      <div className="overflow-hidden rounded-3xl">
-        <div className="flex transition-transform duration-500 ease-out" style={{ transform: `translateX(-${activeIndex * 100}%)` }}>
-          {promotions.map((promotion) => {
-            const Icon = promotion.icon
-            return (
-              <Link key={promotion.title} href={promotion.href} className={cn('relative min-w-full overflow-hidden rounded-3xl bg-gradient-to-br p-5 text-white shadow-lg transition active:scale-[0.98]', promotion.className)}>
-                <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/10 blur-2xl" aria-hidden="true" />
-                <div className="absolute -bottom-10 right-10 h-24 w-24 rounded-full bg-black/10 blur-xl" aria-hidden="true" />
-                <div className="relative flex min-h-36 flex-col justify-between">
-                  <div className="flex items-start justify-between gap-4">
-                    <div><p className="text-[10px] font-black uppercase tracking-[0.16em] text-white/75">À la une</p><h2 className="mt-1 text-xl font-black tracking-tight">{promotion.title}</h2><p className="mt-2 max-w-[16rem] text-xs leading-5 text-white/85">{promotion.description}</p></div>
-                    <span className={cn('grid h-11 w-11 shrink-0 place-items-center rounded-2xl', promotion.accentClassName)}><Icon className="h-5 w-5" /></span>
+      <Carousel opts={{ align: 'start', loop: banners.length > 1 }} setApi={setApi} className="w-full">
+        <CarouselContent className="-ml-0">
+          {banners.map((banner) => (
+            <CarouselItem key={banner.id} className="pl-0">
+              <Link href={banner.action_href} className="group block overflow-hidden rounded-3xl shadow-lg transition active:scale-[0.985]" aria-label={`${banner.title} : ${banner.action_label}`}>
+                <div className="relative aspect-[16/9] overflow-hidden bg-slate-950">
+                  <img src={banner.image_url} alt="" className="absolute inset-0 h-full w-full object-cover transition duration-500 group-active:scale-[1.03]" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/45 to-black/5" />
+                  <div className="relative flex h-full max-w-[74%] flex-col justify-between p-4 text-white sm:p-5">
+                    <div><p className="text-[9px] font-black uppercase tracking-[0.17em] text-white/75">À la une</p><h2 className="mt-1 text-lg font-black leading-tight tracking-tight sm:text-xl">{banner.title}</h2><p className="mt-1.5 text-[11px] leading-4 text-white/85 sm:text-xs sm:leading-5">{banner.body}</p></div>
+                    <span className="inline-flex w-fit items-center rounded-xl bg-white px-3 py-2 text-[11px] font-black text-slate-950 shadow-sm">{banner.action_label}<ArrowRight className="ml-1.5 h-3.5 w-3.5" /></span>
                   </div>
-                  <span className="mt-4 inline-flex items-center text-xs font-black">{promotion.action}<ArrowRight className="ml-1.5 h-4 w-4" /></span>
                 </div>
               </Link>
-            )
-          })}
-        </div>
-      </div>
-      <div className="mt-2.5 flex justify-center gap-1.5" aria-label="Indicateur des promotions">
-        {promotions.map((promotion, index) => <button key={promotion.title} type="button" aria-label={`Voir la promotion ${index + 1}`} aria-current={activeIndex === index ? 'true' : undefined} onClick={() => setActiveIndex(index)} className={cn('h-1.5 rounded-full transition-all', activeIndex === index ? 'w-6 bg-primary' : 'w-1.5 bg-muted-foreground/35')} />)}
-      </div>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+      </Carousel>
+      {banners.length > 1 && <div className="mt-2.5 flex justify-center gap-1.5" aria-label="Indicateur des promotions">{banners.map((banner, index) => <button key={banner.id} type="button" aria-label={`Voir la promotion ${index + 1}`} aria-current={activeIndex === index ? 'true' : undefined} onClick={() => api?.scrollTo(index)} className={cn('h-1.5 rounded-full transition-all', activeIndex === index ? 'w-6 bg-primary' : 'w-1.5 bg-muted-foreground/35')} />)}</div>}
     </section>
   )
 }

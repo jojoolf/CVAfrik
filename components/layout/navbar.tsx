@@ -172,6 +172,7 @@ export function Navbar({ user }: NavbarProps) {
                     })}
                     {!user && <><Link href="/auth/connexion" onClick={closeMoreMenu} className="rounded-2xl border border-border p-4 text-sm font-semibold">{t('nav.connexion')}</Link><Link href="/auth/inscription" onClick={closeMoreMenu} className="rounded-2xl bg-primary p-4 text-sm font-semibold text-primary-foreground">{t('nav.commencer')}</Link></>}
                   </div>
+                  {isAdmin && <Link href="/admin" onClick={closeMoreMenu} className="mt-4 flex h-auto w-full items-center rounded-2xl border border-primary/35 bg-primary px-4 py-3 text-left text-primary-foreground shadow-lg shadow-primary/20 transition active:scale-[0.99]"><ShieldCheck className="mr-3 h-5 w-5" /><span><span className="block text-sm font-black">Administration CVAfrik</span><span className="mt-0.5 block text-xs font-normal text-primary-foreground/80">Gérer bannières, campagnes et contenu</span></span></Link>}
                   {user && <Button type="button" variant="outline" className="mt-4 h-auto w-full justify-start rounded-2xl border-primary/20 bg-primary/5 px-4 py-3 text-left" onClick={() => setMoreView('account')}><UserRound className="mr-3 h-5 w-5 text-primary" /><span><span className="block font-bold">Mon compte</span><span className="mt-0.5 block text-xs font-normal text-muted-foreground">Profil, abonnement, aide et informations</span></span></Button>}
                 </>}
 

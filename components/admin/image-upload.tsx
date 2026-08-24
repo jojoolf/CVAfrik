@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Upload, X, Loader2, ImageIcon } from 'lucide-react'
@@ -18,6 +18,10 @@ export function ImageUpload({ value, onChange, bucket = 'blog-images' }: ImageUp
   const [uploading, setUploading] = useState(false)
   const [preview, setPreview] = useState(value)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    setPreview(value)
+  }, [value])
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
