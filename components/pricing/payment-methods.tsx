@@ -1,6 +1,6 @@
 'use client'
 
-import { CreditCard, Lock, Shield } from 'lucide-react'
+import { Lock, Shield, Smartphone } from 'lucide-react'
 import { useTranslation } from '@/lib/i18n/use-translation'
 import { PaymentOperatorMarquee } from '@/components/payments/payment-operator-marquee'
 
@@ -9,7 +9,7 @@ export function PaymentMethods() {
   const securityFeatures = [
     { icon: Shield, title: t('payment.secure'), description: t('payment.secureDescription') },
     { icon: Lock, title: t('payment.encrypted'), description: t('payment.encryptedDescription') },
-    { icon: CreditCard, title: t('payment.cards'), description: t('payment.cardsDescription') },
+    { icon: Smartphone, title: t('payment.available'), description: t('payment.availableDescription') },
   ]
 
   return (

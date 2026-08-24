@@ -86,13 +86,13 @@
     },
     "payment": {
       "title": "Moyens de paiement acceptés",
-      "subtitle": "Payez facilement avec votre opérateur Mobile Money préféré ou par carte bancaire.",
+      "subtitle": "Payez facilement avec l’un des opérateurs Mobile Money disponibles via FedaPay.",
       "secure": "Paiement sécurisé",
       "secureDescription": "Vos transactions sont protégées par les meilleurs standards de sécurité.",
       "encrypted": "Données chiffrées",
       "encryptedDescription": "Toutes vos informations sont chiffrées et sécurisées.",
-      "cards": "Cartes acceptées",
-      "cardsDescription": "Visa, Mastercard et cartes bancaires africaines.",
+      "available": "Opérateurs disponibles",
+      "availableDescription": "FedaPay affiche les opérateurs réellement disponibles pour votre pays au moment du paiement.",
       "partner": "Partenaire de confiance pour votre réussite professionnelle"
     },
     "footer": {
@@ -263,13 +263,13 @@
     },
     "payment": {
       "title": "Accepted payment methods",
-      "subtitle": "Pay easily with your preferred Mobile Money provider or by bank card.",
+      "subtitle": "Pay easily with one of the Mobile Money providers available through FedaPay.",
       "secure": "Secure payment",
       "secureDescription": "Your transactions are protected by the highest security standards.",
       "encrypted": "Encrypted data",
       "encryptedDescription": "All your information is encrypted and secured.",
-      "cards": "Accepted cards",
-      "cardsDescription": "Visa, Mastercard and African bank cards.",
+      "available": "Available providers",
+      "availableDescription": "FedaPay displays the providers currently available for your country at checkout.",
       "partner": "A trusted partner for your professional success"
     },
     "footer": {

@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { FileText, Mail, CreditCard } from 'lucide-react'
+import { FileText, Mail } from 'lucide-react'
 import { useTranslation } from '@/lib/i18n/use-translation'
 import { Capacitor } from '@capacitor/core'
 
@@ -29,16 +29,6 @@ export function Footer() {
 
   // L’APK utilise une navigation applicative avec barre basse : le pied de page web n’y est pas utile.
   if (Capacitor.isNativePlatform()) return null
-  const paymentMethods = [
-    { name: t('footer.card'), color: 'bg-blue-600', icon: CreditCard },
-    { name: 'Celltiis Cash', color: 'bg-emerald-600' },
-    { name: 'Coris Money', color: 'bg-red-700' },
-    { name: 'Moov Money', color: 'bg-blue-700' },
-    { name: 'TMoney', color: 'bg-amber-400' },
-    { name: 'Mixx by Yas', color: 'bg-sky-700' },
-    { name: 'Wave', color: 'bg-sky-400' },
-  ]
-
   return (
     <footer className="border-t border-border bg-secondary/30">
       <div className="container mx-auto px-4 py-12">
@@ -61,24 +51,6 @@ export function Footer() {
               </div>
             </div>
 
-            <div className="mt-8">
-              <p className="mb-4 text-sm font-bold uppercase tracking-wider text-foreground/70">{t('footer.securePayments')}</p>
-              <div className="flex flex-wrap gap-2">
-                {paymentMethods.map((method) => (
-                  <div
-                    key={method.name}
-                    className="flex items-center gap-2 rounded-xl bg-card px-4 py-2 text-xs font-semibold shadow-sm ring-1 ring-border/50"
-                  >
-                    {method.icon ? (
-                      <method.icon className="h-3.5 w-3.5 text-primary" />
-                    ) : (
-                      <span className={`h-2 w-2 rounded-full ${method.color}`} />
-                    )}
-                    {method.name}
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
 
           <FooterLinkColumn title={t('footer.product')} links={footerLinks.product} t={t} />
