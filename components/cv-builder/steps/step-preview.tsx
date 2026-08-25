@@ -8,8 +8,7 @@ import { Button } from '@/components/ui/button'
 import { CheckCircle, Download, FileText, Loader2, Lock, Maximize2, Sparkles, ZoomIn, ZoomOut } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { CVDonnees, PlanConfig } from '@/lib/types'
-import { toPng } from 'html-to-image'
-import { jsPDF } from 'jspdf'
+import { downloadCvPdf } from '@/lib/cv-pdf-export'
 import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { renderCvTemplate, templateCatalog, type TemplateCatalogItem } from '../templates/cv-preview-collection'
@@ -88,14 +87,11 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
     if (!exportRef.current) return
     setIsExporting(true)
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500))
-      const dataUrl = await toPng(exportRef.current, { quality: 1, pixelRatio: 2, backgroundColor: '#ffffff', width: A4_W, height: exportRef.current.scrollHeight, skipFonts: false })
-      const PdfClass = typeof jsPDF === 'function' ? jsPDF : (jsPDF as any).jsPDF ?? (jsPDF as any).default
-      if (!PdfClass) throw new Error('Moteur PDF introuvable.')
-      const pdf = new PdfClass({ orientation: 'portrait', unit: 'mm', format: 'a4' })
-      const height = exportRef.current.scrollHeight
-      pdf.addImage(dataUrl, 'PNG', 0, 0, 210, (height * 210) / A4_W)
-      pdf.save(`CV_${data.informations_personnelles.prenom || 'CVAfrik'}_${data.informations_personnelles.nom || 'CV'}.pdf`)
+      await new Promise((resolve) => setTimeout(resolve, 250))
+      await downloadCvPdf(
+        exportRef.current,
+        `CV_${data.informations_personnelles.prenom || 'CVAfrik'}_${data.informations_personnelles.nom || 'CV'}`,
+      )
       toast.success('CV téléchargé.')
     } catch (error) {
       console.error('PDF export error:', error)
@@ -108,7 +104,7 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
   return (
     <div className="mx-auto max-w-7xl space-y-4">
       {mounted && createPortal(
-        <div aria-hidden="true" ref={exportRef} style={{ position: 'fixed', top: 0, left: '-9999px', width: A4_W, minHeight: A4_H, overflow: 'hidden', background: '#fff', pointerEvents: 'none', zIndex: -1 }}>
+        <div aria-hidden="true" data-cv-pdf-render="true" ref={exportRef} style={{ position: 'fixed', top: 0, left: 0, width: A4_W, minHeight: A4_H, overflow: 'visible', visibility: 'hidden', background: '#fff', pointerEvents: 'none', zIndex: -1 }}>
           {renderCvTemplate(template, { data, showWatermark: plan.limites.filigrane })}
         </div>,
         document.body,

@@ -16,8 +16,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
 import type { CV, CVDonnees, Competence, Experience, Formation, Langue, PlanConfig } from '@/lib/types'
 import { renderCvTemplate, templateCatalog } from '@/components/cv-builder/templates/cv-preview-collection'
-import { toPng } from 'html-to-image'
-import { jsPDF } from 'jspdf'
+import { downloadCvPdf } from '@/lib/cv-pdf-export'
 
 interface DocumentCvEditorProps {
   cv: CV
@@ -110,21 +109,11 @@ export function DocumentCvEditor({ cv, plan }: DocumentCvEditorProps) {
     if (!exportRef.current) return
     setIsExporting(true)
     try {
-      await new Promise((resolve) => setTimeout(resolve, 450))
-      const png = await toPng(exportRef.current, {
-        quality: 1,
-        pixelRatio: 2,
-        backgroundColor: '#ffffff',
-        width: 794,
-        height: exportRef.current.scrollHeight,
-        skipFonts: false,
-      })
-      const PdfClass = typeof jsPDF === 'function' ? jsPDF : (jsPDF as any).jsPDF ?? (jsPDF as any).default
-      if (!PdfClass) throw new Error('Moteur PDF introuvable.')
-      const pdf = new PdfClass({ orientation: 'portrait', unit: 'mm', format: 'a4' })
-      const height = exportRef.current.scrollHeight
-      pdf.addImage(png, 'PNG', 0, 0, 210, (height * 210) / 794)
-      pdf.save(`CV_${data.informations_personnelles.prenom || 'CVAfrik'}_${data.informations_personnelles.nom || 'CV'}.pdf`)
+      await new Promise((resolve) => setTimeout(resolve, 250))
+      await downloadCvPdf(
+        exportRef.current,
+        `CV_${data.informations_personnelles.prenom || 'CVAfrik'}_${data.informations_personnelles.nom || 'CV'}`,
+      )
       toast.success('PDF téléchargé.')
     } catch (error) {
       console.error('Document editor PDF export error:', error)
@@ -169,7 +158,7 @@ export function DocumentCvEditor({ cv, plan }: DocumentCvEditorProps) {
 
   return (
     <main className="min-h-screen bg-[#fffcf8] pb-10">
-      <div aria-hidden="true" ref={exportRef} style={{ position: 'fixed', top: 0, left: '-9999px', width: 794, minHeight: 1123, overflow: 'hidden', background: '#ffffff', pointerEvents: 'none', zIndex: -1 }}>
+      <div aria-hidden="true" data-cv-pdf-render="true" ref={exportRef} style={{ position: 'fixed', top: 0, left: 0, width: 794, minHeight: 1123, overflow: 'visible', visibility: 'hidden', background: '#ffffff', pointerEvents: 'none', zIndex: -1 }}>
         {renderCvTemplate(template, { data, showWatermark: plan.limites.filigrane })}
       </div>
       <header className="sticky top-0 z-30 border-b border-border/70 bg-background/95 backdrop-blur-xl">
