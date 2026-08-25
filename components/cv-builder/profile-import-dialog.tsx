@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { CheckCircle2, ClipboardPaste, FileArchive, FileText, Linkedin, Loader2, ShieldCheck, Upload } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
@@ -12,6 +12,10 @@ interface ProfileImportDialogProps {
   currentData: CVDonnees
   onApply: (data: CVDonnees) => void
   disabled?: boolean
+  open?: boolean
+  initialMode?: ImportMode
+  hideTrigger?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
 type ImportMode = 'linkedin' | 'pdf' | 'text'
@@ -46,9 +50,9 @@ function mergeImport(current: CVDonnees, imported: Partial<CVDonnees>): CVDonnee
   }
 }
 
-export function ProfileImportDialog({ currentData, onApply, disabled }: ProfileImportDialogProps) {
-  const [open, setOpen] = useState(false)
-  const [mode, setMode] = useState<ImportMode>('linkedin')
+export function ProfileImportDialog({ currentData, onApply, disabled, open: controlledOpen, initialMode, hideTrigger = false, onOpenChange }: ProfileImportDialogProps) {
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false)
+  const [mode, setMode] = useState<ImportMode>(initialMode || 'linkedin')
   const [file, setFile] = useState<File | null>(null)
   const [text, setText] = useState('')
   const [linkedInUrl, setLinkedInUrl] = useState('')
@@ -56,6 +60,20 @@ export function ProfileImportDialog({ currentData, onApply, disabled }: ProfileI
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const open = controlledOpen ?? uncontrolledOpen
+  const setOpen = (nextOpen: boolean) => {
+    if (controlledOpen === undefined) setUncontrolledOpen(nextOpen)
+    onOpenChange?.(nextOpen)
+  }
+
+  useEffect(() => {
+    if (open && initialMode) {
+      setMode(initialMode)
+      setFile(null)
+      setResult(null)
+      setError(null)
+    }
+  }, [open, initialMode])
 
   const importedName = useMemo(() => {
     const info = result?.data.informations_personnelles
@@ -110,11 +128,11 @@ export function ProfileImportDialog({ currentData, onApply, disabled }: ProfileI
 
   return (
     <Dialog open={open} onOpenChange={(value) => { setOpen(value); if (!value) resetResult() }}>
-      <DialogTrigger asChild>
+      {!hideTrigger && <DialogTrigger asChild>
         <Button type="button" disabled={disabled} variant="outline" className="h-10 rounded-xl border-primary/30 bg-primary/5 font-semibold text-primary hover:bg-primary/10">
           <Upload className="mr-2 h-4 w-4" /> Importer mon profil
         </Button>
-      </DialogTrigger>
+      </DialogTrigger>}
       <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto rounded-3xl border-border bg-card p-0 shadow-2xl">
         <DialogHeader className="border-b border-border bg-gradient-to-br from-primary/10 via-card to-blue-500/5 px-6 py-6">
           <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/20"><SparkleIcon /></div>

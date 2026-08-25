@@ -1,9 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import {
-  ArrowLeft, BriefcaseBusiness, Check, ChevronDown, FileText, GraduationCap,
+  ArrowLeft, BriefcaseBusiness, Check, ChevronDown, Download, FileText, GraduationCap,
   Languages, LayoutTemplate, Loader2, Plus, Save, Sparkles, Trash2, UserRound,
 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -16,6 +16,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
 import type { CV, CVDonnees, Competence, Experience, Formation, Langue, PlanConfig } from '@/lib/types'
 import { renderCvTemplate, templateCatalog } from '@/components/cv-builder/templates/cv-preview-collection'
+import { toPng } from 'html-to-image'
+import { jsPDF } from 'jspdf'
 
 interface DocumentCvEditorProps {
   cv: CV
@@ -68,7 +70,9 @@ export function DocumentCvEditor({ cv, plan }: DocumentCvEditorProps) {
   const [template, setTemplate] = useState(cv.template)
   const [activeSection, setActiveSection] = useState<EditorSection>('identity')
   const [isSaving, setIsSaving] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
   const [isTemplatePickerOpen, setIsTemplatePickerOpen] = useState(false)
+  const exportRef = useRef<HTMLDivElement>(null)
   const [isDirty, setIsDirty] = useState(false)
 
   const currentTemplate = useMemo(
@@ -99,6 +103,34 @@ export function DocumentCvEditor({ cv, plan }: DocumentCvEditorProps) {
       toast.error(error instanceof Error ? error.message : 'La sauvegarde a échoué.')
     } finally {
       setIsSaving(false)
+    }
+  }
+
+  const downloadPdf = async () => {
+    if (!exportRef.current) return
+    setIsExporting(true)
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 450))
+      const png = await toPng(exportRef.current, {
+        quality: 1,
+        pixelRatio: 2,
+        backgroundColor: '#ffffff',
+        width: 794,
+        height: exportRef.current.scrollHeight,
+        skipFonts: false,
+      })
+      const PdfClass = typeof jsPDF === 'function' ? jsPDF : (jsPDF as any).jsPDF ?? (jsPDF as any).default
+      if (!PdfClass) throw new Error('Moteur PDF introuvable.')
+      const pdf = new PdfClass({ orientation: 'portrait', unit: 'mm', format: 'a4' })
+      const height = exportRef.current.scrollHeight
+      pdf.addImage(png, 'PNG', 0, 0, 210, (height * 210) / 794)
+      pdf.save(`CV_${data.informations_personnelles.prenom || 'CVAfrik'}_${data.informations_personnelles.nom || 'CV'}.pdf`)
+      toast.success('PDF téléchargé.')
+    } catch (error) {
+      console.error('Document editor PDF export error:', error)
+      toast.error(error instanceof Error ? `Erreur export PDF : ${error.message}` : 'L’export PDF a échoué.')
+    } finally {
+      setIsExporting(false)
     }
   }
 
@@ -136,7 +168,10 @@ export function DocumentCvEditor({ cv, plan }: DocumentCvEditorProps) {
   }))
 
   return (
-    <main className="min-h-screen bg-muted/35 pb-10">
+    <main className="min-h-screen bg-[#fffcf8] pb-10">
+      <div aria-hidden="true" ref={exportRef} style={{ position: 'fixed', top: 0, left: '-9999px', width: 794, minHeight: 1123, overflow: 'hidden', background: '#ffffff', pointerEvents: 'none', zIndex: -1 }}>
+        {renderCvTemplate(template, { data, showWatermark: plan.limites.filigrane })}
+      </div>
       <header className="sticky top-0 z-30 border-b border-border/70 bg-background/95 backdrop-blur-xl">
         <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-3 px-4 py-3 sm:px-6">
           <div className="flex min-w-0 items-center gap-3">
@@ -144,21 +179,27 @@ export function DocumentCvEditor({ cv, plan }: DocumentCvEditorProps) {
               <Link href="/dashboard/cv"><ArrowLeft className="h-5 w-5" /></Link>
             </Button>
             <div className="min-w-0">
-              <p className="text-xs font-medium text-muted-foreground">Éditeur de document</p>
+              <p className="text-xs font-medium text-muted-foreground">Mes CV · Atelier Document</p>
               <Input
                 value={title}
                 onChange={(event) => { setTitle(event.target.value); setIsDirty(true) }}
                 aria-label="Titre du CV"
-                className="h-7 max-w-[210px] border-0 bg-transparent px-0 text-base font-bold shadow-none focus-visible:ring-0 sm:max-w-sm"
+                className="h-7 max-w-[210px] border-0 bg-transparent px-0 text-base font-black shadow-none focus-visible:ring-0 sm:max-w-sm"
               />
             </div>
-            {isDirty && <Badge variant="secondary" className="hidden text-[10px] sm:inline-flex">Modifications non enregistrées</Badge>}
+            <Badge variant="secondary" className="hidden border border-orange-100 bg-orange-50 text-[10px] text-primary sm:inline-flex">{currentTemplate.name}</Badge>
+            {isDirty ? <Badge variant="secondary" className="hidden text-[10px] sm:inline-flex">À enregistrer</Badge> : <span className="hidden items-center gap-1 text-xs font-semibold text-emerald-700 sm:flex"><Check className="h-3.5 w-3.5" />Enregistré</span>}
           </div>
 
-          <Button onClick={save} disabled={isSaving} className="rounded-xl px-4 shadow-sm">
-            {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-            <span className="ml-2 hidden sm:inline">Enregistrer</span>
-          </Button>
+          <div className="flex shrink-0 items-center gap-2">
+            <Button onClick={downloadPdf} disabled={isExporting} variant="outline" className="rounded-xl border-border/80 bg-background px-3 sm:px-4">
+              {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}<span className="ml-2 hidden sm:inline">Télécharger PDF</span>
+            </Button>
+            <Button onClick={save} disabled={isSaving} className="rounded-xl px-3 shadow-sm sm:px-4">
+              {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+              <span className="ml-2 hidden sm:inline">Enregistrer</span>
+            </Button>
+          </div>
         </div>
       </header>
 

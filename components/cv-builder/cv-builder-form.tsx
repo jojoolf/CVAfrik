@@ -4,7 +4,6 @@ import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Progress } from '@/components/ui/progress'
 import { 
   ArrowLeft, 
   ArrowRight, 
@@ -16,12 +15,8 @@ import {
   Star,
   Loader2,
   Lock,
-  Eye,
-  EyeOff,
   CheckCircle2,
   Edit3,
-  ZoomIn,
-  ZoomOut,
   Maximize2,
   Sparkles
 } from 'lucide-react'
@@ -36,7 +31,7 @@ import { StepExperience } from './steps/step-experience'
 import { StepCompetences } from './steps/step-competences'
 import { StepPreview } from './steps/step-preview'
 import { ProfileImportDialog } from './profile-import-dialog'
-import { ComingSoonCard } from '@/components/coming-soon-card'
+import { StudioExpress } from './studio-express'
 
 const steps = [
   { id: 'personal', title: 'Informations', icon: User, description: 'Coordonnées & profil' },
@@ -87,9 +82,11 @@ export function CVBuilderForm({
   const [lastSavedTime, setLastSavedTime] = useState<string | null>(null)
   const [cvTitle, setCvTitle] = useState(existingCV?.titre || 'Mon CV Professionnel')
   const [template, setTemplate] = useState(existingCV?.template || selectedTemplate)
-  const [showLivePreview, setShowLivePreview] = useState(true)
-  const [previewZoom, setPreviewZoom] = useState<number>(0.65)
+  const previewZoom = 0.58
   const [isEditingTitle, setIsEditingTitle] = useState(false)
+  const [isStudioOpen, setIsStudioOpen] = useState(!existingCV)
+  const [importDialogOpen, setImportDialogOpen] = useState(false)
+  const [importMode, setImportMode] = useState<'pdf' | 'linkedin'>('pdf')
 
   const [cvData, setCvData] = useState<CVDonnees>(
     existingCV?.donnees || {
@@ -116,10 +113,14 @@ export function CVBuilderForm({
     const fullName = [data.informations_personnelles.prenom, data.informations_personnelles.nom].filter(Boolean).join(' ')
     if (fullName) setCvTitle(`CV de ${fullName}`)
     setCurrentStep(0)
+    setIsStudioOpen(false)
     toast.success('Profil importé : vérifie les informations avant de générer ton CV.')
   }, [])
 
-  const progress = Math.round(((currentStep + 1) / steps.length) * 100)
+  const openImport = (mode: 'pdf' | 'linkedin') => {
+    setImportMode(mode)
+    setImportDialogOpen(true)
+  }
 
   const handleSave = async (redirect = false) => {
     setIsSaving(true)
@@ -203,6 +204,28 @@ export function CVBuilderForm({
     )
   }
 
+  if (isStudioOpen) {
+    return <>
+      <StudioExpress
+        data={cvData}
+        template={template}
+        plan={plan}
+        onTemplateChange={setTemplate}
+        onUseProfile={() => setIsStudioOpen(false)}
+        onImport={openImport}
+        onManualStart={() => setIsStudioOpen(false)}
+      />
+      <ProfileImportDialog
+        currentData={cvData}
+        onApply={applyImportedData}
+        open={importDialogOpen}
+        initialMode={importMode}
+        hideTrigger
+        onOpenChange={setImportDialogOpen}
+      />
+    </>
+  }
+
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground selection:bg-primary/20">
       {/* Header Glassmorphic Top Bar */}
@@ -244,12 +267,6 @@ export function CVBuilderForm({
           </div>
 
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm" asChild className="hidden rounded-xl border-primary/25 bg-primary/5 text-primary hover:bg-primary/10 sm:inline-flex">
-              <Link href="/dashboard/ats">
-                <Sparkles className="mr-2 h-4 w-4" />
-                Optimiser mon CV
-              </Link>
-            </Button>
             {!existingCV && (
               <div className="hidden sm:block">
                 <ProfileImportDialog currentData={cvData} onApply={applyImportedData} />
@@ -262,27 +279,6 @@ export function CVBuilderForm({
                 Enregistré à {lastSavedTime}
               </span>
             )}
-
-            {/* Toggle Split Screen Preview */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowLivePreview(prev => !prev)}
-              className="hidden lg:flex items-center gap-2 rounded-xl border-border/80 bg-background/50 hover:bg-accent"
-              title={showLivePreview ? "Masquer l'aperçu en direct" : "Afficher l'aperçu côte à côte"}
-            >
-              {showLivePreview ? (
-                <>
-                  <EyeOff className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-xs">Masquer Aperçu</span>
-                </>
-              ) : (
-                <>
-                  <Eye className="h-4 w-4 text-primary" />
-                  <span className="text-xs">Aperçu en Direct</span>
-                </>
-              )}
-            </Button>
 
             {/* Save Button */}
             <Button
@@ -303,9 +299,9 @@ export function CVBuilderForm({
         </div>
 
         {/* Stepper Navigation Bar */}
-        <div className="border-t border-border/40 bg-card/40 backdrop-blur-md">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 py-2.5">
-            <div className="flex items-center justify-between gap-2 overflow-x-auto custom-scrollbar pb-1 pt-0.5">
+        <div className="border-t border-orange-100 bg-[#fffcf8]">
+          <div className="mx-auto max-w-5xl px-4 py-2.5 sm:px-6">
+            <div className="flex items-center justify-center gap-1 overflow-x-auto py-0.5">
               {steps.map((step, index) => {
                 const Icon = step.icon
                 const isActive = index === currentStep
@@ -317,10 +313,10 @@ export function CVBuilderForm({
                     onClick={() => setCurrentStep(index)}
                     className={`group relative flex items-center gap-2.5 rounded-xl px-3 py-1.5 text-xs font-semibold transition-all shrink-0 ${
                       isActive
-                        ? 'bg-primary text-primary-foreground shadow-md shadow-primary/25 scale-[1.02]'
+                        ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/25'
                         : isCompleted
                         ? 'bg-primary/10 text-primary hover:bg-primary/15'
-                        : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'
+                        : 'text-muted-foreground hover:bg-white hover:text-foreground'
                     }`}
                   >
                     <div
@@ -339,48 +335,24 @@ export function CVBuilderForm({
                       )}
                     </div>
 
-                    <div className="flex flex-col text-left">
-                      <span className="leading-tight">{step.title}</span>
-                    </div>
-
-                    {index < steps.length - 1 && (
-                      <span className="ml-1 hidden xl:inline text-muted-foreground/40 font-normal">
-                        ›
-                      </span>
-                    )}
+                    <span className="leading-tight">{step.title}</span>
                   </button>
                 )
               })}
 
-              <div className="ml-auto hidden sm:flex items-center gap-2 text-xs font-medium text-muted-foreground pl-2 border-l border-border/50">
-                <Progress value={progress} className="w-20 h-2 bg-muted overflow-hidden rounded-full" />
-                <span className="text-[11px] font-bold text-primary">{progress}%</span>
-              </div>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="mx-auto max-w-7xl px-4 pb-3 pt-2 sm:px-6">
-        <ComingSoonCard
-          title="Matching automatique CV ↔ opportunités"
-          description="Nous préparerons bientôt des suggestions d’offres adaptées à ton profil, sans créer un nouveau menu."
-        />
-      </div>
 
       {/* Main Content Area - Split Screen Layout */}
           <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
-        <div className={`grid gap-8 transition-all duration-300 ${
-          showLivePreview && currentStep !== 4
-            ? 'lg:grid-cols-12' 
-            : 'max-w-4xl mx-auto'
+        <div className={`grid gap-6 transition-all duration-300 ${
+          currentStep !== 4 ? 'lg:grid-cols-12' : 'max-w-5xl mx-auto'
         }`}>
           {/* Form Step Section */}
-          <div className={`${
-            showLivePreview && currentStep !== 4 
-              ? 'lg:col-span-7 xl:col-span-7' 
-              : 'w-full'
-          }`}>
+          <div className={currentStep !== 4 ? 'lg:col-span-7 xl:col-span-7' : 'w-full'}>
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentStep}
@@ -428,46 +400,20 @@ export function CVBuilderForm({
           </div>
 
           {/* Side-by-Side Live A4 Preview Section (Desktop) */}
-          {showLivePreview && currentStep !== 4 && (
+          {currentStep !== 4 && (
             <div className="hidden lg:block lg:col-span-5 xl:col-span-5 relative">
               <div className="sticky top-28 space-y-3">
                 {/* Preview header bar */}
-                <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-card/60 border border-border/80 backdrop-blur-md shadow-sm">
+                <div className="flex items-center justify-between gap-3 rounded-2xl border border-orange-100 bg-card px-4 py-3 shadow-sm">
                   <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
-                    <Sparkles className="h-3.5 w-3.5 text-primary animate-pulse" />
-                    <span>Aperçu en temps réel</span>
+                    <span className="grid h-7 w-7 place-items-center rounded-lg bg-orange-50 text-primary"><Sparkles className="h-3.5 w-3.5" /></span>
+                    <span><span className="block">Votre CV prend forme</span><span className="mt-0.5 block text-[10px] font-medium text-muted-foreground">L’aperçu change à chaque information.</span></span>
                   </div>
-
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => setPreviewZoom(z => Math.max(0.35, parseFloat((z - 0.05).toFixed(2))))}
-                      className="p-1 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-                      title="Dézoomer"
-                    >
-                      <ZoomOut className="h-3.5 w-3.5" />
-                    </button>
-                    <span className="text-[10px] font-mono font-medium px-1 text-muted-foreground">
-                      {Math.round(previewZoom * 100)}%
-                    </span>
-                    <button
-                      onClick={() => setPreviewZoom(z => Math.min(0.9, parseFloat((z + 0.05).toFixed(2))))}
-                      className="p-1 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-                      title="Zoomer"
-                    >
-                      <ZoomIn className="h-3.5 w-3.5" />
-                    </button>
-                    <button
-                      onClick={() => setCurrentStep(4)}
-                      className="ml-2 flex items-center gap-1 px-2 py-0.5 text-[11px] font-medium text-primary hover:bg-primary/10 rounded-md transition-colors"
-                    >
-                      <Maximize2 className="h-3 w-3" />
-                      Grand écran
-                    </button>
-                  </div>
+                  <button onClick={() => setCurrentStep(4)} className="flex shrink-0 items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-bold text-primary transition-colors hover:bg-orange-50"><Maximize2 className="h-3.5 w-3.5" />Voir le modèle</button>
                 </div>
 
                 {/* A4 preview container — uses wrapper sizing to prevent cutoff */}
-                <div className="flex max-h-[calc(100vh-200px)] items-start justify-center overflow-auto rounded-2xl border border-border/80 bg-muted/70 p-3 shadow-xl custom-scrollbar dark:bg-slate-900/40">
+                <div className="flex max-h-[calc(100vh-210px)] items-start justify-center overflow-auto rounded-3xl border border-orange-100 bg-[#f5eee7] p-3 shadow-xl custom-scrollbar dark:bg-slate-900/40">
                   {/* Outer wrapper shrinks to scaled dimensions → no overflow */}
                   <div
                     style={{
