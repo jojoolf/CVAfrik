@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   ArrowLeft, BriefcaseBusiness, Check, ChevronDown, Download, FileText, GraduationCap,
   Languages, LayoutTemplate, Loader2, Plus, Save, Sparkles, Trash2, UserRound,
@@ -71,7 +71,6 @@ export function DocumentCvEditor({ cv, plan }: DocumentCvEditorProps) {
   const [isSaving, setIsSaving] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
   const [isTemplatePickerOpen, setIsTemplatePickerOpen] = useState(false)
-  const exportRef = useRef<HTMLDivElement>(null)
   const [isDirty, setIsDirty] = useState(false)
 
   const currentTemplate = useMemo(
@@ -106,13 +105,13 @@ export function DocumentCvEditor({ cv, plan }: DocumentCvEditorProps) {
   }
 
   const downloadPdf = async () => {
-    if (!exportRef.current) return
     setIsExporting(true)
     try {
-      await new Promise((resolve) => setTimeout(resolve, 250))
-      await downloadCvPdf(
-        exportRef.current,
+      await new Promise((resolve) => setTimeout(resolve, 120))
+      downloadCvPdf(
+        data,
         `CV_${data.informations_personnelles.prenom || 'CVAfrik'}_${data.informations_personnelles.nom || 'CV'}`,
+        { templateId: template, templateName: currentTemplate.name, showWatermark: plan.limites.filigrane },
       )
       toast.success('PDF téléchargé.')
     } catch (error) {
@@ -158,9 +157,6 @@ export function DocumentCvEditor({ cv, plan }: DocumentCvEditorProps) {
 
   return (
     <main className="min-h-screen bg-[#fffcf8] pb-10">
-      <div aria-hidden="true" data-cv-pdf-render="true" ref={exportRef} style={{ position: 'fixed', top: 0, left: 0, width: 794, minHeight: 1123, overflow: 'visible', visibility: 'hidden', background: '#ffffff', pointerEvents: 'none', zIndex: -1 }}>
-        {renderCvTemplate(template, { data, showWatermark: plan.limites.filigrane })}
-      </div>
       <header className="sticky top-0 z-30 border-b border-border/70 bg-background/95 backdrop-blur-xl">
         <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-3 px-4 py-3 sm:px-6">
           <div className="flex min-w-0 items-center gap-3">

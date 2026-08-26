@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -52,14 +51,10 @@ function withPreviewFallback(data: CVDonnees): CVDonnees {
 }
 
 export function StepPreview({ data, template, onTemplateChange, plan }: StepPreviewProps) {
-  const exportRef = useRef<HTMLDivElement>(null)
   const previewContainerRef = useRef<HTMLDivElement>(null)
   const [isExporting, setIsExporting] = useState(false)
   const [activeCategory, setActiveCategory] = useState('all')
   const [zoomLevel, setZoomLevel] = useState(0.75)
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => setMounted(true), [])
   useEffect(() => {
     const measure = () => {
       if (!previewContainerRef.current) return
@@ -84,13 +79,13 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
   const scaledHeight = Math.round(A4_H * zoomLevel)
 
   const downloadPdf = async () => {
-    if (!exportRef.current) return
     setIsExporting(true)
     try {
-      await new Promise((resolve) => setTimeout(resolve, 250))
-      await downloadCvPdf(
-        exportRef.current,
+      await new Promise((resolve) => setTimeout(resolve, 120))
+      downloadCvPdf(
+        data,
         `CV_${data.informations_personnelles.prenom || 'CVAfrik'}_${data.informations_personnelles.nom || 'CV'}`,
+        { templateId: template, templateName: currentTemplate.name, showWatermark: plan.limites.filigrane },
       )
       toast.success('CV téléchargé.')
     } catch (error) {
@@ -103,13 +98,6 @@ export function StepPreview({ data, template, onTemplateChange, plan }: StepPrev
 
   return (
     <div className="mx-auto max-w-7xl space-y-4">
-      {mounted && createPortal(
-        <div aria-hidden="true" data-cv-pdf-render="true" ref={exportRef} style={{ position: 'fixed', top: 0, left: 0, width: A4_W, minHeight: A4_H, overflow: 'visible', visibility: 'hidden', background: '#fff', pointerEvents: 'none', zIndex: -1 }}>
-          {renderCvTemplate(template, { data, showWatermark: plan.limites.filigrane })}
-        </div>,
-        document.body,
-      )}
-
       <div className="flex flex-col gap-4 rounded-2xl border border-border/80 bg-card p-5 shadow-sm md:flex-row md:items-center md:justify-between">
         <div>
           <div className="flex items-center gap-2"><h2 className="text-xl font-bold">Choisissez votre modèle</h2><Badge variant="secondary" className="text-[10px] uppercase">Étape finale</Badge></div>
